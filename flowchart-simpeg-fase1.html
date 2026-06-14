@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flowchart SIMPEG Fase 1</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #5f6878;
+      --line: #d8dee9;
+      --brand: #0f5f7a;
+      --brand-dark: #07384d;
+      --gold: #b8860b;
+      --soft: #eef7f8;
+      --soft-gold: #fff8e6;
+      --shadow: 0 10px 28px rgba(23, 32, 51, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.55;
+    }
+
+    header {
+      padding: 40px 24px 32px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand-dark), var(--brand));
+      border-bottom: 5px solid var(--gold);
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: #f3d58a;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 920px;
+      margin: 16px 0 0;
+      color: #e8f4f7;
+      font-size: 17px;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+
+    nav .wrap {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 10px 0;
+    }
+
+    nav a {
+      flex: 0 0 auto;
+      color: var(--ink);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    main {
+      padding: 28px 0 48px;
+    }
+
+    section {
+      margin: 0 0 24px;
+      padding: 24px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      color: #0b3f56;
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+
+    ul {
+      margin: 10px 0 0;
+      padding-left: 20px;
+      color: var(--muted);
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .note {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+    }
+
+    .note strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--ink);
+    }
+
+    .diagram {
+      overflow-x: auto;
+      margin-top: 16px;
+      padding: 14px;
+      background: #fbfcfe;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      scrollbar-gutter: stable;
+    }
+
+    .diagram-wide {
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+      padding: 18px 24px;
+      border-left: 0;
+      border-right: 0;
+      border-radius: 0;
+    }
+
+    .diagram-tools {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 4px 14px rgba(23, 32, 51, 0.08);
+    }
+
+    .diagram-tools span {
+      min-width: 48px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      color: #fff;
+      background: var(--brand);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.secondary,
+    .diagram-tools button {
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .diagram-tools button {
+      min-width: 36px;
+      padding: 7px 10px;
+      font-weight: 800;
+    }
+
+    .mermaid {
+      min-width: 1500px;
+      margin: 0;
+      zoom: var(--diagram-zoom, 1);
+    }
+
+    .diagram-wide .mermaid {
+      min-width: 2200px;
+    }
+
+    .diagram svg {
+      max-width: none !important;
+    }
+
+    .diagram-wide svg {
+      min-width: 2200px;
+    }
+
+    .scroll-hint {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tag {
+      display: inline-block;
+      margin: 0 6px 6px 0;
+      padding: 5px 8px;
+      border-radius: 6px;
+      background: var(--soft-gold);
+      color: #624800;
+      border: 1px solid #f0d998;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .page-switcher {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 22px;
+    }
+
+    .page-switcher a {
+      flex: 0 0 auto;
+      color: #fff;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.44);
+      border-radius: 6px;
+      padding: 8px 11px;
+      background: rgba(255, 255, 255, 0.12);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .page-switcher a.active {
+      color: #0b3f56;
+      background: #fff;
+      border-color: #fff;
+    }
+
+    footer {
+      padding: 20px 0 36px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media print {
+      nav,
+      .page-switcher,
+      .actions,
+      .diagram-tools {
+        display: none;
+      }
+
+      body {
+        background: #fff;
+      }
+
+      section {
+        box-shadow: none;
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <p class="eyebrow">SIMPEG LLDIKTI Wilayah XVI</p>
+      <h1>Flowchart Fase 1</h1>
+      <p class="subtitle">
+        Flowchart ini disusun dari PRD v1.1, user story, issues, diagram v0.4, sample data pegawai,
+        dan hasil meeting teknis terbaru. Seluruh diagram menggunakan Mermaid dan dapat di-zoom serta digeser horizontal.
+      </p>
+      <div class="page-switcher" aria-label="Navigasi antar dokumen diagram">
+        <a href="index.html">Beranda</a>
+        <a href="use-case-diagram-simpeg-fase1.html">Use Case</a>
+        <a class="active" href="flowchart-simpeg-fase1.html" aria-current="page">Flowchart</a>
+        <a href="erd-simpeg-fase1.html">ERD</a>
+      </div>
+      <div class="actions">
+        <button onclick="window.print()">Cetak / Simpan PDF</button>
+        <button class="secondary" onclick="location.hash='flow-overview'">Lihat Overview</button>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="wrap">
+      <a href="#dasar">Dasar Penyusunan</a>
+      <a href="#flow-overview">Overview</a>
+      <a href="#flow-login">Login SSO</a>
+      <a href="#flow-pegawai">Data Pegawai</a>
+      <a href="#flow-import">Import Excel/CSV</a>
+      <a href="#flow-cuti">Cuti</a>
+      <a href="#flow-ews">EWS</a>
+      <a href="#flow-notifikasi-audit">Notifikasi & Audit</a>
+      <a href="#flow-deployment">Deployment</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <section id="dasar">
+      <h2>Dasar Penyusunan Flowchart</h2>
+      <p>
+        Flowchart dibuat berdasarkan modul Fase 1 yang sudah tersusun dalam PRD v1.1, user story, dan issues:
+        autentikasi SSO, data pegawai, import CSV, cuti, EWS, notifikasi, audit log, dashboard, laporan, dan konfigurasi referensi.
+      </p>
+      <div class="grid">
+        <div class="note"><strong>Tech Stack</strong> Laravel 12, Blade, PostgreSQL 17, container untuk development.</div>
+        <div class="note"><strong>SSO</strong> Keycloak sebagai autentikasi, RBAC tetap dikelola internal aplikasi.</div>
+        <div class="note"><strong>Cuti</strong> Tahap awal memakai alur seragam lewat Kabag/verifikator lalu pimpinan.</div>
+        <div class="note"><strong>EWS</strong> BUP dihitung dari maksimal usia pensiun pada referensi jabatan.</div>
+      </div>
+    </section>
+
+    <section id="flow-overview">
+      <h2>Flowchart Overview SIMPEG Fase 1</h2>
+      <p>
+        Alur besar dari login sampai user masuk ke modul sesuai role. Dashboard menjadi pintu masuk ke fitur utama.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram diagram-wide" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+flowchart LR
+    Start([User membuka SIMPEG]) --> Login[Login via Keycloak SSO]
+    Login --> Callback[Callback diterima aplikasi]
+    Callback --> Mapping{Akun SSO terhubung ke pegawai?}
+    Mapping -->|Tidak| Unregistered[Halaman akun belum terdaftar]
+    Mapping -->|Ya| RBAC[Cek role dan permission internal]
+    RBAC --> Role{Role user}
+
+    Role -->|Super Admin| DashSA[Dashboard Super Admin]
+    Role -->|Admin Kepegawaian| DashAdmin[Dashboard Admin]
+    Role -->|Pimpinan| DashPimpinan[Dashboard Pimpinan]
+    Role -->|Kabag / Verifikator| DashKabag[Dashboard Verifikator]
+    Role -->|Atasan Langsung| DashAtasan[Dashboard Atasan]
+    Role -->|Pegawai| DashPegawai[Dashboard Pegawai]
+
+    DashSA --> Config[Konfigurasi sistem, RBAC, reference table]
+    DashAdmin --> Pegawai[Manajemen data pegawai]
+    DashAdmin --> Import[Import Excel/CSV pegawai]
+    DashAdmin --> CutiAdmin[Monitor cuti dan saldo]
+    DashAdmin --> EWSAdmin[Kelola EWS dan flag kinerja]
+    DashPimpinan --> ApprovalFinal[Approval final cuti]
+    DashPimpinan --> Reports[Laporan dan export]
+    DashKabag --> Verify[Verifikasi cuti]
+    DashAtasan --> ApprovalDynamic[Approval dinamis bawahan]
+    DashPegawai --> CutiPegawai[Ajukan cuti dan lihat status]
+    DashPegawai --> Profile[Lihat profil sendiri]
+    DashPegawai --> EWSPersonal[Lihat EWS pribadi]
+
+    Config --> Audit[Audit log otomatis]
+    Pegawai --> Audit
+    Import --> Audit
+    CutiAdmin --> Audit
+    ApprovalFinal --> Audit
+    Verify --> Audit
+    CutiPegawai --> Notif[Notifikasi in-app dan email]
+    EWSAdmin --> Notif
+        </pre>
+      </div>
+    </section>
+
+    <section id="flow-login">
+      <h2>Flowchart Login SSO dan RBAC Internal</h2>
+      <p>
+        Keycloak hanya menjadi gerbang autentikasi. Setelah login sukses, SIMPEG melakukan mapping ke data pegawai
+        dan menentukan akses dari role/permission internal.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+flowchart TD
+    A([User akses URL SIMPEG]) --> B{Session aktif?}
+    B -->|Ya| C[Cek role dan permission internal]
+    B -->|Tidak| D[Redirect ke Keycloak]
+    D --> E[User login di Keycloak]
+    E --> F{Login Keycloak berhasil?}
+    F -->|Tidak| G[Tampilkan gagal login / ulangi login]
+    F -->|Ya| H[Keycloak redirect callback ke SIMPEG]
+    H --> I[Ambil data user SSO: email / SSO ID]
+    I --> J{Pegawai ditemukan di database?}
+    J -->|Tidak| K[Tampilkan akun belum terdaftar]
+    J -->|Ya| L[Update keycloak_id jika belum ada]
+    L --> M[Buat session Laravel]
+    M --> N[Catat audit log login]
+    N --> C
+    C --> O{Role user}
+    O -->|Super Admin| P[Dashboard Super Admin]
+    O -->|Admin| Q[Dashboard Admin Kepegawaian]
+    O -->|Pimpinan| R[Dashboard Pimpinan]
+    O -->|Kabag / Atasan| S[Dashboard Approval]
+    O -->|Pegawai| T[Dashboard Pegawai]
+        </pre>
+      </div>
+    </section>
+
+    <section id="flow-pegawai">
+      <h2>Flowchart Manajemen Data Pegawai</h2>
+      <p>
+        Alur ini menggabungkan kebutuhan PRD dan sample Excel: data utama pegawai, jabatan, golongan,
+        status kepegawaian, tanggal lahir, dan data pendukung untuk EWS.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+flowchart TD
+    A([Admin buka modul data pegawai]) --> B{Aksi}
+    B -->|Tambah manual| C[Isi form data pegawai]
+    B -->|Edit| D[Pilih pegawai dari daftar]
+    B -->|Lihat detail| E[Buka detail pegawai]
+    B -->|Import Excel/CSV| F[Lanjut ke flow import Excel/CSV]
+
+    C --> G[Validasi field wajib: nama, NIP, email, jabatan, status, tanggal lahir]
+    D --> H[Ubah data sesuai kewenangan]
+    H --> G
+    G -->|Tidak valid| I[Tampilkan error validasi]
+    G -->|Valid| J[Simpan data pegawai]
+
+    J --> K[Kelola riwayat pangkat, jabatan, KGB]
+    K --> L[Hitung ulang tanggal KP, KGB, dan pensiun]
+    L --> M[Gunakan maksimal usia pensiun dari jabatan]
+    M --> N[Simpan hasil kalkulasi ke data pegawai]
+    N --> O[Catat audit log]
+    O --> P[Kirim notifikasi jika diperlukan]
+
+    E --> Q{Role yang melihat}
+    Q -->|Admin / Super Admin| R[Lihat seluruh data pegawai]
+    Q -->|Pimpinan| S[Lihat data read-only semua pegawai]
+    Q -->|Atasan| T[Lihat data bawahan]
+    Q -->|Pegawai| U[Lihat profil sendiri]
+
+    R --> V[Kelola keluarga, disiplin, dokumen, supervisor]
+    V --> O
+        </pre>
+      </div>
+    </section>
+
+    <section id="flow-import">
+      <h2>Flowchart Import Excel/CSV Pegawai</h2>
+      <p>
+        Berdasarkan sample Excel/CSV, import minimal harus membaca nama pegawai, email, golongan, jabatan,
+        kelas jabatan, NIP, nomor telepon, pangkat, pendidikan, status kepegawaian, tanggal lahir, dan pensiun jika tersedia.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+flowchart TD
+    A([Admin buka halaman Import Excel/CSV]) --> B[Download template import jika perlu]
+    B --> C[Upload file Excel/CSV dari LLDIKTI]
+    C --> D[Parse header kolom]
+    D --> E[Auto mapping kolom Excel/CSV ke field SIMPEG]
+    E --> F{Ada kolom tidak cocok?}
+    F -->|Ya| G[Admin koreksi mapping manual]
+    F -->|Tidak| H[Preview 10 baris pertama]
+    G --> H
+    H --> I[Validasi semua baris]
+
+    I --> J{Hasil validasi}
+    J -->|Error fatal| K[Tampilkan daftar error: baris, kolom, alasan]
+    K --> L{Admin perbaiki file?}
+    L -->|Ya| C
+    L -->|Tidak| M[Batalkan import]
+
+    J -->|Valid dengan sebagian skip| N[Tandai NIP duplikat sebagai skip]
+    J -->|Valid| O[Konfirmasi eksekusi import]
+    N --> O
+
+    O --> P[Jalankan ImportEmployeesJob]
+    P --> Q[Insert / update data pegawai]
+    Q --> R[Generate data referensi jika sesuai kebijakan]
+    R --> S[Hitung TMT dan tanggal pensiun]
+    S --> T[Simpan hasil import]
+    T --> U[Catat audit log import]
+    U --> V[Tampilkan ringkasan berhasil, gagal, skip]
+    V --> W[Download laporan hasil import]
+        </pre>
+      </div>
+    </section>
+
+    <section id="flow-cuti">
+      <h2>Flowchart Approval Cuti</h2>
+      <p>
+        Flow ini mengikuti keputusan meeting: tahap awal memakai alur seragam melalui Kabag/verifikator
+        lalu pimpinan. Desain tetap memuat opsi approval dinamis dan skip jika approver sama.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram diagram-wide" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+flowchart LR
+    A([Pegawai ajukan cuti]) --> B[Pilih jenis cuti dan tanggal]
+    B --> C[Upload lampiran jika diperlukan]
+    C --> D[Hitung jumlah hari kerja]
+    D --> E{Saldo cukup dan tanggal valid?}
+    E -->|Tidak| F[Tampilkan error / tidak bisa submit]
+    E -->|Ya| G[Simpan pengajuan status draft/submitted]
+    G --> H[Catat audit log pengajuan]
+    H --> I[Kirim notifikasi ke verifikator]
+
+    I --> J{Mode approval}
+    J -->|Tahap awal seragam| K[Kabag / Verifikator review]
+    J -->|Dinamis per pegawai| L[Cari chain approval dari konfigurasi pegawai]
+
+    L --> M{Approver sama dengan pejabat final?}
+    M -->|Ya| N[Skip approval duplikat]
+    M -->|Tidak| O[Atasan langsung review]
+    O --> P{Keputusan atasan}
+    P -->|Tunda| Q[Status ditunda oleh atasan]
+    P -->|Setuju / Mengetahui| K
+    N --> R[Pimpinan / pejabat pemberi cuti review]
+
+    K --> S{Keputusan Kabag / Verifikator}
+    S -->|Tunda| T[Status ditunda oleh Kabag]
+    S -->|Setuju / Verifikasi| R
+
+    R --> U{Keputusan final}
+    U -->|Tunda| V[Status ditunda oleh pimpinan]
+    U -->|Setujui| W[Status disetujui]
+    W --> X[Kurangi saldo cuti]
+    X --> Y[Kirim notifikasi hasil ke pegawai]
+    Q --> Y
+    T --> Y
+    V --> Y
+    Y --> Z[Timeline approval dapat dilihat]
+    Z --> AA([Selesai])
+        </pre>
+      </div>
+    </section>
+
+    <section id="flow-ews">
+      <h2>Flowchart Early Warning System</h2>
+      <p>
+        EWS berjalan harian untuk memeriksa kenaikan pangkat, KGB, pensiun, dan kontrak PPPK.
+        Pensiun dihitung dari tanggal lahir dan maksimal usia pensiun pada jabatan.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram diagram-wide" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+flowchart LR
+    A([Scheduler harian 07:00 WITA]) --> B[Ambil semua pegawai aktif]
+    B --> C{Pegawai berikutnya}
+    C -->|Tidak ada| D[Catat log selesai]
+    C -->|Ada| E[Ambil data pangkat, KGB, jabatan, disiplin, kinerja, PPPK]
+
+    E --> F[Hitung kenaikan pangkat: TMT pangkat + 4 tahun]
+    E --> G[Hitung KGB: TMT KGB + 2 tahun]
+    E --> H[Hitung pensiun: tanggal lahir + usia pensiun jabatan]
+    E --> I[Hitung kontrak PPPK: tanggal akhir kontrak]
+
+    F --> J{Masuk H-90/H-60/H-30?}
+    G --> K{Masuk H-60/H-30/H-14?}
+    H --> L{Masuk H-1 tahun/H-6 bulan/H-3 bulan?}
+    I --> M{Masuk H-6 bulan/H-3 bulan/H-1 bulan?}
+
+    J -->|Ya| N{Eligible pangkat?}
+    N -->|Tidak| O[Catat tidak eligible / tidak kirim sesuai kebijakan]
+    N -->|Ya| P[Buat alert kenaikan pangkat]
+    K -->|Ya| Q[Buat alert KGB]
+    L -->|Ya| R[Buat alert pensiun]
+    M -->|Ya| S[Buat alert kontrak PPPK]
+
+    J -->|Tidak| T[Lanjut cek berikutnya]
+    K -->|Tidak| T
+    L -->|Tidak| T
+    M -->|Tidak| T
+    O --> T
+
+    P --> U{Alert duplikat?}
+    Q --> U
+    R --> U
+    S --> U
+    U -->|Ya| T
+    U -->|Tidak| V[Simpan ews_alerts]
+    V --> W[Kirim notifikasi in-app]
+    W --> X[Kirim email jika aktif]
+    X --> T
+    T --> C
+        </pre>
+      </div>
+    </section>
+
+    <section id="flow-notifikasi-audit">
+      <h2>Flowchart Notifikasi dan Audit Log</h2>
+      <p>
+        Notifikasi dan audit log menjadi alur lintas modul. Audit mencatat perubahan penting,
+        sedangkan notifikasi mengirim informasi ke user terkait.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+flowchart TD
+    A([Event sistem terjadi]) --> B{Jenis event}
+    B -->|Login / logout| C[Auth event]
+    B -->|Create / update / delete pegawai| D[Data pegawai event]
+    B -->|Import Excel/CSV| E[Import event]
+    B -->|Approval cuti| F[Cuti event]
+    B -->|EWS trigger| G[EWS event]
+
+    C --> H[Catat audit log]
+    D --> H
+    E --> H
+    F --> H
+    G --> I[Buat notifikasi]
+    F --> I
+
+    H --> J[Simpan user, waktu, IP, user agent, old/new values]
+    J --> K[Audit log immutable]
+
+    I --> L[Simpan notifikasi in-app]
+    L --> M{Email aktif?}
+    M -->|Development| N[Kirim ke Mailpit]
+    M -->|Production| O[Kirim via email operasional LLDIKTI]
+    M -->|Tidak| P[Hanya in-app]
+    N --> Q[User melihat notifikasi]
+    O --> Q
+    P --> Q
+    Q --> R[User tandai dibaca]
+        </pre>
+      </div>
+    </section>
+
+    <section id="flow-deployment">
+      <h2>Flowchart Development dan Deployment</h2>
+      <p>
+        Flow ini merangkum keputusan teknis: PostgreSQL development memakai container, production diarahkan ke Podman,
+        dan server/domain disiapkan LLDIKTI saat tahap deployment.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+flowchart TD
+    A([Setup project awal]) --> B[Laravel 12 + Blade]
+    B --> C[PostgreSQL 17 via container]
+    C --> D[Konfigurasi .env lokal]
+    D --> E[Mailpit untuk testing email]
+    E --> F[Integrasi trait Keycloak dari LLDIKTI]
+    F --> F2[Setup RBAC internal SIMPEG]
+    F2 --> G[Development fitur per sprint]
+    G --> H[Testing lokal dan review internal]
+    H --> I{Siap deployment?}
+    I -->|Belum| G
+    I -->|Ya| J[LLDIKTI siapkan server dan domain]
+    J --> K[Siapkan image dan compose/deploy script]
+    K --> L[Production menggunakan Podman jika memungkinkan]
+    L --> M[Konfigurasi domain, SSL, email operasional]
+    M --> N[Deploy aplikasi]
+    N --> O[UAT bersama LLDIKTI]
+    O --> P{Ada revisi?}
+    P -->|Ya| G
+    P -->|Tidak| Q([Go-live])
+        </pre>
+      </div>
+    </section>
+
+    <section>
+      <h2>Modul yang Dicakup</h2>
+      <div>
+        <span class="tag">Login SSO</span>
+        <span class="tag">RBAC Internal</span>
+        <span class="tag">Data Pegawai</span>
+        <span class="tag">Import Excel/CSV</span>
+        <span class="tag">Approval Cuti</span>
+        <span class="tag">EWS</span>
+        <span class="tag">Notifikasi</span>
+        <span class="tag">Audit Log</span>
+        <span class="tag">Deployment</span>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      Flowchart SIMPEG Fase 1 - dibuat untuk evaluasi alur sebelum implementasi lanjutan.
+    </div>
+  </footer>
+
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+    mermaid.initialize({
+      startOnLoad: true,
+      securityLevel: "loose",
+      theme: "base",
+      themeVariables: {
+        primaryColor: "#f8fafc",
+        primaryTextColor: "#172033",
+        primaryBorderColor: "#64748b",
+        lineColor: "#475569",
+        secondaryColor: "#eef7f8",
+        tertiaryColor: "#fff8e6",
+        fontFamily: "Arial, Helvetica, sans-serif"
+      },
+      flowchart: {
+        htmlLabels: true,
+        curve: "basis",
+        nodeSpacing: 48,
+        rankSpacing: 58
+      }
+    });
+
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+    function setDiagramZoom(diagram, nextZoom) {
+      const zoom = clamp(nextZoom, 0.5, 2.25);
+      const mermaidEl = diagram.querySelector(".mermaid");
+      const label = diagram.querySelector("[data-zoom-label]");
+      diagram.dataset.diagramZoom = String(zoom);
+      if (mermaidEl) {
+        mermaidEl.style.setProperty("--diagram-zoom", zoom);
+      }
+      if (label) {
+        label.textContent = `${Math.round(zoom * 100)}%`;
+      }
+    }
+
+    document.querySelectorAll(".diagram").forEach((diagram) => {
+      setDiagramZoom(diagram, Number(diagram.dataset.diagramZoom || 1));
+      diagram.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-zoom-action]");
+        if (!button) return;
+
+        const current = Number(diagram.dataset.diagramZoom || 1);
+        const action = button.dataset.zoomAction;
+        if (action === "in") setDiagramZoom(diagram, current + 0.15);
+        if (action === "out") setDiagramZoom(diagram, current - 0.15);
+        if (action === "reset") setDiagramZoom(diagram, 1);
+      });
+    });
+  </script>
+</body>
+</html>

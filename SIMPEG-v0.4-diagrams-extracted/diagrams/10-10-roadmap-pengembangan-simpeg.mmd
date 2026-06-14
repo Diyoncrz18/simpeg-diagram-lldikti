@@ -1,0 +1,13 @@
+%%{init:{"flowchart":{"nodeSpacing":90,"rankSpacing":80,"padding":25},"theme":"dark"}}%%
+flowchart LR
+    F1["Fase 1: Core\n \nSetup + Keycloak SSO\nSeed Reference Tables\nRBAC Roles dan Permissions\nData Pegawai Lengkap\nRiwayat Kepangkatan, Jabatan\nKGB, Disiplin, Pengangkatan\nImport CSV awal\nEWS (KP, KGB, Pensiun, PPPK)\nModul Cuti + Approval\nNotifikasi In-App dan Email\nAudit Log\nDashboard Dasar"]:::f1
+    F2["Fase 2: Advanced 1\n \nSelf-Service Pegawai\nPending Changes\nKlaim Kehadiran + Kuota\nSurat Tugas\nKalender Virtual\nLog Harian"]:::f2
+    F3["Fase 3: Advanced 2\n \nSKP + RHK\nLog Harian ke RHK\nEvaluasi Kinerja\nRiwayat Pendidikan\nRiwayat Pelatihan\nTracker 20 JP\nArsip Dokumen\nLaporan PDF dan Excel"]:::f3
+    F4["Fase 4: Advanced 3\n \nKalkulator IP-ASN\nAsesmen Kompetensi\nEkspor Data SIASN\n(Format CSV atau JSON BKN)\nIntegrasi API SIASN\n(jika akses tersedia)"]:::f4
+    F1 -->|"Core stabil\ndan dipakai"| F2
+    F2 -->|"Advanced 1\nstabil"| F3
+    F3 -->|"Advanced 2\nstabil"| F4
+    classDef f1 fill:#1a2d50,stroke:#3b82f6,color:#bfdbfe,font-size:13px
+    classDef f2 fill:#14301f,stroke:#10b981,color:#a7f3d0,font-size:13px
+    classDef f3 fill:#2d1f10,stroke:#f59e0b,color:#fde68a,font-size:13px
+    classDef f4 fill:#2d1f3a,stroke:#8b5cf6,color:#c4b5fd,font-size:13px

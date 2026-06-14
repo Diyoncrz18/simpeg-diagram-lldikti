@@ -1,0 +1,15 @@
+%%{init:{"flowchart":{"nodeSpacing":52,"rankSpacing":60,"padding":18},"theme":"dark"}}%%
+flowchart TD
+    A(["Admin / Atasan"]) --> B["Buat SKP Periode Baru\nper Pegawai"]
+    B --> C["Input RHK\n(Rencana Hasil Kerja)"]
+    C --> D["Set Target, Indikator\ndan Satuan per RHK"]
+    D --> E[Sepanjang Periode]
+    E --> F["Pegawai Isi Log Harian"]
+    F --> G["Kaitkan Log ke RHK\n(Many-to-Many, opsional)"]
+    G --> H[Akhir Periode]
+    H --> I["Atasan Buka Form Evaluasi"]
+    I --> J["Nilai Hasil Kerja\nSangat Baik / Baik / Butuh Perbaikan / Kurang"]
+    I --> K["Nilai Perilaku BerAKHLAK\n(Kriteria sama)"]
+    J --> L[Nilai SKP Final]
+    K --> L
+    L --> M[Input ke Kalkulator IP-ASN]

@@ -1,0 +1,17 @@
+%%{init:{"flowchart":{"nodeSpacing":85,"rankSpacing":80,"padding":28},"theme":"dark"}}%%
+flowchart LR
+    subgraph ADMIN["Admin Kepegawaian Only"]
+        A1["Data Pribadi\n(Nama, TTL, Agama, Foto)"]
+        A2["Riwayat Kepangkatan\n(Append-Only)"]
+        A3["Riwayat Jabatan\n(Append-Only)"]
+        A4["Riwayat KGB\n(Append-Only)"]
+        A5["Hukuman Disiplin\n(PP 94/2021)"]
+        A6["Set Supervisor\n(per Konteks Cuti / Kinerja)"]
+    end
+    subgraph SELF["Self-Service Pegawai"]
+        S1["Edit Kontak dan Data Pendukung\n(Langsung tersimpan)"]
+        S2["Ajukan Pending Changes\n(NIK, KK, Keluarga, Pendidikan)"]
+    end
+    S2 --> APV{Admin\nReview}
+    APV -->|Approve| OK["Data Diperbarui\n+ Notifikasi Pegawai"]
+    APV -->|Tolak| NOK["Notifikasi Penolakan\n+ Alasan"]

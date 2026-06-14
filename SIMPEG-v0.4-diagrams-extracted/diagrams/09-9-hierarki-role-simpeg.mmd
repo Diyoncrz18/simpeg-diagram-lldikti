@@ -1,0 +1,7 @@
+%%{init:{"flowchart":{"nodeSpacing":60,"rankSpacing":70,"padding":22},"theme":"dark"}}%%
+flowchart TD
+    SA["Super Admin\n(Semua fitur + konfigurasi sistem)"] --> AK
+    AK["Admin Kepegawaian\n(Kelola semua data pegawai\nProses pengajuan dan verifikasi)"] --> PM
+    PM["Pimpinan\n(Approve cuti dan klaim\nDashboard semua pegawai)"] --> AL
+    AL["Atasan Langsung\n(Approve cuti dan klaim\nbawahan langsung)"] --> PG
+    PG["Pegawai\n(Lihat data sendiri\nAjukan cuti dan self-service)"]

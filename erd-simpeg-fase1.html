@@ -1,0 +1,1223 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ERD SIMPEG Fase 1</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #5f6878;
+      --line: #d8dee9;
+      --brand: #0f5f7a;
+      --brand-dark: #07384d;
+      --gold: #b8860b;
+      --soft: #eef7f8;
+      --soft-gold: #fff8e6;
+      --shadow: 0 10px 28px rgba(23, 32, 51, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.55;
+    }
+
+    header {
+      padding: 40px 24px 32px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand-dark), var(--brand));
+      border-bottom: 5px solid var(--gold);
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: #f3d58a;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 920px;
+      margin: 16px 0 0;
+      color: #e8f4f7;
+      font-size: 17px;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+
+    nav .wrap {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 10px 0;
+    }
+
+    nav a {
+      flex: 0 0 auto;
+      color: var(--ink);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    main {
+      padding: 28px 0 48px;
+    }
+
+    section {
+      margin: 0 0 24px;
+      padding: 24px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      color: #0b3f56;
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      color: #12364a;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+
+    ul {
+      margin: 10px 0 0;
+      padding-left: 20px;
+      color: var(--muted);
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #edf5f7;
+      color: #0b3f56;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: #eef2f7;
+      color: #111827;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.95em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .note {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+    }
+
+    .note strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--ink);
+    }
+
+    .diagram {
+      overflow-x: auto;
+      margin-top: 16px;
+      padding: 14px;
+      background: #fbfcfe;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      scrollbar-gutter: stable;
+    }
+
+    .diagram-wide {
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+      padding: 18px 24px;
+      border-left: 0;
+      border-right: 0;
+      border-radius: 0;
+    }
+
+    .diagram-tools {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 4px 14px rgba(23, 32, 51, 0.08);
+    }
+
+    .diagram-tools span {
+      min-width: 48px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      color: #fff;
+      background: var(--brand);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.secondary,
+    .diagram-tools button {
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .diagram-tools button {
+      min-width: 36px;
+      padding: 7px 10px;
+      font-weight: 800;
+    }
+
+    .mermaid {
+      min-width: 1500px;
+      margin: 0;
+      zoom: var(--diagram-zoom, 1);
+    }
+
+    .diagram-wide .mermaid {
+      min-width: 2400px;
+    }
+
+    .diagram svg {
+      max-width: none !important;
+    }
+
+    .diagram-wide svg {
+      min-width: 2400px;
+    }
+
+    .scroll-hint {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tag {
+      display: inline-block;
+      margin: 0 6px 6px 0;
+      padding: 5px 8px;
+      border-radius: 6px;
+      background: var(--soft-gold);
+      color: #624800;
+      border: 1px solid #f0d998;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .page-switcher {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 22px;
+    }
+
+    .page-switcher a {
+      flex: 0 0 auto;
+      color: #fff;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.44);
+      border-radius: 6px;
+      padding: 8px 11px;
+      background: rgba(255, 255, 255, 0.12);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .page-switcher a.active {
+      color: #0b3f56;
+      background: #fff;
+      border-color: #fff;
+    }
+
+    footer {
+      padding: 20px 0 36px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media print {
+      nav,
+      .page-switcher,
+      .actions,
+      .diagram-tools {
+        display: none;
+      }
+
+      body {
+        background: #fff;
+      }
+
+      section {
+        box-shadow: none;
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <p class="eyebrow">SIMPEG LLDIKTI Wilayah XVI</p>
+      <h1>ERD / Relasi Database Awal Fase 1</h1>
+      <p class="subtitle">
+        ERD ini disusun berdasarkan PRD, user stories, issues, sample Excel pegawai,
+        dan hasil meeting teknis. Diagram memakai Mermaid <code>erDiagram</code> dan dapat di-zoom serta digeser horizontal.
+      </p>
+      <div class="page-switcher" aria-label="Navigasi antar dokumen diagram">
+        <a href="index.html">Beranda</a>
+        <a href="use-case-diagram-simpeg-fase1.html">Use Case</a>
+        <a href="flowchart-simpeg-fase1.html">Flowchart</a>
+        <a class="active" href="erd-simpeg-fase1.html" aria-current="page">ERD</a>
+      </div>
+      <div class="actions">
+        <button onclick="window.print()">Cetak / Simpan PDF</button>
+        <button class="secondary" onclick="location.hash='erd-overview'">Lihat ERD Overview</button>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="wrap">
+      <a href="#dasar">Dasar</a>
+      <a href="#mapping-excel">Mapping Excel</a>
+      <a href="#erd-overview">Overview</a>
+      <a href="#erd-rbac">RBAC</a>
+      <a href="#erd-pegawai">Pegawai</a>
+      <a href="#erd-import">Import</a>
+      <a href="#erd-cuti">Cuti</a>
+      <a href="#erd-ews">EWS</a>
+      <a href="#erd-reference">Referensi</a>
+      <a href="#catatan">Catatan</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <section id="dasar">
+      <h2>Dasar Penyusunan ERD</h2>
+      <p>
+        Struktur database awal mengikuti data model pada PRD, detail migration pada issues,
+        dan acceptance criteria pada user stories. Hasil meeting terbaru menegaskan bahwa Keycloak
+        hanya dipakai untuk autentikasi, sedangkan role dan permission dikelola di aplikasi.
+      </p>
+      <div class="grid">
+        <div class="note"><strong>Identitas Login</strong> <code>employees.keycloak_id</code> menjadi penghubung akun SSO dengan data pegawai.</div>
+        <div class="note"><strong>RBAC Internal</strong> Tabel <code>roles</code>, <code>permissions</code>, dan pivot disiapkan karena permission dikelola aplikasi.</div>
+        <div class="note"><strong>Riwayat Append-only</strong> Pangkat, jabatan, KGB, disiplin, pendidikan, dokumen, dan pengangkatan dipisah dari tabel pegawai.</div>
+        <div class="note"><strong>BUP</strong> Berdasarkan hasil meeting, usia pensiun paling aman diletakkan di referensi jabatan/jenis jabatan.</div>
+      </div>
+    </section>
+
+    <section id="mapping-excel">
+      <h2>Mapping Sample Excel ke Database</h2>
+      <p>
+        File sample <code>daftar_pegawai.xlsx</code> berisi 10 baris data dan 16 kolom. Kolom tersebut cukup
+        untuk import awal, tetapi belum mencakup semua field lengkap PRD seperti NIK, No KK, alamat,
+        tempat lahir, data keluarga, SK, TMT pangkat, TMT jabatan, dan TMT KGB.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Kolom Excel</th>
+            <th>Target Awal Database</th>
+            <th>Catatan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Nama Pegawai</td><td><code>employees.nama_lengkap</code></td><td>Field utama pegawai.</td></tr>
+          <tr><td>Email Pegawai</td><td><code>employees.email_keycloak</code> / <code>email_pribadi</code></td><td>Dipakai untuk mapping SSO bila email Keycloak sama.</td></tr>
+          <tr><td>NIP</td><td><code>employees.nip</code></td><td>Sample sudah 18 digit.</td></tr>
+          <tr><td>Nomor Telepon</td><td><code>employees.no_hp</code></td><td>Perlu normalisasi format nomor HP.</td></tr>
+          <tr><td>Golongan</td><td><code>rank_histories.golongan_id</code> + <code>ref_golongan</code></td><td>Perlu mapping kode golongan ke reference table.</td></tr>
+          <tr><td>Pangkat</td><td><code>rank_histories</code></td><td>Ada 1 data kosong pada sample, perlu validasi saat import.</td></tr>
+          <tr><td>Jabatan</td><td><code>position_histories.nama_jabatan</code></td><td>Perlu disambungkan ke jenis jabatan dan unit kerja.</td></tr>
+          <tr><td>Kelas Jabatan</td><td><code>position_histories.kelas_jabatan</code></td><td>Tambahan dari sample Excel, belum eksplisit di PRD tapi relevan untuk jabatan.</td></tr>
+          <tr><td>Status Kepegawaian</td><td><code>employees.jenis_pegawai_id</code> / <code>status_aktif</code></td><td>Perlu mapping PNS/PPPK/aktif/nonaktif.</td></tr>
+          <tr><td>Tanggal Lahir</td><td><code>employees.tanggal_lahir</code></td><td>Perlu parsing tanggal karena sample terbaca sebagai teks.</td></tr>
+          <tr><td>Pensiun</td><td><code>employees.tanggal_pensiun</code></td><td>Bisa dipakai sebagai data pembanding hasil kalkulasi BUP.</td></tr>
+          <tr><td>Pendidikan Terakhir</td><td><code>education_histories.jenjang_id</code></td><td>Perlu mapping ke <code>ref_jenjang_pendidikan</code>.</td></tr>
+          <tr><td>Prodi Pendidikan Terakhir</td><td><code>education_histories.jurusan</code></td><td>Dipakai sebagai jurusan/prodi.</td></tr>
+          <tr><td>Person / Person Formula</td><td>-</td><td>Kemungkinan metadata sumber data, dapat diabaikan untuk import awal.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="erd-overview">
+      <h2>ERD Overview Relasi Utama</h2>
+      <p>
+        Overview ini menampilkan relasi besar antar modul: pegawai, RBAC, riwayat, cuti, EWS,
+        notifikasi, audit, supervisor, dan reference table.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram diagram-wide" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+erDiagram
+    EMPLOYEES ||--o{ EMPLOYEE_ROLES : assigned
+    ROLES ||--o{ EMPLOYEE_ROLES : grants
+    ROLES ||--o{ ROLE_PERMISSIONS : has
+    PERMISSIONS ||--o{ ROLE_PERMISSIONS : included
+
+    EMPLOYEES ||--o{ FAMILY_MEMBERS : has
+    EMPLOYEES ||--o{ RANK_HISTORIES : has
+    EMPLOYEES ||--o{ POSITION_HISTORIES : has
+    EMPLOYEES ||--o{ KGB_HISTORIES : has
+    EMPLOYEES ||--o{ DISCIPLINE_RECORDS : has
+    EMPLOYEES ||--o{ EDUCATION_HISTORIES : has
+    EMPLOYEES ||--o{ DOCUMENTS : has
+    EMPLOYEES ||--o{ APPOINTMENTS : has
+
+    EMPLOYEES ||--o{ IMPORT_BATCHES : uploads
+    IMPORT_BATCHES ||--o{ IMPORT_ROWS : contains
+    IMPORT_BATCHES ||--o{ IMPORT_COLUMN_MAPPINGS : maps
+    EMPLOYEES ||--o{ IMPORT_ROWS : created_from
+
+    EMPLOYEES ||--o{ SUPERVISOR_ASSIGNMENTS : employee
+    EMPLOYEES ||--o{ SUPERVISOR_ASSIGNMENTS : supervisor
+
+    EMPLOYEES ||--o{ LEAVE_REQUESTS : submits
+    LEAVE_REQUESTS ||--o{ LEAVE_APPROVALS : has
+    EMPLOYEES ||--o{ LEAVE_APPROVALS : approves
+    EMPLOYEES ||--o{ LEAVE_BALANCES : owns
+    EMPLOYEES ||--o{ APPROVAL_CONFIGS : configured_approver
+
+    EMPLOYEES ||--o{ EWS_ALERTS : receives
+    EMPLOYEES ||--o{ NOTIFICATIONS : receives
+    EMPLOYEES ||--o{ AUDIT_LOGS : actor
+    IMPORT_BATCHES ||--o{ AUDIT_LOGS : recorded_as
+
+    REF_GOLONGAN ||--o{ RANK_HISTORIES : used_by
+    REF_JENIS_JABATAN ||--o{ POSITION_HISTORIES : used_by
+    REF_ESELON ||--o{ POSITION_HISTORIES : used_by
+    REF_UNIT_KERJA ||--o{ POSITION_HISTORIES : used_by
+    REF_JENJANG_PENDIDIKAN ||--o{ EDUCATION_HISTORIES : used_by
+    REF_JENIS_CUTI ||--o{ LEAVE_REQUESTS : used_by
+
+    EMPLOYEES {
+      uuid id PK
+      string keycloak_id UK
+      string nip UK
+      string nik
+      string no_kk
+      string nama_lengkap
+      string email_keycloak
+      string email_pribadi
+      string tempat_lahir
+      date tanggal_lahir
+      string jenis_kelamin
+      uuid agama_id FK
+      uuid status_kawin_id FK
+      string golongan_darah
+      string foto_path
+      uuid jenis_pegawai_id FK
+      string status_aktif
+      text alamat
+      string no_hp
+      string no_telepon_rumah
+      uuid atasan_langsung_id FK
+      boolean is_kinerja_baik
+      date tanggal_kenaikan_pangkat_berikutnya
+      date tanggal_kgb_berikutnya
+      date tanggal_pensiun
+      datetime deleted_at
+      datetime created_at
+      datetime updated_at
+    }
+        </pre>
+      </div>
+    </section>
+
+    <section id="erd-rbac">
+      <h2>ERD Autentikasi dan RBAC Internal</h2>
+      <p>
+        Berdasarkan PRD v1.1, Keycloak tidak menyimpan permission aplikasi. Aplikasi menyimpan role
+        dan permission sendiri. Jika implementasi awal masih memakai <code>employees.role</code>, tabel RBAC ini
+        dapat menjadi struktur lanjutan yang lebih fleksibel.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+erDiagram
+    EMPLOYEES ||--o{ EMPLOYEE_ROLES : has
+    ROLES ||--o{ EMPLOYEE_ROLES : assigned_to
+    ROLES ||--o{ ROLE_PERMISSIONS : contains
+    PERMISSIONS ||--o{ ROLE_PERMISSIONS : granted
+
+    EMPLOYEES {
+      uuid id PK
+      string keycloak_id UK
+      string email_keycloak
+      string nip UK
+      string nama_lengkap
+      string role "fallback enum dari PRD"
+      datetime created_at
+      datetime updated_at
+    }
+
+    ROLES {
+      uuid id PK
+      string name UK
+      string display_name
+      text description
+      datetime created_at
+      datetime updated_at
+    }
+
+    PERMISSIONS {
+      uuid id PK
+      string name UK
+      string module
+      string action
+      text description
+      datetime created_at
+      datetime updated_at
+    }
+
+    EMPLOYEE_ROLES {
+      uuid id PK
+      uuid employee_id FK
+      uuid role_id FK
+      datetime created_at
+      datetime updated_at
+    }
+
+    ROLE_PERMISSIONS {
+      uuid id PK
+      uuid role_id FK
+      uuid permission_id FK
+      datetime created_at
+      datetime updated_at
+    }
+        </pre>
+      </div>
+    </section>
+
+    <section id="erd-pegawai">
+      <h2>ERD Data Pegawai dan Riwayat</h2>
+      <p>
+        Riwayat pangkat, jabatan, KGB, disiplin, pendidikan, dokumen, dan pengangkatan dibuat terpisah
+        agar data pegawai tidak kehilangan histori. Beberapa riwayat bersifat append-only sesuai user story.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram diagram-wide" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+erDiagram
+    EMPLOYEES ||--o{ FAMILY_MEMBERS : has
+    EMPLOYEES ||--o{ RANK_HISTORIES : has
+    EMPLOYEES ||--o{ POSITION_HISTORIES : has
+    EMPLOYEES ||--o{ KGB_HISTORIES : has
+    EMPLOYEES ||--o{ DISCIPLINE_RECORDS : has
+    EMPLOYEES ||--o{ EDUCATION_HISTORIES : has
+    EMPLOYEES ||--o{ DOCUMENTS : has
+    EMPLOYEES ||--o{ APPOINTMENTS : has
+    EMPLOYEES ||--o{ SUPERVISOR_ASSIGNMENTS : employee
+    EMPLOYEES ||--o{ SUPERVISOR_ASSIGNMENTS : supervisor
+
+    REF_GOLONGAN ||--o{ RANK_HISTORIES : used_by
+    REF_JENIS_JABATAN ||--o{ POSITION_HISTORIES : used_by
+    REF_ESELON ||--o{ POSITION_HISTORIES : used_by
+    REF_UNIT_KERJA ||--o{ POSITION_HISTORIES : used_by
+    REF_JENJANG_PENDIDIKAN ||--o{ EDUCATION_HISTORIES : used_by
+
+    EMPLOYEES {
+      uuid id PK
+      string nip UK
+      string nik
+      string no_kk
+      string nama_lengkap
+      string tempat_lahir
+      date tanggal_lahir
+      string jenis_kelamin
+      uuid agama_id FK
+      uuid status_kawin_id FK
+      string golongan_darah
+      string foto_path
+      uuid jenis_pegawai_id FK
+      string status_aktif
+      text alamat
+      string no_hp
+      string email_pribadi
+      string no_telepon_rumah
+      string jenis_pengangkatan
+      date tmt_pengangkatan
+      string no_sk_pengangkatan
+      date tanggal_sk_pengangkatan
+      string file_sk_pengangkatan
+      uuid atasan_langsung_id FK
+      boolean is_kinerja_baik
+      date tanggal_kenaikan_pangkat_berikutnya
+      date tanggal_kgb_berikutnya
+      date tanggal_pensiun
+      datetime deleted_at
+      datetime created_at
+      datetime updated_at
+    }
+
+    FAMILY_MEMBERS {
+      uuid id PK
+      uuid employee_id FK
+      string nama
+      string hubungan
+      string nik
+      string tempat_lahir
+      date tanggal_lahir
+      string jenis_kelamin
+      boolean status_tunjangan
+      string pekerjaan
+      datetime deleted_at
+      datetime created_at
+      datetime updated_at
+    }
+
+    RANK_HISTORIES {
+      uuid id PK
+      uuid employee_id FK
+      uuid golongan_id FK
+      date tmt_pangkat
+      string no_sk
+      date tanggal_sk
+      string file_sk
+      boolean is_latest
+      datetime created_at
+      datetime updated_at
+    }
+
+    POSITION_HISTORIES {
+      uuid id PK
+      uuid employee_id FK
+      string nama_jabatan
+      uuid jenis_jabatan_id FK
+      uuid eselon_id FK
+      uuid unit_kerja_id FK
+      int kelas_jabatan
+      date tmt_jabatan
+      string no_sk
+      date tanggal_sk
+      string file_sk
+      boolean is_latest
+      datetime created_at
+      datetime updated_at
+    }
+
+    KGB_HISTORIES {
+      uuid id PK
+      uuid employee_id FK
+      date tmt_kgb
+      decimal gaji_pokok
+      string no_sk
+      date tanggal_sk
+      string file_sk
+      boolean is_latest
+      datetime created_at
+      datetime updated_at
+    }
+
+    DISCIPLINE_RECORDS {
+      uuid id PK
+      uuid employee_id FK
+      string jenis_hukuman
+      text deskripsi
+      date tanggal_mulai
+      date tanggal_berakhir
+      string no_sk
+      date tanggal_sk
+      string file_sk
+      boolean is_active
+      datetime created_at
+      datetime updated_at
+    }
+
+    EDUCATION_HISTORIES {
+      uuid id PK
+      uuid employee_id FK
+      uuid jenjang_id FK
+      string nama_institusi
+      string jurusan
+      int tahun_lulus
+      string no_ijazah
+      string file_ijazah
+      datetime created_at
+      datetime updated_at
+    }
+
+    DOCUMENTS {
+      uuid id PK
+      uuid employee_id FK
+      string jenis_dokumen
+      string nama_dokumen
+      string file_path
+      datetime created_at
+      datetime updated_at
+    }
+
+    APPOINTMENTS {
+      uuid id PK
+      uuid employee_id FK
+      string jenis_pengangkatan
+      date tmt_pengangkatan
+      string no_sk
+      date tanggal_sk
+      string file_sk
+      datetime created_at
+      datetime updated_at
+    }
+
+    SUPERVISOR_ASSIGNMENTS {
+      uuid id PK
+      uuid employee_id FK
+      uuid supervisor_id FK
+      date tanggal_mulai
+      date tanggal_berakhir
+      datetime created_at
+      datetime updated_at
+    }
+        </pre>
+      </div>
+    </section>
+
+    <section id="erd-import">
+      <h2>ERD Import Excel/CSV Pegawai</h2>
+      <p>
+        Struktur import mengikuti PRD dan user story: download template, upload file, preview,
+        mapping kolom, validasi baris, eksekusi import lewat queue, dan laporan hasil import.
+        Sample <code>daftar_pegawai.xlsx</code> menjadi acuan mapping awal ke data pegawai dan riwayat.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+erDiagram
+    EMPLOYEES ||--o{ IMPORT_BATCHES : uploads
+    IMPORT_BATCHES ||--o{ IMPORT_COLUMN_MAPPINGS : has
+    IMPORT_BATCHES ||--o{ IMPORT_ROWS : contains
+    EMPLOYEES ||--o{ IMPORT_ROWS : created_from
+    IMPORT_BATCHES ||--o{ AUDIT_LOGS : recorded_as
+
+    IMPORT_BATCHES {
+      uuid id PK
+      uuid uploaded_by_id FK
+      string source_type "csv/xlsx"
+      string original_file_name
+      string stored_file_path
+      int file_size
+      string delimiter
+      string encoding
+      string status "uploaded/validated/processing/done/failed"
+      int total_rows
+      int valid_rows
+      int error_rows
+      int imported_rows
+      int failed_rows
+      json validation_summary
+      datetime started_at
+      datetime finished_at
+      datetime created_at
+      datetime updated_at
+    }
+
+    IMPORT_COLUMN_MAPPINGS {
+      uuid id PK
+      uuid import_batch_id FK
+      string source_column
+      string target_table
+      string target_field
+      boolean is_required
+      datetime created_at
+      datetime updated_at
+    }
+
+    IMPORT_ROWS {
+      uuid id PK
+      uuid import_batch_id FK
+      uuid employee_id FK
+      int row_number
+      json raw_data
+      json mapped_data
+      json validation_errors
+      string status "valid/error/imported/skipped"
+      datetime imported_at
+      datetime created_at
+      datetime updated_at
+    }
+
+    EMPLOYEES {
+      uuid id PK
+      string nip UK
+      string nama_lengkap
+      string email_keycloak
+      string no_hp
+      date tanggal_lahir
+      date tanggal_pensiun
+      uuid jenis_pegawai_id FK
+      string status_aktif
+    }
+
+    AUDIT_LOGS {
+      uuid id PK
+      uuid actor_id FK
+      string module
+      string action
+      string auditable_type
+      uuid auditable_id
+      json metadata
+      datetime created_at
+    }
+        </pre>
+      </div>
+    </section>
+
+    <section id="erd-cuti">
+      <h2>ERD Cuti dan Approval</h2>
+      <p>
+        Struktur cuti mengikuti PRD v1.1: pengajuan cuti, approval per stage, saldo cuti,
+        dan konfigurasi approval. Approval chain harus mendukung alur awal Kabag/verifikator ke pimpinan,
+        approval dinamis, serta skip jika approver pada dua stage adalah orang yang sama.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+erDiagram
+    EMPLOYEES ||--o{ LEAVE_REQUESTS : submits
+    REF_JENIS_CUTI ||--o{ LEAVE_REQUESTS : selected
+    LEAVE_REQUESTS ||--o{ LEAVE_APPROVALS : has
+    EMPLOYEES ||--o{ LEAVE_APPROVALS : approver
+    EMPLOYEES ||--o{ LEAVE_BALANCES : owns
+    EMPLOYEES ||--o{ APPROVAL_CONFIGS : approver
+    ROLES ||--o{ APPROVAL_CONFIGS : stage_role
+
+    LEAVE_REQUESTS {
+      uuid id PK
+      uuid employee_id FK
+      uuid jenis_cuti_id FK
+      date tanggal_mulai
+      date tanggal_selesai
+      int jumlah_hari_kerja
+      text alasan
+      string file_lampiran
+      string status
+      int current_stage
+      datetime created_at
+      datetime updated_at
+    }
+
+    LEAVE_APPROVALS {
+      uuid id PK
+      uuid leave_request_id FK
+      int stage
+      uuid approver_id FK
+      string aksi "approve/postpone"
+      text komentar
+      datetime acted_at
+      datetime created_at
+      datetime updated_at
+    }
+
+    LEAVE_BALANCES {
+      uuid id PK
+      uuid employee_id FK
+      int tahun
+      int jatah_awal
+      int carry_over
+      int terpakai
+      int sisa
+      datetime created_at
+      datetime updated_at
+    }
+
+    APPROVAL_CONFIGS {
+      uuid id PK
+      int stage
+      uuid role_id FK
+      uuid approver_id FK
+      boolean is_active
+      datetime created_at
+      datetime updated_at
+    }
+
+    REF_JENIS_CUTI {
+      uuid id PK
+      string nama
+      boolean khusus_pns
+      int default_jatah
+      boolean is_active
+    }
+        </pre>
+      </div>
+    </section>
+
+    <section id="erd-ews">
+      <h2>ERD EWS, Notifikasi, dan Audit Log</h2>
+      <p>
+        EWS memakai data hasil kalkulasi dari pegawai dan riwayat. Notifikasi mengarah ke user/pegawai penerima,
+        sedangkan audit log menyimpan actor, event, serta old/new values.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+erDiagram
+    EMPLOYEES ||--o{ EWS_ALERTS : owns
+    EMPLOYEES ||--o{ NOTIFICATIONS : receives
+    EMPLOYEES ||--o{ AUDIT_LOGS : performs
+
+    EWS_ALERTS {
+      uuid id PK
+      uuid employee_id FK
+      string jenis_event
+      date tanggal_target
+      int sisa_hari
+      boolean is_eligible
+      string trigger_days
+      int tahun
+      datetime notified_at
+      boolean is_processed
+      datetime created_at
+      datetime updated_at
+    }
+
+    NOTIFICATIONS {
+      uuid id PK
+      uuid user_id FK
+      string type
+      string title
+      text body
+      json data
+      boolean is_read
+      datetime read_at
+      datetime created_at
+      datetime updated_at
+    }
+
+    AUDIT_LOGS {
+      uuid id PK
+      uuid user_id FK
+      string user_name
+      string event
+      string auditable_type
+      uuid auditable_id
+      json old_values
+      json new_values
+      string ip_address
+      text user_agent
+      datetime created_at
+    }
+        </pre>
+      </div>
+    </section>
+
+    <section id="erd-reference">
+      <h2>ERD Reference Tables</h2>
+      <p>
+        Tabel referensi mengikuti PRD dan issues. Untuk BUP, dokumen awal punya <code>ref_bup</code>,
+        sedangkan hasil meeting menyarankan usia pensiun melekat pada jabatan. Karena itu ERD menyediakan
+        <code>maks_usia_pensiun</code> di <code>ref_jenis_jabatan</code> dan tetap menampilkan <code>ref_bup</code>
+        sebagai opsi referensi detail bila diperlukan.
+      </p>
+      <p class="scroll-hint">Geser area diagram ke kiri atau kanan. Gunakan tombol zoom untuk memperbesar atau memperkecil.</p>
+      <div class="diagram diagram-wide" data-diagram-zoom="1">
+        <div class="diagram-tools">
+          <button type="button" data-zoom-action="out">-</button>
+          <button type="button" data-zoom-action="reset">Reset</button>
+          <button type="button" data-zoom-action="in">+</button>
+          <span data-zoom-label>100%</span>
+        </div>
+        <pre class="mermaid">
+erDiagram
+    REF_AGAMA ||--o{ EMPLOYEES : used_by
+    REF_STATUS_PERKAWINAN ||--o{ EMPLOYEES : used_by
+    REF_JENIS_PEGAWAI ||--o{ EMPLOYEES : used_by
+    REF_GOLONGAN ||--o{ RANK_HISTORIES : used_by
+    REF_JENIS_JABATAN ||--o{ POSITION_HISTORIES : used_by
+    REF_ESELON ||--o{ POSITION_HISTORIES : used_by
+    REF_UNIT_KERJA ||--o{ POSITION_HISTORIES : used_by
+    REF_JENJANG_PENDIDIKAN ||--o{ EDUCATION_HISTORIES : used_by
+    REF_JENIS_CUTI ||--o{ LEAVE_REQUESTS : used_by
+    REF_JENIS_JABATAN ||--o{ REF_BUP : has
+
+    REF_AGAMA {
+      uuid id PK
+      string nama
+      boolean is_active
+    }
+
+    REF_STATUS_PERKAWINAN {
+      uuid id PK
+      string nama
+      boolean is_active
+    }
+
+    REF_JENIS_PEGAWAI {
+      uuid id PK
+      string nama "PNS/PPPK/CPNS"
+      boolean is_active
+    }
+
+    REF_GOLONGAN {
+      uuid id PK
+      string kode UK
+      string nama
+      boolean is_active
+    }
+
+    REF_JENIS_JABATAN {
+      uuid id PK
+      string nama
+      int maks_usia_pensiun
+      boolean is_active
+    }
+
+    REF_ESELON {
+      uuid id PK
+      string kode UK
+      string nama
+      boolean is_active
+    }
+
+    REF_UNIT_KERJA {
+      uuid id PK
+      string nama
+      text keterangan
+      boolean is_active
+    }
+
+    REF_JENJANG_PENDIDIKAN {
+      uuid id PK
+      string nama
+      boolean is_active
+    }
+
+    REF_JENIS_CUTI {
+      uuid id PK
+      string nama
+      boolean khusus_pns
+      boolean is_active
+    }
+
+    REF_HARI_LIBUR {
+      uuid id PK
+      date tanggal
+      string nama
+      int tahun
+      boolean is_cuti_bersama
+    }
+
+    REF_BUP {
+      uuid id PK
+      uuid jenis_jabatan_id FK
+      string nama_jabatan_detail
+      int usia_pensiun
+      boolean is_active
+    }
+        </pre>
+      </div>
+    </section>
+
+    <section id="catatan">
+      <h2>Catatan Implementasi Awal</h2>
+      <ul>
+        <li><code>employees</code> menjadi pusat data pegawai sekaligus identitas aplikasi yang dihubungkan ke Keycloak melalui <code>keycloak_id</code> atau email.</li>
+        <li>RBAC internal menjadi acuan otorisasi. Fase awal dapat memakai <code>employees.role_id</code> atau tabel pivot <code>employee_roles</code>, tetapi permission tetap dibaca dari database SIMPEG.</li>
+        <li>Riwayat pangkat, jabatan, dan KGB harus append-only dan memakai <code>is_latest</code> untuk record terbaru.</li>
+        <li>Approval cuti awal dapat memakai <code>approval_configs</code>; jika nanti dinamis per pegawai, bisa diperluas dengan chain yang mengacu ke <code>supervisor_assignments</code>.</li>
+        <li>Sample Excel belum memuat semua data wajib PRD, jadi import awal perlu mendukung data parsial dan validasi field kosong.</li>
+        <li>BUP mengikuti PRD v1.1: <code>maks_usia_pensiun</code> pada referensi jabatan, dengan <code>ref_bup</code> sebagai tabel detail bila jenis jabatan perlu lebih spesifik.</li>
+      </ul>
+      <div style="margin-top:14px">
+        <span class="tag">Laravel 12</span>
+        <span class="tag">PostgreSQL 17</span>
+        <span class="tag">Keycloak SSO</span>
+        <span class="tag">RBAC Internal</span>
+        <span class="tag">Append-only History</span>
+        <span class="tag">BUP by Jabatan</span>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      ERD SIMPEG Fase 1 - dibuat sebagai relasi database awal sebelum implementasi migration.
+    </div>
+  </footer>
+
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+    mermaid.initialize({
+      startOnLoad: true,
+      securityLevel: "loose",
+      theme: "base",
+      themeVariables: {
+        primaryColor: "#f8fafc",
+        primaryTextColor: "#172033",
+        primaryBorderColor: "#64748b",
+        lineColor: "#475569",
+        secondaryColor: "#eef7f8",
+        tertiaryColor: "#fff8e6",
+        fontFamily: "Arial, Helvetica, sans-serif"
+      },
+      er: {
+        diagramPadding: 24,
+        layoutDirection: "LR",
+        minEntityWidth: 120,
+        minEntityHeight: 75,
+        entityPadding: 15
+      }
+    });
+
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+    function setDiagramZoom(diagram, nextZoom) {
+      const zoom = clamp(nextZoom, 0.5, 2.25);
+      const mermaidEl = diagram.querySelector(".mermaid");
+      const label = diagram.querySelector("[data-zoom-label]");
+      diagram.dataset.diagramZoom = String(zoom);
+      if (mermaidEl) {
+        mermaidEl.style.setProperty("--diagram-zoom", zoom);
+      }
+      if (label) {
+        label.textContent = `${Math.round(zoom * 100)}%`;
+      }
+    }
+
+    document.querySelectorAll(".diagram").forEach((diagram) => {
+      setDiagramZoom(diagram, Number(diagram.dataset.diagramZoom || 1));
+      diagram.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-zoom-action]");
+        if (!button) return;
+
+        const current = Number(diagram.dataset.diagramZoom || 1);
+        const action = button.dataset.zoomAction;
+        if (action === "in") setDiagramZoom(diagram, current + 0.15);
+        if (action === "out") setDiagramZoom(diagram, current - 0.15);
+        if (action === "reset") setDiagramZoom(diagram, 1);
+      });
+    });
+  </script>
+</body>
+</html>

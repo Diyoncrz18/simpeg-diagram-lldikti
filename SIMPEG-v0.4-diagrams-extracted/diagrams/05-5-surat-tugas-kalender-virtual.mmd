@@ -1,0 +1,20 @@
+%%{init:{"flowchart":{"nodeSpacing":85,"rankSpacing":80,"padding":28},"theme":"dark"}}%%
+flowchart LR
+    subgraph SRC["Sumber Data Kalender"]
+        LN["Hari Libur Nasional\n(Input manual per tahun)"]
+        CB["Cuti Bersama\n(Input manual, terpisah dari libur)"]
+        CT["Cuti Disetujui\n(dari Modul Cuti)"]
+        ST_IN["Surat Tugas\n(Input admin atau pegawai)"]
+        KM["Klaim Kehadiran\n(Retroaktif disetujui)"]
+        LH["Status Log Harian\n(Terisi atau belum)"]
+    end
+    ST_IN --> APV{Approval\nSurat Tugas}
+    APV -->|"Disetujui"| DL["Tandai Dinas Luar\npada Tanggal Tercakup"]
+    LN --> KV["Kalender Virtual\nper Pegawai"]
+    CB --> KV
+    CT --> KV
+    DL --> KV
+    KM --> KV
+    LH --> KV
+    KV --> BLK["Blokir Log Harian\npada Hari Dinas Luar"]
+    KV --> VIEW(["Tampilan Kalender\nper Pegawai atau Tim"])
