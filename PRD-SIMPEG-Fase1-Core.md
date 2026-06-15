@@ -467,23 +467,36 @@ Modul ini menyimpan dan mengelola seluruh data kepegawaian secara terpusat. Di F
 
 ### 7.3 Struktur Data Pegawai
 
+> **Catatan penyesuaian format Excel:** File `daftar_pegawai.xlsx` sheet `Pegawai` menjadi acuan import awal. Header yang tersedia: `No`, `Nama Pegawai`, `Email Pegawai`, `Golongan`, `Jabatan`, `Kelas Jabatan`, `NIP`, `Nomor Telepon`, `Pangkat`, `Pendidikan Terakhir`, `Pensiun`, `Person`, `Person Formula`, `Prodi Pendidikan Terakhir`, `Status Kepegawaian`, dan `Tanggal Lahir`. Mapping detail tersedia di `Mapping-Data-Pegawai-Excel-SIMPEG.md`.
+>
+> Struktur di bawah tetap menjadi target profil lengkap SIMPEG. Untuk import awal dari Excel, field yang tidak tersedia seperti NIK, No. KK, tempat lahir, alamat, data SK, TMT, keluarga, unit kerja, dan atasan langsung boleh kosong dulu dan ditandai sebagai profil belum lengkap.
+
 #### Data Pribadi
 
 | Field | Tipe | Wajib | Keterangan |
 |-------|------|-------|------------|
 | `nama_lengkap` | string(255) | Ya | Nama sesuai SK |
 | `nip` | string(18) | Ya | Unik, 18 digit |
-| `nik` | string(16) | Ya | NIK KTP |
+| `email_pribadi` | string(255) | Ya untuk import Excel | Email dari kolom `Email Pegawai`; kandidat mapping awal Keycloak |
+| `nik` | string(16) | Ya untuk profil lengkap | NIK KTP; belum tersedia di Excel awal |
 | `no_kk` | string(16) | Tidak | Nomor Kartu Keluarga |
-| `tempat_lahir` | string(100) | Ya | |
+| `tempat_lahir` | string(100) | Ya untuk profil lengkap | Belum tersedia di Excel awal |
 | `tanggal_lahir` | date | Ya | Untuk kalkulasi BUP |
-| `jenis_kelamin` | enum | Ya | L / P |
-| `agama` | ref_agama_id | Ya | FK ke ref_agama |
-| `status_perkawinan` | ref_status_kawin_id | Ya | FK ke ref_status_kawin |
+| `jenis_kelamin` | enum | Ya untuk profil lengkap | L / P; belum tersedia di Excel awal |
+| `agama` | ref_agama_id | Ya untuk profil lengkap | FK ke ref_agama; belum tersedia di Excel awal |
+| `status_perkawinan` | ref_status_kawin_id | Ya untuk profil lengkap | FK ke ref_status_kawin; belum tersedia di Excel awal |
 | `golongan_darah` | enum | Tidak | A / B / AB / O |
 | `foto` | string(path) | Tidak | Path ke file foto |
 | `jenis_pegawai` | enum | Ya | PNS / PPPK / CPNS |
 | `status_aktif` | enum | Ya | Aktif / Non-Aktif / Pensiun / Mutasi |
+| `golongan_terakhir` | string(20) | Ya untuk import Excel | Snapshot dari kolom `Golongan`; dapat dinormalisasi ke `ref_golongan` |
+| `pangkat_terakhir` | string(100) | Tidak | Snapshot dari kolom `Pangkat`; boleh kosong untuk PPPK/CPNS |
+| `jabatan_terakhir` | string(255) | Ya untuk import Excel | Snapshot dari kolom `Jabatan` |
+| `kelas_jabatan` | string(10) | Ya untuk import Excel | Dari kolom `Kelas Jabatan` |
+| `pendidikan_terakhir` | string(20) | Ya untuk import Excel | Contoh: D3, S1, S2 |
+| `prodi_pendidikan_terakhir` | string(255) | Ya untuk import Excel | Dari kolom `Prodi Pendidikan Terakhir` |
+| `tanggal_pensiun` | date | Tidak | Dari kolom `Pensiun`; jika kosong dihitung dari BUP setelah referensi final tersedia |
+| `profil_status` | enum | Ya | `belum_lengkap` / `lengkap` untuk membedakan hasil import awal dan profil yang sudah dilengkapi |
 
 #### Data Kontak
 
@@ -615,6 +628,8 @@ Modul ini menyimpan dan mengelola seluruh data kepegawaian secara terpusat. Di F
 
 Fitur import Excel/CSV memungkinkan Admin Kepegawaian melakukan migrasi data awal dari spreadsheet yang sudah ada ke database SIMPEG.
 
+Format import awal mengikuti file `daftar_pegawai.xlsx` sheet `Pegawai`. Sistem tetap menyediakan mapping kolom agar format ini bisa disesuaikan jika LLDIKTI mengirim file versi berikutnya.
+
 ### 8.2 User Stories
 
 #### US-CSV-01: Import Data Pegawai dari Excel/CSV
@@ -626,8 +641,8 @@ Fitur import Excel/CSV memungkinkan Admin Kepegawaian melakukan migrasi data awa
 **Acceptance Criteria:**
 1. Admin bisa upload file Excel/CSV (maks 10MB).
 2. Sistem menampilkan **preview data** (10 baris pertama) sebelum import.
-3. Admin bisa melakukan **mapping kolom** Excel/CSV ke field database SIMPEG.
-4. Validasi sebelum import: NIP unik, format tanggal benar, field wajib terisi.
+3. Sistem auto-match header Excel `daftar_pegawai.xlsx` ke field SIMPEG, dan Admin tetap bisa melakukan **mapping kolom** manual jika diperlukan.
+4. Validasi sebelum import: NIP unik, email pegawai terisi, format tanggal benar, field wajib dari Excel terisi.
 5. Tampilkan **ringkasan validasi**: berapa baris valid, berapa baris error, detail error per baris.
 6. Admin bisa memilih: import hanya yang valid, atau batalkan semua.
 7. Setelah import, tampilkan **laporan hasil**: berapa berhasil, berapa gagal.
@@ -641,7 +656,7 @@ Fitur import Excel/CSV memungkinkan Admin Kepegawaian melakukan migrasi data awa
 
 **Acceptance Criteria:**
 1. Tersedia tombol "Download Template Import".
-2. Template berisi header kolom sesuai field data pegawai.
+2. Template utama berisi header sesuai `daftar_pegawai.xlsx`: `No`, `Nama Pegawai`, `Email Pegawai`, `Golongan`, `Jabatan`, `Kelas Jabatan`, `NIP`, `Nomor Telepon`, `Pangkat`, `Pendidikan Terakhir`, `Pensiun`, `Person`, `Person Formula`, `Prodi Pendidikan Terakhir`, `Status Kepegawaian`, `Tanggal Lahir`.
 3. Sertakan 1-2 baris contoh data.
 4. Format minimal CSV UTF-8 delimiter koma; bila disediakan Excel, gunakan `.xlsx` dengan header kolom yang sama.
 
@@ -649,10 +664,10 @@ Fitur import Excel/CSV memungkinkan Admin Kepegawaian melakukan migrasi data awa
 
 | Jenis Import | Keterangan |
 |-------------|------------|
-| Data Pegawai (Utama) | Data pribadi, kontak, jenis pegawai |
-| Riwayat Kepangkatan | Golongan, TMT, No SK |
-| Riwayat Jabatan | Jabatan, Unit Kerja, TMT |
-| Riwayat KGB | TMT KGB, Gaji Pokok, No SK |
+| Data Pegawai (Utama) | Mengikuti `daftar_pegawai.xlsx`: nama, email, NIP, telepon, status kepegawaian, tanggal lahir, golongan, pangkat, jabatan, kelas jabatan, pendidikan, prodi, dan tanggal pensiun jika tersedia |
+| Riwayat Kepangkatan | Import lanjutan jika LLDIKTI menyediakan TMT dan data SK |
+| Riwayat Jabatan | Import lanjutan jika LLDIKTI menyediakan unit kerja, TMT, dan data SK |
+| Riwayat KGB | Import lanjutan jika LLDIKTI menyediakan TMT KGB, gaji pokok, dan data SK |
 
 ---
 

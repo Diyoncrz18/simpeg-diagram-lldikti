@@ -203,9 +203,10 @@ Setiap story mengikuti format:
 **Acceptance Criteria:**
 
 - [ ] AC-1: Form input multi-step atau tabbed:
-  - Tab 1: Data Pribadi (nama, NIP, NIK, No. KK, TTL, jenis kelamin, agama, status kawin, golongan darah, foto, jenis pegawai)
-  - Tab 2: Data Kontak (alamat, no HP, email pribadi, no telepon rumah)
-  - Tab 3: Data Pengangkatan (jenis pengangkatan, TMT, no SK, tanggal SK, upload file SK)
+  - Tab 1: Data Utama (nama, email pegawai, NIP, status kepegawaian, tanggal lahir, golongan, pangkat, jabatan, kelas jabatan, pendidikan terakhir, prodi pendidikan terakhir, tanggal pensiun)
+  - Tab 2: Data Pelengkap (NIK, No. KK, tempat lahir, jenis kelamin, agama, status kawin, golongan darah, foto)
+  - Tab 3: Data Kontak (alamat, no HP, no telepon rumah)
+  - Tab 4: Data Pengangkatan (jenis pengangkatan, TMT, no SK, tanggal SK, upload file SK)
 - [ ] AC-2: Validasi NIP unik — tidak boleh duplikat dengan pegawai lain.
 - [ ] AC-3: Validasi NIK — format 16 digit.
 - [ ] AC-3a: Validasi No. KK — format 16 digit (opsional, boleh kosong).
@@ -473,9 +474,9 @@ Setiap story mengikuti format:
 
 - [ ] AC-1: Tombol "Download Template Import" di halaman Import.
 - [ ] AC-2: Minimal tersedia template CSV berformat UTF-8; jika disediakan Excel, gunakan `.xlsx` dengan header yang sama.
-- [ ] AC-3: Header kolom sesuai field data pegawai SIMPEG (nama_lengkap, nip, nik, no_kk, tempat_lahir, tanggal_lahir, dll).
+- [ ] AC-3: Header template utama mengikuti file `daftar_pegawai.xlsx`: `No`, `Nama Pegawai`, `Email Pegawai`, `Golongan`, `Jabatan`, `Kelas Jabatan`, `NIP`, `Nomor Telepon`, `Pangkat`, `Pendidikan Terakhir`, `Pensiun`, `Person`, `Person Formula`, `Prodi Pendidikan Terakhir`, `Status Kepegawaian`, `Tanggal Lahir`.
 - [ ] AC-4: Sertakan 2 baris contoh data (dummy) sebagai panduan pengisian.
-- [ ] AC-5: Tersedia template terpisah untuk: Data Pegawai Utama, Riwayat Kepangkatan, Riwayat Jabatan, Riwayat KGB.
+- [ ] AC-5: Tersedia template lanjutan untuk data yang tidak ada di Excel awal: Data Pelengkap, Riwayat Kepangkatan, Riwayat Jabatan, Riwayat KGB.
 
 ---
 
@@ -498,7 +499,7 @@ Setiap story mengikuti format:
 - [ ] AC-1: Upload file Excel/CSV (maks 10MB).
 - [ ] AC-2: Sistem mendeteksi header kolom secara otomatis.
 - [ ] AC-3: Tampilkan preview 10 baris pertama dalam bentuk tabel.
-- [ ] AC-4: Tampilkan mapping kolom: kolom Excel/CSV → field SIMPEG (auto-match berdasarkan nama, bisa diubah manual via dropdown).
+- [ ] AC-4: Tampilkan mapping kolom: kolom Excel/CSV -> field SIMPEG (auto-match berdasarkan header `daftar_pegawai.xlsx`, bisa diubah manual via dropdown).
 - [ ] AC-5: Jika ada kolom yang tidak cocok, tampilkan peringatan.
 - [ ] AC-6: Tombol "Lanjutkan ke Validasi" dan "Batal".
 
@@ -520,7 +521,7 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Validasi semua baris: NIP unik, NIK format 16 digit, tanggal valid, field wajib terisi, golongan ada di reference table.
+- [ ] AC-1: Validasi semua baris: NIP unik, email pegawai terisi, tanggal lahir valid, status kepegawaian valid (PNS/CPNS/PPPK), field wajib Excel terisi, golongan ada di reference table jika ref sudah tersedia.
 - [ ] AC-2: Tampilkan ringkasan validasi: jumlah baris total, baris valid (✅), baris error (❌).
 - [ ] AC-3: Untuk baris error, tampilkan detail: nomor baris, kolom yang bermasalah, jenis error.
 - [ ] AC-4: Admin bisa memilih: "Import Hanya yang Valid" atau "Batalkan Semua".

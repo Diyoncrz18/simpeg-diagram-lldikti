@@ -50,13 +50,14 @@ Berdasarkan penelusuran website LLDIKTI XVI, kami menemukan struktur organisasi 
 - Siapa saja yang berperan sebagai **Atasan Langsung**? Apakah Ketua Tim Kerja dan Kepala Urusan tersebut, atau Kabag Umum untuk semua pegawai?
 
 ### B2. 🔴 Data Pegawai Existing
-**Status PRD 1.1:** Sebagian terjawab. Sample Excel awal sudah tersedia dan digunakan sebagai acuan import awal.
+**Status PRD 1.1 + file `daftar_pegawai.xlsx`:** Format Excel awal sudah tersedia dan digunakan sebagai acuan import awal. Header yang tersedia: `No`, `Nama Pegawai`, `Email Pegawai`, `Golongan`, `Jabatan`, `Kelas Jabatan`, `NIP`, `Nomor Telepon`, `Pangkat`, `Pendidikan Terakhir`, `Pensiun`, `Person`, `Person Formula`, `Prodi Pendidikan Terakhir`, `Status Kepegawaian`, `Tanggal Lahir`.
 
 Yang masih perlu diminta:
-- Sample/format final CSV atau Excel yang akan dipakai saat import production.
-- **Kolom/field lengkap** yang akan dipakai, karena sample awal belum mencakup semua field PRD.
-- Apakah data sudah **bersih dan konsisten**, atau masih perlu pembersihan?
-- Berapa banyak **riwayat kepangkatan/jabatan** rata-rata per pegawai?
+- Konfirmasi apakah `daftar_pegawai.xlsx` ini adalah format final untuk production atau baru contoh format.
+- Konfirmasi apakah jumlah baris sudah mencakup seluruh pegawai yang akan diimpor saat go-live.
+- Data yang belum ada di Excel: NIK, No. KK, tempat lahir, jenis kelamin, agama, status kawin, alamat, unit kerja, atasan langsung, TMT/SK kepangkatan, TMT/SK jabatan, TMT KGB, dan data keluarga.
+- Apakah data yang belum ada tersebut akan diinput manual setelah import awal, atau akan diberikan dalam file tambahan?
+- Apakah kolom `Person` dan `Person Formula` perlu disimpan di SIMPEG, atau hanya metadata dari file sumber?
 
 ### B3. 🟡 NIP dan Identitas Pegawai
 - Apakah semua pegawai sudah punya **NIP**? (termasuk PPPK?)
@@ -254,10 +255,11 @@ Rekap (Bagian 13.1) menyebutkan Fase 1 harus selesai sebelum 1 September 2026.
 ## I. Data Migration & Go-Live
 
 ### I1. 🔴 Data Awal yang Akan Diimpor
-**Status PRD 1.1:** Sebagian terjawab. Sample Excel awal sudah tersedia.
+**Status PRD 1.1 + file `daftar_pegawai.xlsx`:** Format data pegawai utama sudah tersedia untuk import awal, tetapi isi/kelengkapan production masih perlu dikonfirmasi.
 
 Yang masih perlu diminta:
-- Data final yang akan diimpor saat production.
+- Konfirmasi apakah file `daftar_pegawai.xlsx` sudah menjadi data final production.
+- Jika belum final, minta file final dengan header yang sama agar fitur import tetap konsisten.
 - Selain data pegawai, apakah ada **data riwayat** (kepangkatan, jabatan, KGB) yang juga perlu diimpor?
 - Apakah data riwayat sudah **lengkap dan terstruktur**, atau perlu dikumpulkan dari berbagai sumber?
 
@@ -306,8 +308,8 @@ Yang masih perlu diminta:
 
 | Prioritas | Jumlah | Kategori |
 |-----------|--------|----------|
-| 🔴 Blocker | 4 | Credential/akses Keycloak final, struktur atasan langsung, format data final import, keputusan kinerja/EWS yang belum eksplisit |
+| 🔴 Blocker | 4 | Credential/akses Keycloak final, struktur atasan langsung, konfirmasi kelengkapan file data import final, keputusan kinerja/EWS yang belum eksplisit |
 | 🟡 Penting | 14 | NIP, Data Keluarga, Golongan/Jabatan, PPPK, Aturan Cuti, Carry-over, daftar BUP final, Kontrak PPPK, Audit Log, Dashboard, Laporan, Backup, Timeline/UAT, Go-Live |
 | 🟢 Nice-to-know | 8 | Pembatalan Cuti, Eskalasi EWS, Akses Audit Log, Kalender Tim, Environment Dev, Akses Koordinasi, Data Pribadi/PDP, Cuti Darurat |
 
-> **Rekomendasi setelah PRD 1.1**: Development dapat berjalan sambil menunggu data final non-production. Yang paling perlu dikejar segera adalah credential Keycloak, daftar atasan langsung, file data final untuk import, dan referensi jabatan/BUP final.
+> **Rekomendasi setelah PRD 1.1**: Development dapat berjalan memakai format `daftar_pegawai.xlsx` sebagai acuan import awal. Yang paling perlu dikejar segera adalah credential Keycloak, daftar atasan langsung, konfirmasi kelengkapan file data final, dan referensi jabatan/BUP final.

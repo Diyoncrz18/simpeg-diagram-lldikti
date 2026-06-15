@@ -447,8 +447,9 @@ Buat migration untuk semua tabel terkait pegawai.
 
 **Tasks:**
 - [ ] Migration `employees`:
-  - Data pribadi: nama_lengkap, nip (unique), nik, no_kk, tempat_lahir, tanggal_lahir, jenis_kelamin, agama_id, status_kawin_id, golongan_darah, foto_path, jenis_pegawai_id
-  - Data kontak: alamat, no_hp, email_pribadi, no_telepon_rumah
+  - Data utama sesuai Excel: nama_lengkap, email_pribadi, nip (unique), tanggal_lahir, jenis_pegawai/status_kepegawaian, golongan_terakhir, pangkat_terakhir, jabatan_terakhir, kelas_jabatan, pendidikan_terakhir, prodi_pendidikan_terakhir, tanggal_pensiun, person_label, person_formula_label, profil_status
+  - Data pelengkap profil: nik, no_kk, tempat_lahir, jenis_kelamin, agama_id, status_kawin_id, golongan_darah, foto_path
+  - Data kontak: alamat, no_hp, no_telepon_rumah
   - Data pengangkatan: jenis_pengangkatan, tmt_pengangkatan, no_sk_pengangkatan, tanggal_sk_pengangkatan, file_sk_pengangkatan
   - Auth: keycloak_id (nullable), role
   - Supervisor: atasan_langsung_id (FK self-referencing, nullable)
@@ -667,8 +668,9 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 **Tasks:**
 - [ ] Buat `ImportTemplateController@download` — generate template CSV dan/atau Excel
-- [ ] Template terpisah: Data Pegawai, Riwayat Kepangkatan, Riwayat Jabatan, Riwayat KGB
-- [ ] Header kolom sesuai field SIMPEG
+- [ ] Template utama Data Pegawai mengikuti header `daftar_pegawai.xlsx`: `No`, `Nama Pegawai`, `Email Pegawai`, `Golongan`, `Jabatan`, `Kelas Jabatan`, `NIP`, `Nomor Telepon`, `Pangkat`, `Pendidikan Terakhir`, `Pensiun`, `Person`, `Person Formula`, `Prodi Pendidikan Terakhir`, `Status Kepegawaian`, `Tanggal Lahir`
+- [ ] Template lanjutan: Data Pelengkap, Riwayat Kepangkatan, Riwayat Jabatan, Riwayat KGB
+- [ ] Header kolom mengikuti `Mapping-Data-Pegawai-Excel-SIMPEG.md`
 - [ ] Sertakan 2 baris contoh data dummy
 - [ ] Format minimal CSV UTF-8 delimiter koma; opsi Excel memakai `.xlsx`
 - [ ] Tombol download di halaman Import
@@ -688,13 +690,15 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 **Tasks Backend 2 (Grantly):**
 - [ ] Buat `EmployeeImportController` dengan method: upload, preview, validate, execute
 - [ ] Upload: terima file Excel/CSV, simpan sementara, parse header
-- [ ] Auto-match kolom Excel/CSV ke field SIMPEG berdasarkan nama
+- [ ] Auto-match kolom Excel/CSV ke field SIMPEG berdasarkan header `daftar_pegawai.xlsx`
 - [ ] Validasi semua baris:
   - NIP unik (cek DB + antar baris)
-  - NIK format 16 digit
-  - Tanggal valid
-  - Field wajib terisi
-  - Golongan ada di reference table
+  - Email Pegawai terisi dan berformat email
+  - Tanggal Lahir valid
+  - Pensiun valid jika terisi
+  - Status Kepegawaian valid: PNS/CPNS/PPPK
+  - Field wajib Excel terisi
+  - Golongan ada di reference table jika reference sudah tersedia
 - [ ] Return ringkasan: total, valid ✅, error ❌, skip (NIP duplikat)
 - [ ] Untuk baris error: nomor baris, kolom, jenis error
 
@@ -723,7 +727,9 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 - [ ] Buat `ImportEmployeesJob` (queue job):
   - Process baris valid → insert ke employees
   - Skip baris NIP duplikat
-  - Hitung TMT otomatis untuk semua pegawai yang diimpor
+  - Simpan snapshot awal dari Excel: golongan, pangkat, jabatan, kelas jabatan, pendidikan, prodi, tanggal pensiun jika tersedia
+  - Set `profil_status = belum_lengkap` untuk pegawai hasil import yang belum punya data pelengkap PRD
+  - Hitung tanggal pensiun hanya untuk baris yang kolom `Pensiun` kosong dan referensi BUP sudah tersedia
   - Track progress (jumlah berhasil/gagal)
 - [ ] Dispatch job dari controller setelah user klik "Import"
 - [ ] Tampilkan progress bar atau loading indicator
