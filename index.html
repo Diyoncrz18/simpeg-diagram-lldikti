@@ -171,7 +171,9 @@
       <p class="eyebrow">SIMPEG LLDIKTI Wilayah XVI</p>
       <h1>Dokumentasi Diagram Fase 1</h1>
       <p class="subtitle">
-        Halaman utama untuk mengakses use case diagram, flowchart, dan ERD awal SIMPEG Fase 1/Core.
+        Halaman utama untuk mengakses diagram SIMPEG Fase 1/Core: use case, flowchart, ERD,
+        activity, sequence, class, state cuti, component, deployment, DFD, role hierarchy,
+        permission matrix, dan roadmap.
       </p>
     </div>
   </header>
@@ -217,6 +219,116 @@
         </div>
         <div class="actions">
           <a class="button" href="erd-simpeg-fase1.html">Buka ERD</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div>
+          <span class="meta">Aktivitas Sistem</span>
+          <h2>Activity Diagram</h2>
+          <p>Aktivitas utama Fase 1 mulai dari SSO, import Excel, pengelolaan pegawai, cuti, EWS, notifikasi, audit, dan laporan.</p>
+        </div>
+        <div class="actions">
+          <a class="button" href="activity-diagram-simpeg-fase1.html">Buka Activity</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div>
+          <span class="meta">Interaksi Sistem</span>
+          <h2>Sequence Diagram</h2>
+          <p>Urutan interaksi pengguna, SIMPEG Laravel, Keycloak, PostgreSQL, queue, dan SMTP/Mailpit.</p>
+        </div>
+        <div class="actions">
+          <a class="button" href="sequence-diagram-simpeg-fase1.html">Buka Sequence</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div>
+          <span class="meta">Model Domain</span>
+          <h2>Class Diagram</h2>
+          <p>Struktur class/model utama untuk pegawai, role, permission, cuti, EWS, notifikasi, audit, dan import.</p>
+        </div>
+        <div class="actions">
+          <a class="button" href="class-diagram-simpeg-fase1.html">Buka Class</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div>
+          <span class="meta">Status Cuti</span>
+          <h2>State Diagram</h2>
+          <p>Perubahan status pengajuan cuti dari draft, validasi, approval tiga tahap, tunda, tolak, sampai disetujui.</p>
+        </div>
+        <div class="actions">
+          <a class="button" href="state-diagram-cuti-simpeg-fase1.html">Buka State</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div>
+          <span class="meta">Komponen Aplikasi</span>
+          <h2>Component Diagram</h2>
+          <p>Komponen Laravel SIMPEG seperti Auth, RBAC, Pegawai, Import, Cuti, EWS, Notifikasi, Audit, Dashboard, dan Export.</p>
+        </div>
+        <div class="actions">
+          <a class="button" href="component-diagram-simpeg-fase1.html">Buka Component</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div>
+          <span class="meta">Server & Deploy</span>
+          <h2>Deployment Diagram</h2>
+          <p>Topologi deployment development dan production: Podman, Laravel, PostgreSQL, queue, scheduler, Keycloak, SMTP, DNS, dan SSL.</p>
+        </div>
+        <div class="actions">
+          <a class="button" href="deployment-diagram-simpeg-fase1.html">Buka Deployment</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div>
+          <span class="meta">Aliran Data</span>
+          <h2>DFD</h2>
+          <p>Aliran data dari aktor, file Excel, Keycloak, proses SIMPEG, database, notifikasi, dan export laporan.</p>
+        </div>
+        <div class="actions">
+          <a class="button" href="dfd-simpeg-fase1.html">Buka DFD</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div>
+          <span class="meta">Role</span>
+          <h2>Role Hierarchy</h2>
+          <p>Hierarki Super Admin, Admin Kepegawaian, Pimpinan, Atasan Langsung, dan Pegawai beserta fungsi ringkasnya.</p>
+        </div>
+        <div class="actions">
+          <a class="button" href="role-hierarchy-diagram-simpeg-fase1.html">Buka Role</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div>
+          <span class="meta">RBAC</span>
+          <h2>Permission Matrix</h2>
+          <p>Matriks akses role terhadap SSO, RBAC, data pegawai, import, cuti, EWS, audit, dashboard, laporan, dan reference tables.</p>
+        </div>
+        <div class="actions">
+          <a class="button" href="permission-matrix-simpeg-fase1.html">Buka Matrix</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div>
+          <span class="meta">Fase Proyek</span>
+          <h2>Roadmap Diagram</h2>
+          <p>Batas Fase 1/Core dan arah pengembangan Fase 2, Fase 3, dan Fase 4 sesuai PRD.</p>
+        </div>
+        <div class="actions">
+          <a class="button" href="roadmap-diagram-simpeg.html">Buka Roadmap</a>
         </div>
       </article>
     </section>

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Class Diagram SIMPEG Fase 1</title>
+  <style>
+    :root { --bg:#f5f7fb; --panel:#fff; --ink:#172033; --muted:#5f6878; --line:#d8dee9; --brand:#0f5f7a; --brand-dark:#07384d; --gold:#b8860b; --soft:#eef7f8; --shadow:0 10px 28px rgba(23,32,51,.08); }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:Arial,Helvetica,sans-serif; line-height:1.55; }
+    header { padding:40px 24px 32px; color:#fff; background:linear-gradient(135deg,var(--brand-dark),var(--brand)); border-bottom:5px solid var(--gold); }
+    .wrap { width:min(1180px, calc(100% - 32px)); margin:0 auto; }
+    .eyebrow { margin:0 0 8px; color:#f3d58a; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+    h1 { margin:0; font-size:clamp(28px,4vw,46px); line-height:1.1; letter-spacing:0; }
+    .subtitle { max-width:920px; margin:16px 0 0; color:#e8f4f7; font-size:17px; }
+    main { padding:28px 0 48px; }
+    section { margin:0 0 24px; padding:24px; background:var(--panel); border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow); }
+    h2 { margin:0 0 12px; color:#0b3f56; font-size:24px; letter-spacing:0; }
+    p { margin:0 0 12px; color:var(--muted); }
+    .diagram { overflow-x:auto; margin-top:16px; padding:14px; background:#fbfcfe; border:1px solid var(--line); border-radius:8px; scrollbar-gutter:stable; }
+    .note { margin-top:14px; padding:14px; border:1px solid #c7dde4; border-radius:8px; background:var(--soft); color:var(--ink); }
+    a { color:#0b5f7a; font-weight:700; }
+    footer { padding:20px 0 36px; color:var(--muted); font-size:13px; text-align:center; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <p class="eyebrow">SIMPEG LLDIKTI Wilayah XVI</p>
+      <h1>Class Diagram Fase 1</h1>
+      <p class="subtitle">Model domain utama untuk pegawai, RBAC, cuti, EWS, notifikasi, audit, import, dan riwayat kepegawaian.</p>
+    </div>
+  </header>
+  <main class="wrap">
+    <section>
+      <h2>Model Domain</h2>
+      <p>Class diagram ini mengikuti kebutuhan Fase 1 dan penyesuaian import Excel `daftar_pegawai.xlsx`.</p>
+      <div class="diagram">
+        <pre class="mermaid">
+classDiagram
+    class Employee {
+      +uuid id
+      +string nama_lengkap
+      +string email_pribadi
+      +string nip
+      +date tanggal_lahir
+      +string jenis_pegawai
+      +string status_kepegawaian
+      +string golongan_terakhir
+      +string pangkat_terakhir
+      +string jabatan_terakhir
+      +string kelas_jabatan
+      +string pendidikan_terakhir
+      +string prodi_pendidikan_terakhir
+      +date tanggal_pensiun
+      +string profil_status
+      +string keycloak_id
+      +uuid atasan_langsung_id
+      +bool is_kinerja_baik
+    }
+
+    class Role {
+      +uuid id
+      +string name
+      +string description
+    }
+
+    class Permission {
+      +uuid id
+      +string name
+      +string module
+    }
+
+    class FamilyMember {
+      +uuid id
+      +string nama
+      +string hubungan
+      +string nik
+      +date tanggal_lahir
+      +bool status_tunjangan
+    }
+
+    class Education {
+      +uuid id
+      +string jenjang
+      +string prodi
+      +string institusi
+      +int tahun_lulus
+    }
+
+    class RankHistory {
+      +uuid id
+      +string golongan
+      +string pangkat
+      +date tmt_pangkat
+      +string no_sk
+      +bool is_latest
+    }
+
+    class PositionHistory {
+      +uuid id
+      +string nama_jabatan
+      +string jenis_jabatan
+      +string unit_kerja
+      +date tmt_jabatan
+      +bool is_latest
+    }
+
+    class KgbHistory {
+      +uuid id
+      +date tmt_kgb
+      +decimal gaji_pokok
+      +string no_sk
+      +bool is_latest
+    }
+
+    class DisciplineRecord {
+      +uuid id
+      +string jenis_hukuman
+      +date tanggal_mulai
+      +date tanggal_berakhir
+      +bool is_active
+    }
+
+    class LeaveRequest {
+      +uuid id
+      +date tanggal_mulai
+      +date tanggal_selesai
+      +int jumlah_hari_kerja
+      +string alasan
+      +string status
+      +int current_stage
+    }
+
+    class LeaveApproval {
+      +uuid id
+      +int stage
+      +string action
+      +string komentar
+      +datetime acted_at
+    }
+
+    class LeaveBalance {
+      +uuid id
+      +int tahun
+      +int saldo_awal
+      +int carry_over
+      +int terpakai
+      +int sisa
+    }
+
+    class Holiday {
+      +uuid id
+      +date tanggal
+      +string nama
+      +string jenis
+    }
+
+    class EwsAlert {
+      +uuid id
+      +string event_type
+      +date tanggal_target
+      +int sisa_hari
+      +string eligibility_status
+      +string status
+    }
+
+    class Notification {
+      +uuid id
+      +string channel
+      +string title
+      +string body
+      +datetime read_at
+    }
+
+    class AuditLog {
+      +uuid id
+      +string event
+      +json old_values
+      +json new_values
+      +string ip_address
+      +string user_agent
+    }
+
+    class ImportBatch {
+      +uuid id
+      +string file_name
+      +int total_rows
+      +int success_count
+      +int failed_count
+      +int skipped_count
+      +string status
+    }
+
+    class ImportRowError {
+      +uuid id
+      +int row_number
+      +string column_name
+      +string error_message
+    }
+
+    Employee "1" --> "0..*" FamilyMember
+    Employee "1" --> "0..*" Education
+    Employee "1" --> "0..*" RankHistory
+    Employee "1" --> "0..*" PositionHistory
+    Employee "1" --> "0..*" KgbHistory
+    Employee "1" --> "0..*" DisciplineRecord
+    Employee "1" --> "0..*" LeaveRequest
+    Employee "1" --> "0..*" LeaveBalance
+    Employee "1" --> "0..*" EwsAlert
+    Employee "1" --> "0..*" Notification
+    Employee "1" --> "0..*" AuditLog
+    Employee "0..1" --> "0..*" Employee : atasan langsung
+    Employee "0..*" --> "1..*" Role
+    Role "0..*" --> "0..*" Permission
+    LeaveRequest "1" --> "1..*" LeaveApproval
+    LeaveRequest "0..*" --> "1" Holiday : excludes workday
+    ImportBatch "1" --> "0..*" ImportRowError
+    ImportBatch "1" --> "0..*" Employee : creates
+        </pre>
+      </div>
+      <div class="note">Snapshot seperti `golongan_terakhir`, `jabatan_terakhir`, dan `tanggal_pensiun` disimpan agar import awal dari Excel tetap berguna meskipun riwayat TMT/SK belum tersedia.</div>
+    </section>
+  </main>
+  <footer><div class="wrap"><a href="index.html">Kembali ke daftar diagram</a></div></footer>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({ startOnLoad: true, theme: "base", securityLevel: "loose" });
+  </script>
+</body>
+</html>

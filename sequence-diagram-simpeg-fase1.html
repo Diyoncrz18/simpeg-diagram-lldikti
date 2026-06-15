@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sequence Diagram SIMPEG Fase 1</title>
+  <style>
+    :root { --bg:#f5f7fb; --panel:#fff; --ink:#172033; --muted:#5f6878; --line:#d8dee9; --brand:#0f5f7a; --brand-dark:#07384d; --gold:#b8860b; --soft:#eef7f8; --shadow:0 10px 28px rgba(23,32,51,.08); }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:Arial,Helvetica,sans-serif; line-height:1.55; }
+    header { padding:40px 24px 32px; color:#fff; background:linear-gradient(135deg,var(--brand-dark),var(--brand)); border-bottom:5px solid var(--gold); }
+    .wrap { width:min(1180px, calc(100% - 32px)); margin:0 auto; }
+    .eyebrow { margin:0 0 8px; color:#f3d58a; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+    h1 { margin:0; font-size:clamp(28px,4vw,46px); line-height:1.1; letter-spacing:0; }
+    .subtitle { max-width:920px; margin:16px 0 0; color:#e8f4f7; font-size:17px; }
+    main { padding:28px 0 48px; }
+    section { margin:0 0 24px; padding:24px; background:var(--panel); border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow); }
+    h2 { margin:0 0 12px; color:#0b3f56; font-size:24px; letter-spacing:0; }
+    p { margin:0 0 12px; color:var(--muted); }
+    .diagram { overflow-x:auto; margin-top:16px; padding:14px; background:#fbfcfe; border:1px solid var(--line); border-radius:8px; scrollbar-gutter:stable; }
+    .note { margin-top:14px; padding:14px; border:1px solid #c7dde4; border-radius:8px; background:var(--soft); color:var(--ink); }
+    a { color:#0b5f7a; font-weight:700; }
+    footer { padding:20px 0 36px; color:var(--muted); font-size:13px; text-align:center; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <p class="eyebrow">SIMPEG LLDIKTI Wilayah XVI</p>
+      <h1>Sequence Diagram Fase 1</h1>
+      <p class="subtitle">Urutan interaksi antar aktor, Laravel SIMPEG, Keycloak, database, queue, dan layanan email/notifikasi.</p>
+    </div>
+  </header>
+  <main class="wrap">
+    <section>
+      <h2>Sequence Utama</h2>
+      <p>Sequence ini merangkum tiga skenario inti: login SSO, import data pegawai, dan pengajuan cuti sampai notifikasi.</p>
+      <div class="diagram">
+        <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor User as Pengguna
+    participant Browser
+    participant App as SIMPEG Laravel
+    participant Keycloak
+    participant DB as PostgreSQL
+    participant Queue as Queue Worker
+    participant Mail as SMTP/Mailpit
+
+    rect rgb(238, 247, 248)
+      User->>Browser: Buka SIMPEG
+      Browser->>App: GET /
+      App->>App: Cek session
+      alt Belum login
+        App-->>Browser: Redirect ke Keycloak
+        Browser->>Keycloak: Login SSO
+        Keycloak-->>Browser: Authorization callback
+        Browser->>App: Callback dengan token/code
+        App->>Keycloak: Validasi token dan ambil profil
+        Keycloak-->>App: Email, nama, Keycloak ID
+        App->>DB: Cari employee berdasarkan email/Keycloak ID
+        alt Pegawai ditemukan
+          DB-->>App: Employee + role internal
+          App->>DB: Update keycloak_id jika kosong
+          App-->>Browser: Redirect dashboard sesuai role
+        else Pegawai belum terdaftar
+          App-->>Browser: Halaman akun belum terdaftar
+        end
+      else Sudah login
+        App->>DB: Load role dan permission internal
+        App-->>Browser: Dashboard
+      end
+    end
+
+    rect rgb(255, 248, 230)
+      actor Admin as Admin Kepegawaian
+      Admin->>Browser: Upload daftar_pegawai.xlsx
+      Browser->>App: POST /import/pegawai/preview
+      App->>App: Parse sheet Pegawai dan header 16 kolom
+      App->>DB: Cek referensi golongan/status dan NIP existing
+      DB-->>App: Hasil validasi
+      App-->>Browser: Preview, mapping, error per baris
+      Admin->>Browser: Konfirmasi import valid
+      Browser->>App: POST /import/pegawai/execute
+      App->>Queue: Dispatch ImportEmployeesJob
+      Queue->>DB: Insert employees dan profil_status belum_lengkap
+      Queue->>DB: Simpan audit log import
+      Queue-->>App: Progress dan hasil import
+      App-->>Browser: Laporan berhasil/gagal/skip
+    end
+
+    rect rgb(241, 245, 249)
+      actor Pegawai
+      actor Atasan as Atasan Langsung
+      actor Kabag as Kabag/Verifikator
+      actor Pimpinan as Pimpinan/PYBMC
+
+      Pegawai->>Browser: Submit pengajuan cuti
+      Browser->>App: POST /cuti
+      App->>DB: Validasi saldo, hari kerja, jenis cuti, atasan
+      App->>DB: Simpan leave_requests status menunggu atasan
+      App->>DB: Catat audit log pengajuan
+      App->>Queue: Kirim notifikasi ke Atasan
+      Queue->>Mail: Email/notifikasi jika channel aktif
+
+      Atasan->>Browser: Setujui/tunda stage 1
+      Browser->>App: POST /cuti/{id}/approve
+      App->>DB: Simpan approval stage 1
+      App->>App: Tentukan stage berikutnya dan skip jika approver sama
+      App->>Queue: Notifikasi ke Kabag atau stage berikutnya
+
+      Kabag->>Browser: Setujui/tunda stage 2
+      Browser->>App: POST /cuti/{id}/approve
+      App->>DB: Simpan approval stage 2
+      App->>Queue: Notifikasi ke Pimpinan
+
+      Pimpinan->>Browser: Keputusan final
+      Browser->>App: POST /cuti/{id}/finalize
+      App->>DB: Update status cuti dan saldo jika disetujui
+      App->>DB: Catat audit log approval
+      App->>Queue: Notifikasi hasil ke Pegawai
+    end
+        </pre>
+      </div>
+      <div class="note">Role dan permission selalu dibaca dari database SIMPEG, bukan dari role Keycloak.</div>
+    </section>
+  </main>
+  <footer><div class="wrap"><a href="index.html">Kembali ke daftar diagram</a></div></footer>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({ startOnLoad: true, theme: "base", securityLevel: "loose" });
+  </script>
+</body>
+</html>
