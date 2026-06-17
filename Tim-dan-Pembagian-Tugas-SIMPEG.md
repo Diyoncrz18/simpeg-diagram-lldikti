@@ -11,7 +11,7 @@ Proyek SIMPEG menggunakan **Laravel 12 + Blade** di mana backend dan frontend sa
 
 - Membagi "backend murni" dan "frontend murni" di proyek Laravel justru memperlambat karena satu fitur butuh keduanya sekaligus
 - Tanpa UI/UX designer, desain UI bisa diatasi dengan **Blade Components** dan design system internal yang konsisten
-- QA yang hanya di akhir sprint akan memperlambat — lebih baik **QA berjalan paralel** sejak Sprint 2
+- QA yang hanya di akhir sprint akan memperlambat — lebih baik **QA berjalan paralel** sejak Sprint 1 lewat checklist, smoke test, evidence, dan retest
 
 ---
 
@@ -21,9 +21,9 @@ Proyek SIMPEG menggunakan **Laravel 12 + Blade** di mana backend dan frontend sa
 |------|-----------|--------------|---------|
 | **Dion Kobi** | Project Manager | System Analyst, Tech Lead, Code Reviewer | 30% coding, 70% manajemen |
 | **Jordan Sutarto** | Fullstack Developer (Backend 1) | Backend leadership, business logic, queue/scheduler | 90% coding |
-| **Grantly Sorongan** | Fullstack Developer (Backend 2) | Backend implementation, QA operations, documentation operations | 70% backend, 20% QA ops, 10% dokumentasi |
+| **Grantly Sorongan** | Fullstack Developer (Backend 2) + QA & Documentation | Backend implementation, QA execution, QA evidence, documentation operations | 65% backend, 25% QA, 10% dokumentasi |
 | **Adithian Gunawan** | Fullstack Developer (Lead Frontend) | UI/Layout, Blade Components, Dashboard | 90% coding |
-| **Adriel Walintukan** | Fullstack Developer (Frontend) + QA | Testing, Bug Fixing, Export/Laporan | 70% coding, 30% QA |
+| **Adriel Walintukan** | Fullstack Developer (Frontend) + GitHub Review/Merge | Frontend implementation, PR review, merge gate, release branch hygiene | 70% frontend, 30% review/merge |
 
 ### Kenapa Semua "Fullstack"?
 
@@ -34,7 +34,7 @@ Di Laravel, satu fitur = 1 migration + 1 model + 1 controller + 1 blade view. Ka
 
 Dengan pendekatan **fullstack per fitur**, satu orang bisa menyelesaikan satu user story **end-to-end** dari database sampai UI.
 
-> **Catatan:** Jordan menjadi **Backend 1** dan memimpin pembagian kerja teknis backend. Grantly menjadi **Backend 2** dengan fokus utama backend, sekaligus menjaga operasional QA dan dokumentasi agar hasil sprint rapi, bisa diuji, dan bisa dihandover.
+> **Catatan:** Jordan menjadi **Backend 1** dan memimpin pembagian kerja teknis backend. Grantly menjadi **Backend 2 + QA & Documentation** dengan fokus backend, validasi QA, evidence bug/retest, dan dokumentasi handover. Adriel menjadi **Frontend + GitHub Review/Merge**: tetap mengerjakan UI, sekaligus menjadi gatekeeper PR dan merge ke `develop` setelah review/checks terpenuhi.
 
 ---
 
@@ -46,7 +46,7 @@ Dengan pendekatan **fullstack per fitur**, satu orang bisa menyelesaikan satu us
 - Sprint planning, daily standup (15 menit/hari), sprint review
 - Menjaga backlog dan prioritas — update Notion
 - Komunikasi dengan pihak LLDIKTI (menjawab pertanyaan blocker)
-- Code review untuk semua Pull Request (quality gate)
+- Review teknis untuk PR kritis dan acceptance criteria, bukan gate merge harian
 - Menulis/validasi acceptance criteria sebelum story dikerjakan
 - Menyiapkan test data dan seed data reference tables
 
@@ -60,7 +60,7 @@ Dengan pendekatan **fullstack per fitur**, satu orang bisa menyelesaikan satu us
 **Output:**
 - Notion board selalu up-to-date
 - Setiap sprint punya sprint goal yang jelas
-- Pull Request di-review dalam < 24 jam
+- PR kritis mendapat arahan teknis jelas sebelum merge
 
 ---
 
@@ -121,16 +121,16 @@ Dengan pendekatan **fullstack per fitur**, satu orang bisa menyelesaikan satu us
 
 ---
 
-### ⚙️ Grantly Sorongan — Backend 2 / Fullstack + QA & Documentation Ops
+### ⚙️ Grantly Sorongan — Backend 2 + QA & Documentation
 
-**Spesialisasi:** Backend Implementation, Database, API Core, Keycloak Integration, QA Operations, Documentation Operations
+**Spesialisasi:** Backend Implementation, Database, API Core, Keycloak Integration, QA Execution, Documentation Operations
 
-**Mandat Backend 2 + Operasional:**
+**Mandat Backend 2 + QA & Documentation:**
 - Fokus utama tetap backend implementation untuk modul core yang sudah ditetapkan.
 - Menjadi partner Backend 1 untuk implementasi teknis, debugging, dan validasi business rule.
-- Menjaga checklist QA per sprint: test scope, skenario kritis, evidence bug, dan status retest.
+- Menjaga sekaligus menjalankan QA per sprint: test scope, skenario kritis, smoke test, evidence bug, dan status retest.
 - Menjaga dokumentasi operasional: README, catatan setup, runbook, keputusan teknis, dan catatan handover.
-- Berkoordinasi dengan Adriel untuk eksekusi QA dan dengan Dion untuk dokumentasi project-level.
+- Berkoordinasi dengan Dion untuk dokumentasi project-level dan dengan owner fitur untuk retest setelah bug diperbaiki.
 
 **Sprint 1 (Fondasi):**
 - Setup Laravel project structure + PostgreSQL connection
@@ -171,7 +171,7 @@ Dengan pendekatan **fullstack per fitur**, satu orang bisa menyelesaikan satu us
 | Approval Engine | US-4.4, US-4.5, US-4.6, US-4.12 |
 | EWS Engine | US-5.1, US-5.5 |
 | Export Engine | US-9.1, US-9.3 |
-| QA Operations | Checklist QA, retest tracking, evidence bug, koordinasi dengan Adriel |
+| QA & Documentation | Checklist QA, smoke/regression test, retest tracking, evidence bug, runbook, handover sprint |
 | Documentation Operations | README, runbook setup, catatan teknis, handover sprint |
 
 ---
@@ -228,56 +228,65 @@ Dengan pendekatan **fullstack per fitur**, satu orang bisa menyelesaikan satu us
 
 ---
 
-### 🧪 Adriel Walintukan — Frontend + QA Tester
+### 🔎 Adriel Walintukan — Frontend + GitHub Review/Merge
 
-**Spesialisasi:** Frontend Support, Testing, Export/Laporan, Bug Fixing
+**Spesialisasi:** Frontend Implementation, Blade Views, Component Polish, Pull Request Review, Merge Gate
+
+**Mandat Frontend + GitHub Gatekeeper:**
+- Mengerjakan UI pendukung bersama Adithian agar frontend tidak menjadi bottleneck.
+- Menjadi reviewer/merge gate GitHub untuk PR harian ke `develop`.
+- Memastikan PR punya deskripsi jelas, acceptance criteria tercentang, screenshot/evidence UI jika relevan, dan tidak ada conflict sebelum merge.
+- Tidak melakukan self-review: PR milik Adriel harus di-review dan di-merge oleh Dion atau Adithian.
 
 **Sprint 1 (Fondasi):**
-- Bantu Adithian setup design system — membuat reusable Blade components (alert, modal, toast, pagination)
-- Setup testing framework: PHPUnit (unit test) + Laravel Dusk (browser test)
-- Tulis test cases dasar untuk auth flow
+- Bantu Adithian setup design system — reusable Blade components: alert, modal, toast, pagination, breadcrumb, empty state.
+- Setup GitHub hygiene: PR template, branch naming, checklist review, label prioritas, dan aturan merge ke `develop`.
+- Review dan merge PR awal setelah environment, layout, dan checks dasar terpenuhi.
 
 **Sprint 2 (Data Pegawai):**
-- **QA:** Test semua CRUD pegawai — happy path + edge cases (NIP duplikat, NIK invalid, file upload >10MB)
-- Buat Blade components: form elements (date picker, dropdown, file upload with preview)
-- UI Data keluarga — form + tabel di tab detail pegawai (US-2.8 views)
+- Buat Blade components: form elements, date picker, dropdown, file upload with preview.
+- UI Data keluarga — form + tabel di tab detail pegawai (US-2.8 views).
+- Review/merge PR CRUD pegawai, riwayat, dan UI pegawai secara bertahap agar branch tidak menumpuk.
 
 **Sprint 3:**
-- **QA:** Test import CSV — file corrupt, encoding, baris error, NIP duplikat
-- UI Soft delete — konfirmasi dialog, daftar non-aktif, restore (US-2.9 views)
-- UI Hard delete — double confirm + ketik nama (US-2.10 views)
+- UI Soft delete — konfirmasi dialog, daftar non-aktif, restore (US-2.9 views).
+- UI Hard delete — double confirm + ketik nama (US-2.10 views).
+- UI Profil sendiri — versi read-only dari detail pegawai (US-2.5 views), jika Adithian fokus ke import UI.
+- Review/merge PR import setelah kontrak backend, validasi, dan evidence dari Grantly tersedia.
 
 **Sprint 4:**
-- **QA:** Test flow cuti end-to-end: submit → approval chain → skip approver duplikat jika ada → saldo berkurang saat final approve
-- UI Saldo cuti — card view + riwayat (US-4.3 views)
-- Assign atasan langsung — UI dropdown + riwayat (US-4.11 views)
+- UI Saldo cuti — card view + riwayat (US-4.3 views).
+- Assign atasan langsung — UI dropdown + riwayat (US-4.11 views).
+- Timeline approval partial untuk dipakai ulang di detail cuti.
+- Review/merge PR cuti secara bertahap: form cuti, approval engine, saldo, lalu timeline.
 
 **Sprint 5:**
-- **QA:** Test EWS scheduler — trigger notifikasi, eligibility, no-duplicate alerts
-- UI Flag kinerja — toggle dengan tooltip (US-5.4 views)
-- Email template — HTML responsive template untuk semua jenis notifikasi
+- UI Flag kinerja — toggle dengan tooltip (US-5.4 views).
+- Email template — HTML responsive template untuk notifikasi utama.
+- Halaman notifikasi lanjutan dan state kosong/error untuk EWS.
+- Review/merge PR EWS dan notifikasi setelah skenario QA Grantly selesai.
 
 **Sprint 6:**
-- Export PDF — layout laporan dengan header/footer/tanda tangan (US-9.2, US-9.4)
-- **QA:** Test dashboard — widget data accuracy, responsive
+- Export PDF — layout laporan dengan header/footer/tanda tangan (US-9.2, US-9.4).
+- Audit log views — halaman daftar + diff view awal (US-7.2, US-7.3 views), jika export PDF sudah stabil.
+- Review/merge PR dashboard dan laporan dengan fokus konsistensi UI dan bukti hasil export.
 
 **Sprint 7:**
-- **QA FULL REGRESSION**: Test seluruh sistem end-to-end
-- Audit log views — halaman daftar + diff view (US-7.2, US-7.3 views)
-- Tandai notifikasi dibaca (US-6.4)
-- Redirect per role (US-1.5)
-- Bug fixing dari hasil QA
+- Finalisasi Audit log views — diff view, filter, detail event (US-7.2, US-7.3).
+- Tandai notifikasi dibaca dan halaman semua notifikasi (US-6.4/US-6.2 support).
+- GitHub release gate: pastikan semua PR UAT sudah direview, conflict bersih, dan branch `develop` siap kandidat rilis.
+- Bug fixing frontend dari hasil QA Grantly dan UAT.
 
 **Ringkasan Ownership:**
 | Area | Stories |
 |------|---------|
-| Reusable Components | Modal, alert, toast, form elements |
-| Soft/Hard Delete | US-2.9, US-2.10 (views) |
-| Saldo Cuti Views | US-4.3, US-4.9 (views) |
-| Export PDF | US-9.2, US-9.4 |
+| GitHub Review/Merge | PR checklist, review, conflict check, merge gate ke `develop` |
+| Reusable Components | Modal, alert, toast, form elements, empty state, breadcrumb |
+| Frontend Pegawai | US-2.5, US-2.8, US-2.9, US-2.10 views |
+| Frontend Cuti | US-4.3, US-4.7 partial, US-4.11 views |
+| Frontend EWS/Notif | US-5.4 views, email templates, US-6.2/US-6.4 support |
+| Export PDF Views | US-9.2, US-9.4 |
 | Audit Log Views | US-7.2, US-7.3 |
-| Notifikasi | US-6.4, US-1.5 |
-| **QA Testing** | **Semua sprint** |
 
 ---
 
@@ -286,61 +295,61 @@ Dengan pendekatan **fullstack per fitur**, satu orang bisa menyelesaikan satu us
 ### Sprint 1 — Fondasi (Minggu 1–2)
 
 ```
-Dion      │ Setup project + environment + Keycloak config + seed data
-Jordan    │ Backend 1: US-1.4 Mapping User + US-6.1 Notifikasi + US-8.4 Hari Libur
-Grantly   │ Backend 2 + Ops: US-1.1 Login SSO + US-1.2 Logout + US-7.1 Audit Log + QA/docs checklist
-Adithian  │ Design System: layout, sidebar, navbar, components
-Adriel    │ Reusable components + setup testing framework
+Dion      │ Project baseline, acceptance criteria, seed/reference plan, unblock Keycloak/env
+Jordan    │ Backend 1: US-1.4 Mapping User + US-6.1 Notifikasi backend + US-8.4 Hari Libur
+Grantly   │ Backend 2 + QA/Docs: US-1.1 SSO + US-1.2 Logout + US-7.1 Audit Log + QA checklist + README/runbook
+Adithian  │ Lead Frontend: design system, layout, sidebar, navbar, auth/unregistered views
+Adriel    │ Frontend + GitHub Gate: reusable components + PR template/checklist + review/merge awal
 ```
 
 ### Sprint 2 — Data Pegawai (Minggu 3–4)
 
 ```
-Dion      │ Code review + validasi acceptance criteria + sprint planning
+Dion      │ Validasi AC + sprint planning + review teknis untuk PR kritis
 Jordan    │ Backend 1: US-2.6 Riwayat (Pangkat/Jabatan/KGB) + US-2.7 Disiplin
-Grantly   │ Backend 2 + Ops: US-2.1 Tambah + US-2.2 Edit + US-2.3 Daftar + US-2.4 Detail + QA/docs checklist
+Grantly   │ Backend 2 + QA/Docs: US-2.1 Tambah + US-2.2 Edit + US-2.3 Daftar + US-2.4 Detail + QA CRUD pegawai + docs
 Adithian  │ UI: form pegawai, tabel daftar, halaman detail (tabbed)
-Adriel    │ QA Sprint 1 + UI data keluarga + blade components
+Adriel    │ Frontend + GitHub Gate: UI data keluarga + form components + review/merge PR pegawai bertahap
 ```
 
 ### Sprint 3 — Import Excel/CSV & Pelengkap (Minggu 5–6)
 
 ```
-Dion      │ Code review + siapkan template CSV + sample data
+Dion      │ Validasi format template CSV + sample data + keputusan mapping kolom
 Jordan    │ Backend 1: US-3.1 Template + US-2.5 Profil + US-2.8 Keluarga
-Grantly   │ Backend 2 + Ops: US-3.2, US-3.3, US-3.4 Import engine + QA/docs checklist
+Grantly   │ Backend 2 + QA/Docs: US-3.2, US-3.3, US-3.4 Import engine + QA import + runbook import
 Adithian  │ UI import CSV: upload, preview, progress bar
-Adriel    │ QA Sprint 2 + US-2.9 Soft delete + US-2.10 Hard delete views
+Adriel    │ Frontend + GitHub Gate: US-2.5 profil + US-2.9 soft delete + US-2.10 hard delete views + review/merge import
 ```
 
 ### Sprint 4 — Cuti (Minggu 7–9)
 
 ```
-Dion      │ Code review + koordinasi data approval chain dengan LLDIKTI
+Dion      │ Koordinasi aturan approval chain dengan LLDIKTI + review teknis PR kritis cuti
 Jordan    │ Backend 1: US-4.1 Ajukan cuti + US-4.10, US-4.11 Assign atasan/approver + US-4.3 Saldo
-Grantly   │ Backend 2 + Ops: US-4.4, US-4.5, US-4.6 Approval engine + US-4.12 Kalkulasi + QA/docs checklist
+Grantly   │ Backend 2 + QA/Docs: US-4.4, US-4.5, US-4.6 Approval engine + US-4.12 Kalkulasi + QA cuti E2E + docs
 Adithian  │ UI: form cuti, daftar cuti, approval views, badge status
-Adriel    │ QA Sprint 3 + US-4.3 Saldo views + US-4.11 views
+Adriel    │ Frontend + GitHub Gate: US-4.3 saldo views + US-4.11 assign atasan views + timeline partial + review/merge cuti
 ```
 
 ### Sprint 5 — EWS & Notifikasi (Minggu 10–11)
 
 ```
-Dion      │ Code review + verifikasi business rules EWS
+Dion      │ Verifikasi business rules EWS + keputusan eligibility jika ada edge case
 Jordan    │ Backend 1: US-5.2 Daftar EWS + US-5.4 Flag kinerja + US-6.3 Email + US-1.3 Timeout
-Grantly   │ Backend 2 + Ops: US-5.1 Scheduler EWS + US-5.5 Kalkulasi TMT + QA/docs checklist
+Grantly   │ Backend 2 + QA/Docs: US-5.1 Scheduler EWS + US-5.5 Kalkulasi TMT + QA EWS/notifikasi + docs
 Adithian  │ UI: daftar EWS (warna), EWS pribadi (US-5.3)
-Adriel    │ QA Sprint 4 (flow cuti E2E) + US-5.4 views + email templates
+Adriel    │ Frontend + GitHub Gate: US-5.4 views + email templates + halaman notifikasi lanjutan + review/merge EWS
 ```
 
 ### Sprint 6 — Dashboard & Laporan (Minggu 12–13)
 
 ```
-Dion      │ Code review + UAT preparation
+Dion      │ UAT preparation + validasi data demo + review teknis PR dashboard/laporan kritis
 Jordan    │ Backend 1: US-4.9 Kelola saldo + US-4.8 Daftar cuti admin
-Grantly   │ Backend 2 + Ops: US-8.1 Dashboard queries + US-9.1 Export Excel pegawai + US-9.3 Export Excel cuti + QA/docs checklist
+Grantly   │ Backend 2 + QA/Docs: US-8.1 Dashboard queries + US-9.1 Export Excel pegawai + US-9.3 Export Excel cuti + QA dashboard/export + docs
 Adithian  │ US-8.1 Dashboard Admin (charts) + US-8.2 Dashboard Pegawai
-Adriel    │ QA Sprint 5 + US-9.2 Export PDF pegawai + US-9.4 Export PDF cuti
+Adriel    │ Frontend + GitHub Gate: US-9.2 Export PDF pegawai + US-9.4 Export PDF cuti + audit views awal + review/merge laporan
 ```
 
 ### Sprint 7 — P1 Stories & UAT (Minggu 14–16)
@@ -348,10 +357,36 @@ Adriel    │ QA Sprint 5 + US-9.2 Export PDF pegawai + US-9.4 Export PDF cuti
 ```
 Dion      │ UAT coordination + deployment preparation + dokumentasi
 Jordan    │ Backend 1: Bug fixes + US-4.8 + US-4.9 + US-1.5 redirect
-Grantly   │ Backend 2 + Ops: Bug fixes + performance optimization + US-8.5 Reference tables + QA/docs finalization
+Grantly   │ Backend 2 + QA/Docs: Bug fixes + performance optimization + US-8.5 Reference tables + full regression QA + docs finalization
 Adithian  │ US-8.3 Dashboard atasan + US-4.7 Timeline + US-6.2 Semua notifikasi
-Adriel    │ FULL REGRESSION TEST + US-7.2, US-7.3 Audit views + US-6.4 + bug fixes
+Adriel    │ Frontend + GitHub Gate: US-7.2, US-7.3 Audit views + US-6.4 + release PR gate + frontend bug fixes
 ```
+
+### Dependensi yang Harus Didahulukan
+
+| Sprint | Harus selesai dulu | Baru bisa dilanjutkan ke | Agar tetap paralel |
+|--------|--------------------|--------------------------|--------------------|
+| Sprint 1 | Project Laravel, `.env.example`, koneksi DB, branch `develop` | Semua migration, auth, layout, testing, PR awal | Dion/Grantly selesaikan baseline hari pertama; Adithian/Adriel mulai dari Blade static dan component skeleton |
+| Sprint 1 | Kontrak auth Keycloak: route login/callback/logout, struktur session user, fallback unregistered | RBAC middleware, navbar user info, logout button, redirect dashboard | Pakai mock auth/local stub sampai credential Keycloak final tersedia |
+| Sprint 1 | Migration `employees`, `roles`, `permissions`, reference tables dasar | Mapping user, CRUD pegawai, relasi riwayat, notifikasi ke pegawai | Jordan/Grantly sepakati nama tabel/field sebelum implementasi detail; frontend pakai seed dummy |
+| Sprint 1 | Layout master dan komponen dasar form/table/badge/modal | Semua halaman Sprint 2-7 | Adithian buat layout utama; Adriel pecah komponen kecil dan review PR UI |
+| Sprint 1 | Audit log base + notification base | Login/logout audit, CRUD audit, cuti/import/EWS notification | Grantly siapkan service/interface; owner fitur panggil service yang sama |
+| Sprint 2 | Employee model + validasi field wajib + reference lookup | Riwayat, keluarga, profil, import, cuti, EWS | Backend expose kontrak form/data lebih dulu; UI bisa dibuat dengan fixture JSON/seed |
+| Sprint 3 | Header template import dan mapping kolom final | Upload preview, validasi baris, eksekusi queue import | Dion/Jordan kunci format; Grantly bangun engine; Adithian/Adriel pakai contoh file |
+| Sprint 4 | Tabel cuti, saldo cuti, jenis cuti, atasan langsung, approval chain | Approval engine, daftar approval, timeline, pengurangan saldo final | Jordan kunci struktur data; Grantly kerjakan state machine; frontend mulai dari state dummy |
+| Sprint 4 | `ref_hari_libur` dan aturan hitung hari kerja | Kalkulasi jumlah hari cuti dan validasi saldo | Jika data libur belum lengkap, pakai seed minimal dan tandai sebagai data yang perlu konfirmasi |
+| Sprint 5 | Data riwayat pegawai dan tanggal target valid | Scheduler EWS, daftar EWS, notifikasi EWS | Grantly siapkan command dengan dry-run; UI pakai hasil dummy sampai scheduler stabil |
+| Sprint 6 | Query/filter dashboard dan laporan disepakati | Chart dashboard, export Excel/PDF | Grantly publish query contract; Adithian/Adriel render UI/export dengan dataset sample |
+| Sprint 7 | Semua P0 merged ke `develop` dan smoke test lulus | UAT, regression, release candidate | Grantly jalankan regression; Adriel tahan merge PR yang belum punya evidence/fix |
+
+### Prinsip Supaya Tidak Saling Menunggu
+
+- Setiap story dimulai dengan kontrak singkat: route, nama method/controller, field request, field response/view data, acceptance criteria.
+- Frontend boleh mulai dari fixture/seed/mock selama kontrak field sudah disepakati.
+- Backend boleh merge service/controller dasar dulu walau UI belum final, selama test minimal dan route tidak berubah sembarangan.
+- PR kecil lebih aman: pisah migration, service/backend, view, dan polish jika story terlalu besar.
+- Grantly membuat QA checklist di awal sprint, bukan setelah fitur selesai.
+- Adriel melakukan review/merge bertahap setiap hari agar branch tidak menumpuk di akhir sprint.
 
 ---
 
@@ -367,11 +402,15 @@ Adriel    │ FULL REGRESSION TEST + US-7.2, US-7.3 Audit views + US-6.4 + bug f
         - Setiap story: buat branch → code → PR → review → merge
 
 14:00   Mid-day sync (opsional, jika ada blocker)
+        - Kunci kontrak route/field jika frontend dan backend mulai paralel
 
-16:30   Adriel: mulai QA testing untuk PR yang sudah di-merge hari ini
-        Grantly: update QA checklist, catatan retest, dan dokumentasi teknis terkait PR
+16:00   Grantly: QA smoke/retest untuk PR yang sudah siap atau sudah merge
+        Owner fitur: fix bug hasil QA di hari yang sama jika memungkinkan
 
-17:00   Dion: Review PR yang masuk + update Notion board
+16:30   Adriel: review PR, cek conflict/checklist/evidence, merge PR yang sudah layak
+        Catatan: PR milik Adriel di-review dan di-merge oleh Dion atau Adithian
+
+17:00   Dion: update Notion board, cek blocker, review PR kritis jika ada
 ```
 
 ---
@@ -385,21 +424,25 @@ main (production)
        ├── feature/US-1.1-login-sso         (Grantly)
        ├── feature/US-1.4-mapping-user       (Jordan)
        ├── feature/design-system             (Adithian)
-       └── fix/US-2.1-nip-validation         (Adriel - bug fix)
+       └── feature/US-2.8-family-ui          (Adriel)
 ```
 
 ### Code Review Rules
-- Setiap PR **wajib di-review minimal 1 orang** sebelum merge
-- PR backend → di-review Jordan (Backend 1), Grantly (Backend 2), atau Dion
-- PR frontend → di-review Adithian atau Adriel
-- PR critical (auth, approval engine, EWS) → **wajib di-review Dion**
+- Setiap PR **wajib di-review minimal 1 orang** sebelum merge.
+- Adriel menjadi **GitHub review/merge gate**: cek deskripsi PR, checklist AC, screenshot/evidence, conflict, dan hasil test/checks sebelum merge ke `develop`.
+- PR backend → review teknis oleh Jordan, Grantly, atau Dion; setelah approve, Adriel melakukan merge.
+- PR frontend → review teknis oleh Adithian atau Adriel; setelah approve/checks aman, Adriel melakukan merge.
+- PR critical (auth, approval engine, EWS, audit log, export final) → wajib mendapat review Dion atau reviewer domain senior sebelum Adriel merge.
+- PR milik Adriel → tidak boleh self-review/self-merge; review dan merge dilakukan Dion atau Adithian.
+- PR milik Grantly yang terkait QA/docs tetap perlu review domain jika mengubah logic aplikasi; perubahan dokumentasi murni cukup review Adriel/Dion.
 
 ### Definition of Done (DoD)
 Sebuah user story dianggap "Done" jika:
 - [ ] Code sudah di-merge ke branch `develop`
 - [ ] Semua acceptance criteria terpenuhi
 - [ ] Unit test untuk business logic kritis sudah ada
-- [ ] Adriel sudah melakukan QA dan tidak ada bug kritis
+- [ ] Adriel sudah melakukan review/merge gate GitHub atau PR milik Adriel sudah di-review/merge oleh Dion/Adithian
+- [ ] Grantly sudah melakukan QA/retest dan tidak ada bug kritis terbuka
 - [ ] Grantly sudah memperbarui checklist QA, catatan retest, dan dokumentasi operasional jika story berdampak ke setup/flow teknis
 - [ ] UI sesuai dengan design (responsive di desktop & tablet)
 - [ ] Audit log berfungsi untuk operasi CRUD terkait
@@ -412,11 +455,11 @@ Sebuah user story dianggap "Done" jika:
 |------|-----------------------|----------|---------------------|
 | Dion | 5 (setup + review) | ~15 | ~2 |
 | Jordan | 16 (Backend 1) | ~60 | ~9 |
-| Grantly | 16 (Backend 2) + QA/dokumentasi ops | ~65 + ops | ~9 + ops |
+| Grantly | 16 (Backend 2) + QA/dokumentasi | ~65 + QA/docs | ~9 + QA/docs |
 | Adithian | 12 | ~55 | ~8 |
-| Adriel | 8 + QA semua sprint | ~40 + QA | ~6 + QA |
+| Adriel | 10 frontend + GitHub review/merge | ~45 + review/merge | ~7 + review/merge |
 
-> **Catatan:** Banyak stories dikerjakan kolaboratif (backend + frontend), jadi angka di atas bersifat indikatif. Yang penting adalah setiap story punya **satu owner** yang bertanggung jawab atas delivery-nya.
+> **Catatan:** Banyak stories dikerjakan kolaboratif (backend + frontend), jadi angka di atas bersifat indikatif. Pembagian ini lebih adil karena QA/dokumentasi dipusatkan ke Grantly, sementara Adriel tidak lagi memegang QA penuh dan fokus pada frontend + review/merge GitHub.
 
 ---
 
@@ -426,11 +469,12 @@ Sebuah user story dianggap "Done" jika:
 |---------|-----------------|----------|
 | **Jordan (Backend 1)** | Laravel Queue + Scheduler | [Laravel Queues](https://laravel.com/docs/queues) |
 | **Jordan (Backend 1)** | Laravel Notification | [Laravel Notifications](https://laravel.com/docs/notifications) |
-| **Grantly (Backend 2 + Ops)** | Keycloak + Socialite/OpenID | [Laravel Socialite](https://laravel.com/docs/socialite) |
-| **Grantly (Backend 2 + Ops)** | Laravel Auditing + dokumentasi teknis | [owen-it/laravel-auditing](https://laravel-auditing.com) |
+| **Grantly (Backend 2 + QA/Docs)** | Keycloak + Socialite/OpenID | [Laravel Socialite](https://laravel.com/docs/socialite) |
+| **Grantly (Backend 2 + QA/Docs)** | Laravel Auditing + dokumentasi teknis | [owen-it/laravel-auditing](https://laravel-auditing.com) |
+| **Grantly (Backend 2 + QA/Docs)** | QA checklist, smoke test, regression evidence | Laravel/PHPUnit/Dusk docs internal |
 | **Adithian** | Filament (jika dipakai) | [filamentphp.com](https://filamentphp.com) |
 | **Adithian** | Chart.js / ApexCharts | [apexcharts.com](https://apexcharts.com) |
-| **Adriel** | Laravel Dusk (browser testing) | [Laravel Dusk](https://laravel.com/docs/dusk) |
+| **Adriel** | GitHub PR review, branch protection, merge workflow | GitHub Pull Requests docs |
 | **Adriel** | DomPDF / Snappy | [barryvdh/laravel-dompdf](https://github.com/barryvdh/laravel-dompdf) |
 | **Semua** | Laravel Livewire (jika dipakai) | [livewire.laravel.com](https://livewire.laravel.com) |
 
@@ -465,7 +509,7 @@ Sebuah user story dianggap "Done" jika:
 |---------|--------|------|
 | Jordan | Grantly | Backend 1 / business logic |
 | Grantly | Jordan | Backend 2 / core implementation |
-| Grantly | Adriel + Dion | QA operations & dokumentasi teknis |
+| Grantly | Dion + owner fitur | QA operations & dokumentasi teknis |
 | Adithian | Adriel | Frontend/UI |
-| Adriel | Adithian | QA/Testing |
+| Adriel | Dion + Adithian | GitHub review/merge |
 | Dion | Grantly | Tech decisions |
