@@ -6,8 +6,23 @@
 | Dokumen | Tracking Sprint Vertical Slice SIMPEG Fase 1 |
 | Acuan | PRD-SIMPEG-Fase1-Core.md, User-Stories-SIMPEG-Fase1.md, Issues-SIMPEG-Fase1.md |
 | Model kerja | Vertical slice mulai Sprint 2 |
-| Target | Sprint 1 sampai release candidate / UAT selesai |
+| Target | Sprint 1 sampai release candidate / UAT selesai pada 20 Agustus 2026 |
+| Tanggal mulai project | 8 Juni 2026 |
+| Tanggal selesai Sprint 1 | 20 Juni 2026 |
+| Target selesai project | 20 Agustus 2026 |
 | Branch integrasi | `develop` |
+
+---
+
+Jadwal pengerjaan sprint:
+
+- Sprint 1 dikerjakan dari tanggal 8 Juni 2026 sampai 20 Juni 2026.
+- Sprint 2 dikerjakan dari tanggal 21 Juni 2026 sampai 30 Juni 2026.
+- Sprint 3 dikerjakan dari tanggal 1 Juli 2026 sampai 10 Juli 2026.
+- Sprint 4 dikerjakan dari tanggal 11 Juli 2026 sampai 20 Juli 2026.
+- Sprint 5 dikerjakan dari tanggal 21 Juli 2026 sampai 30 Juli 2026.
+- Sprint 6 dikerjakan dari tanggal 31 Juli 2026 sampai 9 Agustus 2026.
+- Sprint 7 dikerjakan dari tanggal 10 Agustus 2026 sampai 20 Agustus 2026.
 
 ---
 
@@ -70,7 +85,7 @@ Catatan dashboard role:
 
 ---
 
-## 4. Sprint 1 - Fondasi (Minggu 1-2)
+## 4. Sprint 1 - Fondasi (8 Juni 2026 - 20 Juni 2026)
 
 Sprint 1 belum memakai vertical slice penuh. Fokusnya menyiapkan fondasi agar Sprint 2 bisa berjalan dengan UI dummy dan backend real data secara paralel.
 
@@ -96,7 +111,7 @@ DoD Sprint 1:
 
 ---
 
-## 5. Sprint 2 - Data Pegawai Core (Minggu 3-4)
+## 5. Sprint 2 - Data Pegawai Core (21 Juni 2026 - 30 Juni 2026)
 
 ### Slice 2.1 - CRUD Pegawai Core
 
@@ -155,7 +170,7 @@ DoD Sprint 1:
 
 ---
 
-## 6. Sprint 3 - Import & Pelengkap Data Pegawai (Minggu 5-6)
+## 6. Sprint 3 - Import & Pelengkap Data Pegawai (1 Juli 2026 - 10 Juli 2026)
 
 ### Slice 3.1 - Import Excel/CSV
 
@@ -215,7 +230,7 @@ DoD Sprint 1:
 
 ---
 
-## 7. Sprint 4 - Cuti Core (Minggu 7-9)
+## 7. Sprint 4 - Cuti Core (11 Juli 2026 - 20 Juli 2026)
 
 ### Slice 4.1 - Setup Aturan Cuti
 
@@ -275,7 +290,7 @@ DoD Sprint 1:
 
 ---
 
-## 8. Sprint 5 - EWS & Notifikasi (Minggu 10-11)
+## 8. Sprint 5 - EWS & Notifikasi (21 Juli 2026 - 30 Juli 2026)
 
 ### Slice 5.1 - Kalkulasi TMT & Scheduler EWS
 
@@ -335,7 +350,7 @@ DoD Sprint 1:
 
 ---
 
-## 9. Sprint 6 - Dashboard & Laporan (Minggu 12-13)
+## 9. Sprint 6 - Dashboard & Laporan (31 Juli 2026 - 9 Agustus 2026)
 
 ### Slice 6.1 - Dashboard Admin & Pegawai
 
@@ -395,7 +410,7 @@ DoD Sprint 1:
 
 ---
 
-## 10. Sprint 7 - Stabilization, Regression, UAT, Go-Live Prep (Minggu 14-16)
+## 10. Sprint 7 - Stabilization, Regression, UAT, Go-Live Prep (10 Agustus 2026 - 20 Agustus 2026)
 
 ### Slice 7.1 - Audit View + Redirect Role + Polish P1
 
@@ -520,12 +535,12 @@ Status retest:
 
 ## 14. Ringkasan Timeline
 
-| Sprint | Minggu | Fokus | Jumlah Slice | Gate Akhir |
+| Sprint | Periode Pengerjaan | Fokus | Jumlah Slice | Gate Akhir |
 |--------|--------|-------|--------------|------------|
-| Sprint 1 | Minggu 1-2 | Fondasi project, auth, layout, GitHub, QA template | Foundation | Fondasi siap Sprint 2 |
-| Sprint 2 | Minggu 3-4 | Data pegawai core | 3 | CRUD, riwayat, disiplin QA pass |
-| Sprint 3 | Minggu 5-6 | Import dan pelengkap data pegawai | 3 | Import, profil/keluarga, delete policy QA pass |
-| Sprint 4 | Minggu 7-9 | Cuti core | 3 | Cuti E2E QA pass |
-| Sprint 5 | Minggu 10-11 | EWS dan notifikasi | 3 | EWS/notifikasi QA pass |
-| Sprint 6 | Minggu 12-13 | Dashboard dan laporan | 3 | Dashboard/export QA pass |
-| Sprint 7 | Minggu 14-16 | Stabilization, regression, UAT, release candidate | 3 | RC siap dan tidak ada bug critical/major |
+| Sprint 1 | 8 Juni 2026 - 20 Juni 2026 | Fondasi project, auth, layout, GitHub, QA template | Foundation | Fondasi siap Sprint 2 |
+| Sprint 2 | 21 Juni 2026 - 30 Juni 2026 | Data pegawai core | 3 | CRUD, riwayat, disiplin QA pass |
+| Sprint 3 | 1 Juli 2026 - 10 Juli 2026 | Import dan pelengkap data pegawai | 3 | Import, profil/keluarga, delete policy QA pass |
+| Sprint 4 | 11 Juli 2026 - 20 Juli 2026 | Cuti core | 3 | Cuti E2E QA pass |
+| Sprint 5 | 21 Juli 2026 - 30 Juli 2026 | EWS dan notifikasi | 3 | EWS/notifikasi QA pass |
+| Sprint 6 | 31 Juli 2026 - 9 Agustus 2026 | Dashboard dan laporan | 3 | Dashboard/export QA pass |
+| Sprint 7 | 10 Agustus 2026 - 20 Agustus 2026 | Stabilization, regression, UAT, release candidate | 3 | RC siap dan tidak ada bug critical/major |
