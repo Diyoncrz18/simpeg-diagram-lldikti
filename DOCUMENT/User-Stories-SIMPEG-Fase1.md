@@ -668,6 +668,12 @@ Setiap story mengikuti format:
 - [ ] AC-7: Audit log mencatat aksi approval/penundaan.
 - [ ] AC-8: Atasan Langsung hanya melihat pengajuan dari pegawai yang di-assign kepadanya (bukan semua pegawai).
 - [ ] AC-9: Jika atasan langsung juga menjadi approver pada stage berikutnya, sistem otomatis skip stage duplikat agar orang yang sama tidak menyetujui dua kali.
+- [ ] AC-10: Pengajuan yang berstatus "Ditunda" tetap aktif dan muncul di halaman daftar pengajuan approver tersebut dengan status **"Ditunda — Menunggu Tindakan Lanjut"**.
+- [ ] AC-11: Approver yang telah memilih "Tunda" dapat membuka kembali pengajuan yang sama dan mengubah keputusannya menjadi **"Setujui"** kapan saja selama pengajuan belum dibatalkan.
+- [ ] AC-12: Saat approver mengubah "Tunda" → "Setujui", status pengajuan kembali ke alur normal — lanjut ke stage berikutnya atau final approve sesuai konfigurasi approval chain.
+- [ ] AC-13: Perubahan keputusan dari "Tunda" → "Setujui" dicatat di audit log beserta timestamp dan komentar (opsional).
+- [ ] AC-14: Notifikasi terkirim ke approver berikutnya (atau ke pegawai jika ini stage final) saat keputusan diubah menjadi "Setujui".
+- [ ] AC-15: Tidak ada batas waktu kadaluarsa untuk pengajuan berstatus "Ditunda" — pengajuan menunggu tanpa auto-expire.
 
 ---
 
@@ -692,6 +698,12 @@ Setiap story mengikuti format:
 - [ ] AC-3: Notifikasi terkirim sesuai aksi.
 - [ ] AC-4: Audit log tercatat.
 - [ ] AC-5: Jika Kabag/verifikator juga merupakan pejabat pemberi cuti final, stage final dapat di-skip sesuai konfigurasi approval.
+- [ ] AC-6: Pengajuan yang berstatus "Ditunda" tetap aktif dan muncul di halaman daftar pengajuan approver tersebut dengan status **"Ditunda — Menunggu Tindakan Lanjut"**.
+- [ ] AC-7: Approver yang telah memilih "Tunda" dapat membuka kembali pengajuan yang sama dan mengubah keputusannya menjadi **"Setujui"** kapan saja selama pengajuan belum dibatalkan.
+- [ ] AC-8: Saat approver mengubah "Tunda" → "Setujui", status pengajuan kembali ke alur normal — lanjut ke stage berikutnya atau final approve sesuai konfigurasi approval chain.
+- [ ] AC-9: Perubahan keputusan dari "Tunda" → "Setujui" dicatat di audit log beserta timestamp dan komentar (opsional).
+- [ ] AC-10: Notifikasi terkirim ke approver berikutnya (atau ke pegawai jika ini stage final) saat keputusan diubah menjadi "Setujui".
+- [ ] AC-11: Tidak ada batas waktu kadaluarsa untuk pengajuan berstatus "Ditunda" — pengajuan menunggu tanpa auto-expire.
 
 ---
 
@@ -723,6 +735,11 @@ Setiap story mengikuti format:
   - Notifikasi "Cuti Anda Ditunda" + alasan terkirim ke pegawai.
 - [ ] AC-5: Audit log mencatat aksi beserta komentar.
 - [ ] AC-6: Stage final mengikuti konfigurasi approval chain; default awal adalah Pimpinan / PYBMC.
+- [ ] AC-7: Pengajuan yang berstatus "Ditunda" tetap aktif dan muncul di halaman daftar pengajuan Pimpinan/PYBMC dengan status **"Ditunda — Menunggu Tindakan Lanjut"**.
+- [ ] AC-8: Pimpinan/PYBMC yang telah memilih "Tunda" dapat membuka kembali pengajuan yang sama dan mengubah keputusannya menjadi **"Setujui"** kapan saja selama pengajuan belum dibatalkan.
+- [ ] AC-9: Saat keputusan diubah "Tunda" → "Setujui" pada stage final: status menjadi **"Disetujui"**, saldo cuti tahunan dikurangi otomatis (jika cuti tahunan), dan notifikasi "Cuti Anda Disetujui" terkirim ke pegawai.
+- [ ] AC-10: Perubahan keputusan dari "Tunda" → "Setujui" dicatat di audit log beserta timestamp dan komentar (opsional).
+- [ ] AC-11: Tidak ada batas waktu kadaluarsa untuk pengajuan berstatus "Ditunda" — pengajuan menunggu tanpa auto-expire.
 
 ---
 
@@ -1489,6 +1506,9 @@ E9 (Laporan) ←── E2, E4
 ## Rekomendasi Urutan Sprint
 
 ### Sprint 1 — Fondasi (Minggu 1–2)
+
+Sprint 1 tetap menjadi fondasi teknis sebelum vertical slice dimulai.
+
 | Story | SP |
 |-------|:--:|
 | US-7.1 Audit Log otomatis | 5 |
@@ -1499,82 +1519,89 @@ E9 (Laporan) ←── E2, E4
 | US-8.4 Kelola hari libur | 3 |
 | **Total** | **25** |
 
-### Sprint 2 — Data Pegawai (Minggu 3–4)
-| Story | SP |
-|-------|:--:|
-| US-2.1 Tambah pegawai | 8 |
-| US-2.2 Edit pegawai | 5 |
-| US-2.3 Daftar pegawai | 5 |
-| US-2.4 Detail pegawai | 5 |
-| US-2.6 Riwayat (kepangkatan/jabatan/KGB) | 5 |
-| US-2.7 Hukuman disiplin | 3 |
-| **Total** | **31** |
+### Sprint 2 — Data Pegawai Core (Minggu 3–4)
 
-### Sprint 3 — Import Excel/CSV & Pelengkap (Minggu 5–6)
-| Story | SP |
-|-------|:--:|
-| US-3.1 Template Import | 2 |
-| US-3.2 Upload & Preview | 5 |
-| US-3.3 Validasi | 5 |
-| US-3.4 Eksekusi Import | 7 |
-| US-2.5 Profil sendiri | 3 |
-| US-2.8 Data keluarga | 3 |
-| US-2.9 Soft delete | 3 |
-| **Total** | **28** |
+| Vertical Slice | Story | SP |
+|----------------|-------|:--:|
+| CRUD pegawai core | US-2.1 Tambah pegawai | 8 |
+| CRUD pegawai core | US-2.2 Edit pegawai | 5 |
+| CRUD pegawai core | US-2.3 Daftar pegawai | 5 |
+| CRUD pegawai core | US-2.4 Detail pegawai | 5 |
+| Riwayat pegawai | US-2.6 Riwayat kepangkatan/jabatan/KGB | 5 |
+| Disiplin pegawai | US-2.7 Hukuman disiplin | 3 |
+| **Total** | | **31** |
 
-### Sprint 4 — Cuti (Minggu 7–9)
-| Story | SP |
-|-------|:--:|
-| US-4.11 Assign atasan | 3 |
-| US-4.10 Assign approver | 3 |
-| US-4.12 Kalkulasi hari kerja | 5 |
-| US-4.1 Ajukan cuti | 5 |
-| US-4.4 Approval stage 1 | 5 |
-| US-4.5 Approval stage 2 | 3 |
-| US-4.6 Approval stage 3 | 5 |
-| US-4.3 Saldo cuti | 3 |
-| **Total** | **32** |
+### Sprint 3 — Import & Pelengkap Data Pegawai (Minggu 5–6)
+
+| Vertical Slice | Story | SP |
+|----------------|-------|:--:|
+| Import Excel/CSV | US-3.1 Template Import | 2 |
+| Import Excel/CSV | US-3.2 Upload & Preview | 5 |
+| Import Excel/CSV | US-3.3 Validasi | 5 |
+| Import Excel/CSV | US-3.4 Eksekusi Import | 7 |
+| Profil & keluarga | US-2.5 Profil sendiri | 3 |
+| Profil & keluarga | US-2.8 Data keluarga | 3 |
+| Penghapusan aman | US-2.9 Soft delete | 3 |
+| Penghapusan aman | US-2.10 Hard delete | 2 |
+| **Total** | | **30** |
+
+### Sprint 4 — Cuti Core (Minggu 7–9)
+
+| Vertical Slice | Story | SP |
+|----------------|-------|:--:|
+| Setup aturan cuti | US-4.10 Assign approver | 3 |
+| Setup aturan cuti | US-4.11 Assign atasan | 3 |
+| Setup aturan cuti | US-4.12 Kalkulasi hari kerja | 5 |
+| Setup aturan cuti | US-4.3 Saldo cuti | 3 |
+| Pengajuan cuti | US-4.1 Ajukan cuti | 5 |
+| Pengajuan cuti | US-4.2 Daftar cuti pegawai | 3 |
+| Approval & timeline | US-4.4 Approval stage 1 | 5 |
+| Approval & timeline | US-4.5 Approval stage 2 | 3 |
+| Approval & timeline | US-4.6 Approval stage 3 | 5 |
+| Approval & timeline | US-4.7 Timeline approval | 3 |
+| **Total** | | **38** |
 
 ### Sprint 5 — EWS & Notifikasi (Minggu 10–11)
-| Story | SP |
-|-------|:--:|
-| US-5.5 Kalkulasi TMT | 5 |
-| US-5.4 Flag kinerja | 2 |
-| US-5.1 Scheduler EWS | 8 |
-| US-5.2 Daftar EWS | 5 |
-| US-6.3 Email notifikasi | 5 |
-| US-1.3 Session timeout | 3 |
-| **Total** | **28** |
 
-### Sprint 6 — Dashboard, Laporan & Polish (Minggu 12–13)
-| Story | SP |
-|-------|:--:|
-| US-8.1 Dashboard admin | 8 |
-| US-8.2 Dashboard pegawai | 5 |
-| US-9.1 Export pegawai Excel | 3 |
-| US-9.3 Export cuti Excel | 3 |
-| US-4.2 Daftar cuti pegawai | 3 |
-| US-4.7 Timeline approval | 3 |
-| **Total** | **25** |
+| Vertical Slice | Story | SP |
+|----------------|-------|:--:|
+| Kalkulasi & scheduler EWS | US-5.1 Scheduler EWS | 8 |
+| Kalkulasi & scheduler EWS | US-5.5 Kalkulasi TMT | 5 |
+| Daftar EWS & flag | US-5.2 Daftar EWS | 5 |
+| Daftar EWS & flag | US-5.3 EWS pribadi | 3 |
+| Daftar EWS & flag | US-5.4 Flag kinerja | 2 |
+| Notifikasi & keamanan session | US-6.3 Email notifikasi | 5 |
+| Notifikasi & keamanan session | US-1.3 Session timeout | 3 |
+| **Total** | | **31** |
 
-### Sprint 7 — P1 Stories & UAT (Minggu 14–16)
-| Story | SP |
-|-------|:--:|
-| US-8.3 Dashboard atasan | 5 |
-| US-8.5 Kelola reference tables | 5 |
-| US-5.3 EWS pribadi | 3 |
-| US-4.8 Daftar cuti admin | 3 |
-| US-4.9 Kelola saldo | 5 |
-| US-6.2 Halaman notifikasi | 3 |
-| US-7.2 Halaman audit log | 3 |
-| US-7.3 Detail audit diff | 3 |
-| US-9.2 Export pegawai PDF | 3 |
-| US-9.4 Export cuti PDF | 3 |
-| US-2.10 Hard delete | 2 |
-| US-1.5 Redirect per role | 3 |
-| US-6.4 Tandai dibaca | 2 |
-| **Total** | **43** |
+### Sprint 6 — Dashboard & Laporan (Minggu 12–13)
+
+| Vertical Slice | Story | SP |
+|----------------|-------|:--:|
+| Dashboard admin/pegawai | US-8.1 Dashboard admin | 8 |
+| Dashboard admin/pegawai | US-8.2 Dashboard pegawai | 5 |
+| Dashboard atasan/reference | US-8.3 Dashboard atasan | 5 |
+| Dashboard atasan/reference | US-8.5 Kelola reference tables | 5 |
+| Laporan & export | US-9.1 Export pegawai Excel | 3 |
+| Laporan & export | US-9.2 Export pegawai PDF | 3 |
+| Laporan & export | US-9.3 Export cuti Excel | 3 |
+| Laporan & export | US-9.4 Export cuti PDF | 3 |
+| **Total** | | **35** |
+
+### Sprint 7 — Stabilization, Regression, UAT, Go-Live Prep (Minggu 14–16)
+
+| Vertical Slice | Story | SP |
+|----------------|-------|:--:|
+| Audit & redirect | US-7.2 Halaman audit log | 3 |
+| Audit & redirect | US-7.3 Detail audit diff | 3 |
+| Audit & redirect | US-1.5 Redirect per role | 3 |
+| Notifikasi lanjutan | US-6.2 Halaman notifikasi | 3 |
+| Notifikasi lanjutan | US-6.4 Tandai dibaca | 2 |
+| Admin cuti & bugfix | US-4.8 Daftar cuti admin | 3 |
+| Admin cuti & bugfix | US-4.9 Kelola saldo | 5 |
+| Regression/UAT | Bugfix mayor, full regression, UAT, release candidate | — |
+| **Total story point fitur** | | **22** |
 
 ---
 
-> **Catatan:** Estimasi story points dan sprint plan bersifat indikatif. Tim magang perlu melakukan sprint planning bersama supervisor untuk menyesuaikan dengan kapasitas aktual tim.
+> **Catatan:** Mulai Sprint 2, setiap vertical slice mengikuti alur: kickoff acceptance criteria, frontend mock/dummy data, backend real data, sinkronisasi, review PR oleh Adriel, bugfix oleh owner task, lalu QA/retest oleh Grantly. Estimasi story points dan sprint plan tetap indikatif dan bisa disesuaikan dengan kapasitas aktual tim.

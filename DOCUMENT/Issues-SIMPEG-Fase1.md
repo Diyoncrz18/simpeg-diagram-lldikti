@@ -27,7 +27,7 @@
 | `type:ui` | — | Frontend / UI |
 | `type:engine` | — | Business logic / engine |
 | `type:test` | — | Testing |
-| `sprint:1` s/d `sprint:6` | — | Sprint assignment |
+| `sprint:1` s/d `sprint:7` | — | Sprint assignment |
 
 ---
 
@@ -1107,7 +1107,9 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 ---
 
-# SPRINT 6 — DASHBOARD, LAPORAN & UAT (18–29 Agustus 2026)
+# SPRINT 6-7 — DASHBOARD, LAPORAN, STABILIZATION & UAT
+
+> Catatan revisi vertical slice: beberapa issue P1/UAT di bagian ini dipindahkan ke Sprint 7, sementara issue yang lebih tepat masuk ke Sprint 3-5 diberi label sprint sesuai rencana terbaru. Nomor issue dipertahankan agar referensi tetap stabil.
 
 ---
 
@@ -1236,7 +1238,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 | Field | Detail |
 |-------|--------|
 | **Story** | US-4.2 + US-4.7 · Daftar Cuti + Timeline |
-| **Labels** | `epic:cuti`, `type:feature`, `sprint:6`, `priority:P0` |
+| **Labels** | `epic:cuti`, `type:feature`, `sprint:4`, `priority:P0` |
 | **Assignee** | Adithian Gunawan |
 | **Story Points** | 6 |
 | **Dependensi** | Issue #31 |
@@ -1256,7 +1258,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 | Field | Detail |
 |-------|--------|
 | **Story** | US-4.8 + US-4.9 · Admin Cuti |
-| **Labels** | `epic:cuti`, `type:feature`, `sprint:6`, `priority:P1` |
+| **Labels** | `epic:cuti`, `type:feature`, `sprint:7`, `priority:P1` |
 | **Assignee** | Jordan Sutarto |
 | **Story Points** | 8 |
 | **Dependensi** | Issue #31 |
@@ -1296,7 +1298,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 | Field | Detail |
 |-------|--------|
 | **Story** | US-7.2 + US-7.3 · Daftar + Detail Audit Log |
-| **Labels** | `epic:audit`, `type:feature`, `sprint:6`, `priority:P1` |
+| **Labels** | `epic:audit`, `type:feature`, `sprint:7`, `priority:P1` |
 | **Assignee** | Adriel Walintukan |
 | **Story Points** | 6 |
 | **Dependensi** | Issue #5 |
@@ -1320,7 +1322,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 | Field | Detail |
 |-------|--------|
 | **Story** | US-6.2 + US-6.4 · Notifikasi |
-| **Labels** | `epic:notifikasi`, `type:feature`, `sprint:6`, `priority:P1` |
+| **Labels** | `epic:notifikasi`, `type:feature`, `sprint:7`, `priority:P1` |
 | **Assignee** | Adithian Gunawan (halaman) + Adriel Walintukan (tandai dibaca) |
 | **Story Points** | 5 |
 | **Dependensi** | Issue #6 |
@@ -1341,7 +1343,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 | Field | Detail |
 |-------|--------|
 | **Story** | US-5.3 · EWS Pribadi |
-| **Labels** | `epic:ews`, `type:feature`, `sprint:6`, `priority:P1` |
+| **Labels** | `epic:ews`, `type:feature`, `sprint:5`, `priority:P1` |
 | **Assignee** | Adithian Gunawan |
 | **Story Points** | 3 |
 | **Dependensi** | Issue #34 |
@@ -1359,7 +1361,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 | Field | Detail |
 |-------|--------|
 | **Story** | US-1.5 · Redirect Setelah Login |
-| **Labels** | `epic:auth`, `type:feature`, `sprint:6`, `priority:P1` |
+| **Labels** | `epic:auth`, `type:feature`, `sprint:7`, `priority:P1` |
 | **Assignee** | Adriel Walintukan |
 | **Story Points** | 3 |
 | **Dependensi** | Issue #2, Issue #39, Issue #40, Issue #41 |
@@ -1378,8 +1380,8 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 | Field | Detail |
 |-------|--------|
 | **Story** | US-2.10 · Hard Delete |
-| **Labels** | `epic:pegawai`, `type:feature`, `sprint:6`, `priority:P1` |
-| **Assignee** | Adriel Walintukan |
+| **Labels** | `epic:pegawai`, `type:feature`, `sprint:3`, `priority:P1` |
+| **Assignee** | Jordan Sutarto (backend/delete policy) + Adriel Walintukan (UI/review) |
 | **Story Points** | 2 |
 | **Dependensi** | Issue #25 |
 
@@ -1397,8 +1399,8 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 | Field | Detail |
 |-------|--------|
 | **Story** | — (QA) |
-| **Labels** | `type:test`, `sprint:6`, `priority:P0` |
-| **Assignee** | Adriel Walintukan |
+| **Labels** | `type:test`, `sprint:7`, `priority:P0` |
+| **Assignee** | Grantly Sorongan (QA) + Dion Kobi (UAT coordination) + Adriel Walintukan (release gate) |
 | **Story Points** | 8 |
 
 **Deskripsi:**
@@ -1433,18 +1435,19 @@ Full end-to-end testing seluruh sistem sebelum go-live.
 |--------|--------|:-----:|
 | Sprint 1 — Fondasi | #1 – #12 | 12 |
 | Sprint 2 — Data Pegawai | #13 – #19 | 7 |
-| Sprint 3 — Import & Pelengkap | #20 – #25 | 6 |
-| Sprint 4 — Cuti | #26 – #32 | 7 |
-| Sprint 5 — EWS & Notifikasi | #33 – #38 | 6 |
-| Sprint 6 — Dashboard & UAT | #39 – #52 | 14 |
+| Sprint 3 — Import & Pelengkap | #20 – #25, #51 | 7 |
+| Sprint 4 — Cuti | #26 – #32, #44 | 8 |
+| Sprint 5 — EWS & Notifikasi | #33 – #38, #49 | 7 |
+| Sprint 6 — Dashboard & Laporan | #39 – #43, #46 | 6 |
+| Sprint 7 — Stabilization, Regression & UAT | #45, #47, #48, #50, #52 | 5 |
 | **Total** | | **52** |
 
 ## Ringkasan Issues per Assignee
 
 | Assignee | Issues |
 |----------|--------|
-| **Dion Kobi** | #1, #11 |
-| **Jordan Sutarto — Backend 1** | #4, #6, #10, #11, #18, #19, #20, #23, #24, #26, #27, #28, #30, #32, #35, #36, #37, #38, #43, #45, #46 |
-| **Grantly Sorongan — Backend 2 + QA/Dokumentasi Ops** | #2, #3, #5, #13, #14, #15, #16, #17, #21, #22, #29, #31, #33, #34, #39, #42 |
+| **Dion Kobi** | #1, #11, #52 |
+| **Jordan Sutarto — Lead Backend** | #4, #6, #10, #11, #18, #19, #20, #23, #24, #26, #27, #28, #30, #32, #35, #36, #37, #38, #43, #45, #46, #51 |
+| **Grantly Sorongan — Support Backend + QA Tester** | #2, #3, #5, #13, #14, #15, #16, #17, #21, #22, #29, #31, #33, #34, #39, #42, #52 |
 | **Adithian Gunawan** | #7, #8, #14, #16, #17, #21, #30, #31, #35, #39, #40, #41, #44, #48, #49 |
 | **Adriel Walintukan** | #9, #12, #25, #32, #36, #37, #42, #43, #47, #48, #50, #51, #52 |
