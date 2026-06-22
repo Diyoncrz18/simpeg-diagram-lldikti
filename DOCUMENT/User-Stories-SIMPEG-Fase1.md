@@ -431,7 +431,7 @@ Setiap story mengikuti format:
 
 ---
 
-### US-2.10 · Hard Delete Pegawai (Super Admin)
+### US-2.10 · Soft Delete Pegawai oleh Super Admin
 
 | Field | Detail |
 |-------|--------|
@@ -442,15 +442,16 @@ Setiap story mengikuti format:
 | **Dependensi** | US-2.9 |
 
 > **Sebagai** Super Admin,
-> **Saya ingin** menghapus data pegawai secara permanen jika diperlukan,
-> **Sehingga** data yang benar-benar salah atau tidak relevan bisa dihilangkan sepenuhnya.
+> **Saya ingin** menonaktifkan data pegawai tanpa menghapus permanen,
+> **Sehingga** data yang sewaktu-waktu dibutuhkan masih bisa ditemukan dan dipulihkan.
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Tombol "Hapus Permanen" hanya muncul untuk pegawai yang sudah di-soft-delete dan hanya untuk role Super Admin.
-- [ ] AC-2: Konfirmasi ganda: dialog pertama *"Data akan dihapus permanen dan tidak bisa dikembalikan."* + ketik nama pegawai untuk konfirmasi.
-- [ ] AC-3: Hard delete menghapus semua data terkait (keluarga, riwayat, dokumen, file fisik) dari database.
-- [ ] AC-4: Audit log mencatat hard delete (log itu sendiri **tidak** ikut terhapus).
+- [ ] AC-1: Tidak ada tombol "Hapus Permanen" di aplikasi untuk role apa pun, termasuk Super Admin.
+- [ ] AC-2: Super Admin hanya bisa melakukan soft delete/nonaktifkan pegawai dengan konfirmasi.
+- [ ] AC-3: Data yang dinonaktifkan tetap tersimpan di database dan bisa ditemukan melalui filter pegawai non-aktif.
+- [ ] AC-4: Super Admin bisa melakukan restore jika data perlu dipakai kembali.
+- [ ] AC-5: Audit log mencatat soft delete dan restore.
 
 ---
 
@@ -1139,7 +1140,6 @@ Setiap story mengikuti format:
   - CREATE (tambah pegawai, tambah riwayat, tambah keluarga, dll)
   - UPDATE (edit data pegawai, koreksi saldo cuti, dll)
   - SOFT_DELETE (nonaktifkan pegawai)
-  - HARD_DELETE (hapus permanen)
   - RESTORE (aktifkan kembali)
   - APPROVE (setujui cuti)
   - POSTPONE (tunda cuti)
@@ -1447,7 +1447,7 @@ E2 (Data Pegawai) ←── E1
   ├── US-2.7 Hukuman Disiplin ←── US-2.1
   ├── US-2.8 Data Keluarga ←── US-2.1
   ├── US-2.9 Soft Delete ←── US-2.1
-  └── US-2.10 Hard Delete ←── US-2.9
+  └── US-2.10 Soft Delete Super Admin ←── US-2.9
 
 E3 (Import Excel/CSV) ←── E2
   ├── US-3.1 Template Import
@@ -1542,7 +1542,7 @@ Sprint 1 tetap menjadi fondasi teknis sebelum vertical slice dimulai.
 | Profil & keluarga | US-2.5 Profil sendiri | 3 |
 | Profil & keluarga | US-2.8 Data keluarga | 3 |
 | Penghapusan aman | US-2.9 Soft delete | 3 |
-| Penghapusan aman | US-2.10 Hard delete | 2 |
+| Penghapusan aman | US-2.10 Soft delete Super Admin | 2 |
 | **Total** | | **30** |
 
 ### Sprint 4 — Cuti Core (Minggu 7–9)

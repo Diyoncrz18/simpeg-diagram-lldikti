@@ -122,7 +122,7 @@ Pengelolaan data kepegawaian di LLDIKTI Wilayah XVI masih dilakukan secara manua
 | 8 | Audit Log | Semua operasi CRUD + approval + login/logout |
 | 9 | Dashboard | 7 widget untuk pimpinan dan admin |
 | 10 | Laporan & Export | Daftar nominatif + rekap cuti + riwayat kepangkatan ke PDF/Excel |
-| 11 | Soft Delete | Flag-based deletion, hard delete hanya Super Admin |
+| 11 | Soft Delete | Flag-based deletion; tidak ada penghapusan permanen di aplikasi |
 | 12 | Reference Tables | 11 tabel master data (seed) |
 
 **Tidak Termasuk (Out of Scope Fase 1):**
@@ -182,7 +182,7 @@ Super Admin
 | Konfigurasi Sistem | Kelola reference tables, konfigurasi EWS, hari libur nasional |
 | User Management | Assign role ke user, mapping user Keycloak ↔ pegawai |
 | Semua Fitur Admin | Semua yang bisa dilakukan Admin Kepegawaian |
-| Hard Delete | Satu-satunya role yang bisa menghapus data secara permanen |
+| Soft Delete & Restore | Menonaktifkan data tanpa menghapus permanen, serta memulihkan data jika dibutuhkan |
 | Audit Log | Akses penuh ke seluruh audit log |
 
 #### Admin Kepegawaian
@@ -453,17 +453,19 @@ Modul ini menyimpan dan mengelola seluruh data kepegawaian secara terpusat. Di F
 4. Admin bisa me-restore pegawai yang di-soft-delete.
 5. Audit log mencatat soft delete dan restore.
 
-#### US-PEG-06: Hard Delete (Super Admin)
+#### US-PEG-06: Soft Delete oleh Super Admin
 
 > **Sebagai** Super Admin,
-> **Saya ingin** menghapus data pegawai secara permanen jika diperlukan,
-> **Sehingga** data yang benar-benar tidak dibutuhkan bisa dihilangkan.
+> **Saya ingin** menonaktifkan data pegawai tanpa menghapus permanen,
+> **Sehingga** data yang sewaktu-waktu dibutuhkan masih bisa ditemukan dan dipulihkan.
 
 **Acceptance Criteria:**
-1. Hanya Super Admin yang bisa hard delete.
-2. Konfirmasi ganda sebelum hard delete (dialog "Apakah Anda yakin?").
-3. Hard delete menghapus data dari database secara permanen.
-4. Audit log mencatat hard delete (log itu sendiri tidak ikut terhapus).
+1. Tidak ada fitur hapus permanen untuk data pegawai di aplikasi.
+2. Super Admin hanya bisa melakukan soft delete/nonaktifkan pegawai dengan konfirmasi.
+3. Data pegawai yang dinonaktifkan tetap tersimpan di database.
+4. Data pegawai yang dinonaktifkan bisa ditemukan melalui filter pegawai non-aktif.
+5. Super Admin bisa melakukan restore jika data perlu dipakai kembali.
+6. Audit log mencatat soft delete dan restore.
 
 ### 7.3 Struktur Data Pegawai
 
@@ -1000,7 +1002,7 @@ Setiap perubahan data di SIMPEG dicatat dalam audit log yang immutable. Audit lo
 | **Create** | Tambah pegawai baru, tambah riwayat kepangkatan |
 | **Update** | Edit data pribadi, update saldo cuti |
 | **Soft Delete** | Nonaktifkan pegawai |
-| **Hard Delete** | Super Admin hapus permanen |
+| **Restore** | Aktifkan kembali data pegawai non-aktif |
 | **Approve / Tunda Cuti** | Setiap stage approval |
 | **Login** | Login berhasil via Keycloak |
 | **Logout** | Logout manual atau session timeout |
@@ -1595,7 +1597,6 @@ Meskipun Fase 1 menggunakan Laravel Blade (server-side rendering), semua logika 
 | PUT | `/pegawai/{id}` | EmployeeController@update | Admin | Update data |
 | DELETE | `/pegawai/{id}` | EmployeeController@destroy | Admin | Soft delete |
 | POST | `/pegawai/{id}/restore` | EmployeeController@restore | Admin | Restore |
-| DELETE | `/pegawai/{id}/force` | EmployeeController@forceDelete | SuperAdmin | Hard delete |
 | GET | `/profil-saya` | EmployeeController@myProfile | Pegawai | Data sendiri |
 
 #### History Routes (Riwayat)

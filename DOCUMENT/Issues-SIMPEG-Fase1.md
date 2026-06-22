@@ -1375,22 +1375,23 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 ---
 
-## Issue #51 · Hard Delete Pegawai (Super Admin)
+## Issue #51 · Kebijakan Soft Delete Pegawai (Super Admin)
 
 | Field | Detail |
 |-------|--------|
-| **Story** | US-2.10 · Hard Delete |
+| **Story** | US-2.10 · Soft Delete Pegawai oleh Super Admin |
 | **Labels** | `epic:pegawai`, `type:feature`, `sprint:3`, `priority:P1` |
 | **Assignee** | Jordan Sutarto (backend/delete policy) + Adriel Walintukan (UI/review) |
 | **Story Points** | 2 |
 | **Dependensi** | Issue #25 |
 
 **Tasks:**
-- [ ] Tombol "Hapus Permanen" — hanya untuk pegawai yang sudah di-soft-delete, hanya Super Admin
-- [ ] Double confirm: dialog + ketik nama pegawai
-- [ ] Hard delete semua data terkait (keluarga, riwayat, dokumen, file)
-- [ ] Audit log tetap tersimpan
-- [ ] Hapus file fisik dari storage
+- [ ] Pastikan tidak ada tombol "Hapus Permanen" untuk role apa pun, termasuk Super Admin
+- [ ] Super Admin hanya bisa soft delete/nonaktifkan pegawai dengan dialog konfirmasi
+- [ ] Data pegawai yang dinonaktifkan tetap tersimpan di database dan file fisik tetap ada di storage
+- [ ] Data non-aktif bisa ditemukan melalui filter "Tampilkan Pegawai Non-Aktif"
+- [ ] Super Admin bisa restore data pegawai yang dinonaktifkan
+- [ ] Audit log mencatat soft delete dan restore
 
 ---
 
@@ -1420,7 +1421,7 @@ Full end-to-end testing seluruh sistem sebelum go-live.
 - [ ] **Notifikasi:** In-app badge + email terkirim
 - [ ] **Responsive:** Test di Chrome, Firefox, Edge — desktop + tablet
 - [ ] **RBAC:** Setiap role hanya bisa akses halaman yang diizinkan
-- [ ] **Soft/Hard Delete:** Nonaktifkan → tidak muncul → restore → muncul lagi → hard delete
+- [ ] **Soft Delete & Restore:** Nonaktifkan → tidak muncul di daftar aktif → tampil di filter non-aktif → restore → muncul lagi
 
 **Output:**
 - [ ] Bug report list (severity: critical/major/minor)

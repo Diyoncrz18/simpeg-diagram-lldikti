@@ -65,7 +65,7 @@ Catatan dashboard role:
 
 - **Super Admin** dan **Admin Kepegawaian** memakai satu halaman yang sama: **Dashboard Admin**.
 - Perbedaannya bukan di dashboard terpisah, tetapi di permission/menu/aksi.
-- Super Admin bisa melihat semua fitur Admin Kepegawaian plus konfigurasi sistem, user/role management, reference tables, audit penuh, dan hard delete.
+- Super Admin bisa melihat semua fitur Admin Kepegawaian plus konfigurasi sistem, user/role management, reference tables, audit penuh, serta soft delete/restore sesuai permission.
 - Admin Kepegawaian memakai Dashboard Admin untuk operasional kepegawaian: data pegawai, import, cuti, EWS, dashboard, dan laporan, tetapi tidak mendapat aksi khusus Super Admin.
 
 ---
@@ -209,24 +209,24 @@ DoD Sprint 1:
 | Review | Adriel | Review PR profil dan keluarga | Merge atau return bug | Not Started |
 | QA | Grantly | Test role pegawai/admin, CRUD keluarga, audit log | QA pass/retest note | Not Started |
 
-### Slice 3.3 - Soft Delete, Restore, Hard Delete Terbatas
+### Slice 3.3 - Soft Delete dan Restore Pegawai
 
 | Field | Detail |
 |-------|--------|
 | User stories | US-2.9, US-2.10 |
 | Durasi target | Hari 9-10 |
-| Goal | Data pegawai bisa dinonaktifkan, dipulihkan, dan hard delete hanya untuk role berhak |
+| Goal | Data pegawai bisa dinonaktifkan dan dipulihkan tanpa penghapusan permanen |
 
 | Stage | Owner | Yang Dihandle | Output | Status |
 |-------|-------|---------------|--------|--------|
-| Kickoff | Dion | Kunci aturan delete, role Super Admin, audit log | Kontrak delete | Not Started |
+| Kickoff | Dion | Kunci aturan soft delete, restore, role access, audit log | Kontrak delete | Not Started |
 | Frontend dummy | Adithian | Dialog soft delete/restore dan state nonaktif | UI delete siap | Not Started |
-| Frontend support | Adriel | Double confirm hard delete dan review destructive flow | UI hard delete aman | Not Started |
-| Backend | Jordan | Soft delete, restore, hard delete policy, file cleanup | Backend delete siap | Not Started |
+| Frontend support | Adriel | Review dialog konfirmasi soft delete dan flow restore | UI delete aman | Not Started |
+| Backend | Jordan | Soft delete, restore, policy akses, filter data non-aktif | Backend delete siap | Not Started |
 | Backend support | Grantly | Negative case, data uji, audit evidence | QA data siap | Not Started |
 | Integrasi | Adithian + Jordan | Hubungkan UI delete ke backend | Flow delete real data | Not Started |
-| Review | Adriel | Review PR destructive action sebelum merge | Merge atau return bug | Not Started |
-| QA | Grantly | Test permission, restore, hard delete, audit log | Sprint 3 QA pass | Not Started |
+| Review | Adriel | Review PR soft delete/restore sebelum merge | Merge atau return bug | Not Started |
+| QA | Grantly | Test permission, soft delete, restore, audit log | Sprint 3 QA pass | Not Started |
 
 ---
 

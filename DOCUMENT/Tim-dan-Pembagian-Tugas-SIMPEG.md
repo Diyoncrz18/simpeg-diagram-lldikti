@@ -202,7 +202,7 @@ Sprint 1 tetap fokus pada fondasi karena vertical slice baru efektif jika layout
 |--------|--------|----------------|---------------|-----------------|----------------|
 | 3.1 | Hari 1-5 | Import Excel/CSV (US-3.1, US-3.2, US-3.3, US-3.4) | Template, upload, preview, validasi, dan eksekusi import | Dion kunci format kolom; Adithian buat UI upload/preview dummy; Jordan buat template dan kontrak import; Grantly bangun parser/queue/validasi dan QA file sample; Adriel review PR import | Admin bisa import data pegawai dari file sample dan melihat hasil validasi |
 | 3.2 | Hari 6-8 | Profil sendiri + data keluarga (US-2.5, US-2.8) | Pegawai bisa melihat data sendiri dan admin bisa kelola keluarga | Adithian buat profil read-only dan tab keluarga; Jordan buat policy/query data sendiri; Grantly bantu CRUD keluarga dan QA role access; Adriel review UI dan conflict | Profil sendiri dan data keluarga berjalan dengan real data |
-| 3.3 | Hari 9-10 | Soft delete/restore + hard delete terbatas (US-2.9, US-2.10) | Penghapusan aman sesuai role | Adithian buat dialog konfirmasi; Jordan buat soft delete/restore/hard delete policy; Grantly QA negative case; Adriel review flow destruktif sebelum merge | Data pegawai bisa dinonaktifkan, dipulihkan, dan hard delete hanya untuk role yang berhak |
+| 3.3 | Hari 9-10 | Soft delete dan restore pegawai (US-2.9, US-2.10) | Penghapusan aman tanpa hapus permanen | Adithian buat dialog konfirmasi soft delete/restore; Jordan buat soft delete/restore policy dan filter data non-aktif; Grantly QA negative case; Adriel review flow sebelum merge | Data pegawai bisa dinonaktifkan dan dipulihkan tanpa penghapusan permanen |
 
 ### Sprint 4 — Cuti Core (Minggu 7-9)
 
