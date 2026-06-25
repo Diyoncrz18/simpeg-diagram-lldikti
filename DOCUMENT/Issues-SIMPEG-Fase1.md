@@ -82,6 +82,7 @@ Setup project Laravel baru beserta konfigurasi environment dasar untuk proyek SI
 
 **Deskripsi:**
 Implementasi login SSO menggunakan Keycloak. User mengakses SIMPEG → redirect ke Keycloak login → callback → session Laravel terbentuk. Role dan permission aplikasi tetap dibaca dari database SIMPEG.
+User pertama yang berhasil login melalui SSO saat tabel user SIMPEG masih kosong otomatis dibootstrap sebagai `Super Admin`. Setelah bootstrap, user yang berhasil login tetapi belum memiliki role internal SIMPEG tetap memiliki session, namun akses dashboard/fitur normal ditolak dengan HTTP `403 Access Forbidden` dan pesan: *"Akun Anda belum memiliki role SIMPEG. Hubungi Admin."*
 
 **Tasks:**
 - [ ] Adaptasi trait/fungsi Keycloak dari LLDIKTI atau konfigurasi `socialite` + Keycloak provider
@@ -93,8 +94,11 @@ Implementasi login SSO menggunakan Keycloak. User mengakses SIMPEG → redirect 
   - `logout()` — hapus session Laravel + trigger Keycloak end-session
 - [ ] Saat callback berhasil:
   - Cari pegawai di tabel `employees` berdasarkan email Keycloak
-  - Jika ditemukan → login, simpan `keycloak_id` jika belum ada
+  - Jika ditemukan dan belum ada user lokal sama sekali → login, simpan `keycloak_id`, bootstrap role `Super Admin`
+  - Jika ditemukan dan user lokal sudah ada → login, simpan `keycloak_id` jika belum ada, role tetap diatur dari SIMPEG
+  - Jika role SIMPEG kosong / belum diset / tidak valid → session boleh aktif tetapi dashboard/fitur normal harus mengembalikan `403 Access Forbidden` dengan pesan hubungi admin
   - Jika tidak ditemukan → tampilkan halaman "Akun belum terdaftar"
+- [ ] Abaikan role dasar / role claim dari SSO untuk otorisasi fitur; RBAC tetap memakai database SIMPEG
 - [ ] Buat halaman "Akun belum terdaftar" (`resources/views/auth/unregistered.blade.php`)
 - [ ] Register middleware di `bootstrap/app.php`
 - [ ] Buat route group yang di-protect middleware auth
@@ -104,8 +108,10 @@ Implementasi login SSO menggunakan Keycloak. User mengakses SIMPEG → redirect 
 - [ ] AC-2: Session terbentuk setelah login sukses
 - [ ] AC-3: Mapping via email ke tabel employees
 - [ ] AC-4: Halaman info jika belum terdaftar
-- [ ] AC-5: Redirect ke dashboard sesuai role
-- [ ] AC-6: Login dicatat di audit log
+- [ ] AC-5: User SSO pertama dibootstrap sebagai Super Admin jika belum ada user lokal SIMPEG
+- [ ] AC-6: User dengan role kosong/tidak valid mendapat 403 Access Forbidden dan pesan hubungi admin
+- [ ] AC-7: Redirect ke dashboard sesuai role jika role SIMPEG valid
+- [ ] AC-8: Login dicatat di audit log
 
 ---
 
@@ -151,6 +157,7 @@ Implementasi logout yang menghapus session Laravel dan juga memicu single logout
 
 **Deskripsi:**
 Halaman admin untuk memetakan akun Keycloak ke pegawai dan menetapkan role/permission internal SIMPEG.
+Role dasar dari SSO tidak menjadi sumber otorisasi fitur; Super Admin menetapkan role internal SIMPEG melalui modul ini. User SSO baru setelah bootstrap dapat tercatat dengan role kosong sampai role ditetapkan di SIMPEG.
 
 **Tasks:**
 - [ ] Buat migration tabel `employees` (jika belum):
@@ -170,6 +177,7 @@ Halaman admin untuk memetakan akun Keycloak ke pegawai dan menetapkan role/permi
   - Tombol "Edit" per baris → modal/form edit
 - [ ] Buat middleware `RoleMiddleware` — cek role user untuk akses halaman
 - [ ] Pastikan middleware membaca role/permission dari database SIMPEG, bukan dari data otorisasi Keycloak
+- [ ] User yang sudah login tetapi role SIMPEG kosong / tidak valid harus ditolak dari dashboard/fitur normal dengan `403 Access Forbidden` dan pesan hubungi admin
 - [ ] Validasi: satu keycloak_id hanya bisa di-mapping ke satu pegawai
 - [ ] Audit log: catat perubahan mapping dan role
 
@@ -180,6 +188,9 @@ Halaman admin untuk memetakan akun Keycloak ke pegawai dan menetapkan role/permi
 - [ ] AC-4: Perubahan berlaku login berikutnya
 - [ ] AC-5: Audit log tercatat
 - [ ] AC-6: Validasi 1 akun = 1 pegawai
+- [ ] AC-7: Role/permission dibaca dari database SIMPEG, bukan data otorisasi Keycloak
+- [ ] AC-8: User SSO baru setelah bootstrap dibuat dengan role kosong sampai Super Admin menetapkan role di SIMPEG
+- [ ] AC-9: Role dasar dari SSO tidak otomatis memberi permission SIMPEG
 
 ---
 

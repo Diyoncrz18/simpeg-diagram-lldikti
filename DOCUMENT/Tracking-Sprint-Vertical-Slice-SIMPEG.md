@@ -92,8 +92,8 @@ Sprint 1 belum memakai vertical slice penuh. Fokusnya menyiapkan fondasi agar Sp
 | No | Area | Owner | Yang Dikerjakan | Output | Status |
 |----|------|-------|-----------------|--------|--------|
 | 1.1 | Project baseline | Dion | Setup scope, backlog, board, sprint goal, branch workflow | Backlog dan workflow siap | Not Started |
-| 1.2 | Keycloak SSO | Grantly | Login SSO, logout, middleware auth, fallback akun belum terdaftar | Auth dasar berjalan | Not Started |
-| 1.3 | User mapping & RBAC | Jordan | Mapping user Keycloak ke pegawai, role/permission dasar | Akses per role siap | Not Started |
+| 1.2 | Keycloak SSO | Grantly | Login SSO, logout, middleware auth, fallback akun belum terdaftar, bootstrap Super Admin dari login SSO pertama | Auth dasar berjalan | Not Started |
+| 1.3 | User mapping & RBAC | Jordan | Mapping user Keycloak ke pegawai, role/permission dasar, user tanpa role mendapat 403 hubungi admin | Akses per role siap | Not Started |
 | 1.4 | Audit log base | Grantly | Audit log otomatis untuk auth dan CRUD awal | Audit log siap dipanggil fitur | Not Started |
 | 1.5 | Notification base | Jordan | In-app notification base dan mail channel awal | Notifikasi dasar siap | Not Started |
 | 1.6 | Reference tables | Jordan | Migration/seeder reference tables dan hari libur | Master data awal siap | Not Started |

@@ -82,8 +82,10 @@ Setiap story mengikuti format:
 - [ ] AC-2: Setelah login berhasil di Keycloak, browser redirect kembali ke SIMPEG dan session aktif terbentuk.
 - [ ] AC-3: Data email user dari Keycloak disimpan / di-cache ke tabel `employees` (kolom `keycloak_id` dan email) saat login pertama kali.
 - [ ] AC-4: Jika email Keycloak belum ter-mapping ke data pegawai manapun di SIMPEG, tampilkan halaman informasi: *"Akun Anda belum terdaftar di SIMPEG. Silakan hubungi Admin Kepegawaian."*
-- [ ] AC-5: Jika mapping ditemukan, user diarahkan ke halaman dashboard sesuai role-nya.
-- [ ] AC-6: Login yang berhasil dan gagal mapping dicatat di audit log.
+- [ ] AC-5: Jika ini adalah user pertama yang berhasil login melalui SSO dan belum ada user lokal SIMPEG, sistem otomatis membuat user tersebut sebagai `Super Admin` untuk kebutuhan bootstrap awal.
+- [ ] AC-6: Jika mapping ditemukan tetapi role SIMPEG user masih kosong / belum diset / tidak valid, session login tetap terbentuk tetapi akses dashboard/fitur normal ditolak dengan HTTP `403 Access Forbidden` dan pesan: *"Akun Anda belum memiliki role SIMPEG. Hubungi Admin."*
+- [ ] AC-7: Jika mapping ditemukan dan role SIMPEG valid, user diarahkan ke halaman dashboard sesuai role-nya.
+- [ ] AC-8: Login yang berhasil, gagal mapping, dan penolakan karena role belum diset dicatat di audit log jika mekanisme audit sudah tersedia pada flow tersebut.
 
 ---
 
@@ -158,6 +160,8 @@ Setiap story mengikuti format:
 - [ ] AC-5: Perubahan mapping dan role dicatat di audit log.
 - [ ] AC-6: Validasi: satu akun Keycloak hanya bisa di-mapping ke satu pegawai.
 - [ ] AC-7: Role dan permission aplikasi dibaca dari database SIMPEG, bukan dari data otorisasi Keycloak.
+- [ ] AC-8: User yang sudah berhasil login SSO tetapi belum memiliki role internal SIMPEG tetap tercatat sebagai user lokal dengan role kosong sampai Super Admin menetapkan role.
+- [ ] AC-9: Role dasar dari SSO tidak boleh otomatis memberi akses fitur; role tersebut hanya boleh diperlakukan sebagai informasi identitas eksternal, bukan sumber otorisasi SIMPEG.
 
 ---
 

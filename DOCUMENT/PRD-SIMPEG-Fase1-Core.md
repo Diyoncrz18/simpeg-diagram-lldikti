@@ -170,6 +170,10 @@ Super Admin
 **Aturan:**
 - Keycloak hanya menjadi sumber autentikasi / SSO.
 - SIMPEG tetap menjadi sumber kebenaran untuk role, permission, dan otorisasi fitur.
+- Role dasar yang ada di SSO tidak dipakai sebagai sumber RBAC aplikasi; role SIMPEG hanya ditetapkan dan dibaca dari database SIMPEG.
+- User pertama yang berhasil login melalui SSO saat tabel user SIMPEG masih kosong otomatis dibootstrap sebagai `Super Admin`.
+- Setelah bootstrap pertama, user SSO baru yang berhasil teridentifikasi tetapi belum ditetapkan role oleh admin SIMPEG tetap boleh memiliki session login, tetapi tidak boleh mengakses dashboard/fitur normal.
+- User dengan role kosong, belum diset, atau role tidak valid harus menerima HTTP `403 Access Forbidden` dengan pesan: *"Akun Anda belum memiliki role SIMPEG. Hubungi Admin."*
 - Fase 1 menggunakan satu role utama per pegawai agar implementasi awal sederhana.
 - Struktur permission internal tetap disiapkan agar akses fitur dapat diatur tanpa mengubah Keycloak.
 
