@@ -435,7 +435,7 @@ Command yang umum dipakai:
 
 ```powershell
 php artisan test tests/Feature/NamaTest.php
-php "C:\Unklabb\XAMPP\php\composer.phar" qa
+composer qa
 php artisan route:list --path=api/v1 --json
 ```
 
