@@ -277,6 +277,241 @@ Route::middleware(['web', 'keycloak.auth', 'role:super_admin,admin_kepegawaian']
 
 Jangan hanya menyembunyikan tombol di Blade. Jika user tidak boleh melakukan aksi, backend harus menolak request.
 
+## Blade Component Pattern
+
+Blade component dipakai untuk bagian UI yang berulang, punya variasi state yang jelas, atau menjadi elemen dasar tampilan SIMPEG. Tujuannya adalah menjaga tampilan konsisten, mengurangi copy-paste HTML, dan membuat perubahan desain lebih mudah dilakukan dari satu tempat.
+
+### Kapan Membuat Blade Component
+
+Buat component jika UI:
+
+- dipakai minimal di dua halaman atau berpotensi dipakai ulang;
+- memiliki style yang harus konsisten, seperti button, badge, alert, card, table toolbar, empty state, modal, pagination, atau form field;
+- memiliki beberapa variasi yang masih satu keluarga, seperti `primary`, `secondary`, `danger`, `success`, `warning`;
+- punya state yang berulang, seperti loading, disabled, error, empty, active, selected;
+- membutuhkan slot agar isi bisa fleksibel tetapi wrapper/style tetap sama.
+
+Jangan membuat component jika:
+
+- hanya dipakai sekali dan tidak ada pola reuse yang jelas;
+- component hanya membungkus satu tag tanpa nilai konsistensi;
+- props terlalu banyak sampai component sulit dipahami;
+- component mencampur query database, authorization business rule, atau logic controller.
+
+### Lokasi dan Penamaan
+
+Simpan Blade component di:
+
+```text
+resources/views/components/
+```
+
+Gunakan struktur folder berdasarkan jenis UI:
+
+```text
+resources/views/components/ui/button.blade.php
+resources/views/components/ui/badge.blade.php
+resources/views/components/ui/alert.blade.php
+resources/views/components/form/input.blade.php
+resources/views/components/form/select.blade.php
+resources/views/components/layouts/app.blade.php
+resources/views/components/admin/page-header.blade.php
+```
+
+Gunakan nama kebab-case dan panggil dengan prefix yang sesuai:
+
+```blade
+<x-ui.button variant="primary" type="submit">
+    Simpan
+</x-ui.button>
+
+<x-form.input
+    name="nip"
+    label="NIP"
+    :value="old('nip', $pegawai->nip ?? '')"
+    required
+/>
+```
+
+### Props dan Slot
+
+Props harus sederhana dan eksplisit. Gunakan props untuk konfigurasi kecil, bukan untuk membawa data domain besar.
+
+Contoh props yang boleh:
+
+- `variant`
+- `size`
+- `type`
+- `label`
+- `name`
+- `value`
+- `required`
+- `disabled`
+- `href`
+- `icon`
+
+Contoh props yang harus dihindari:
+
+- seluruh model Eloquent jika hanya butuh satu atau dua field;
+- collection besar;
+- flag business rule yang seharusnya dihitung di controller/action;
+- array konfigurasi panjang yang membuat component sulit dibaca.
+
+Gunakan slot untuk konten utama:
+
+```blade
+<x-ui.alert variant="warning">
+    Data pegawai belum lengkap. Lengkapi data SK dan riwayat kepangkatan.
+</x-ui.alert>
+```
+
+Gunakan named slot hanya jika benar-benar perlu area khusus:
+
+```blade
+<x-admin.page-header title="Data Pegawai">
+    <x-slot:actions>
+        <x-ui.button href="{{ route('pegawai.create') }}" variant="primary">
+            Tambah Pegawai
+        </x-ui.button>
+    </x-slot:actions>
+</x-admin.page-header>
+```
+
+### Styling Component
+
+Semua class visual utama harus berada di dalam component, bukan disalin berulang di halaman.
+
+Aturan styling:
+
+- gunakan token/class design system yang sudah dipakai project;
+- variasi style dikontrol lewat props seperti `variant` dan `size`;
+- jangan membuat style inline kecuali untuk nilai dinamis yang tidak bisa diwakili class;
+- jangan menyisipkan CSS panjang di file Blade halaman;
+- pastikan state `hover`, `focus`, `disabled`, dan `loading` konsisten;
+- component form wajib menampilkan error validation dengan pola yang sama.
+
+Contoh pola variant:
+
+```blade
+@props([
+    'variant' => 'primary',
+    'type' => 'button',
+    'disabled' => false,
+])
+
+@php
+    $variants = [
+        'primary' => 'bg-primary text-white hover:bg-primary/90',
+        'secondary' => 'bg-surface text-ink border border-border hover:bg-soft',
+        'danger' => 'bg-danger text-white hover:bg-danger/90',
+    ];
+@endphp
+
+<button
+    type="{{ $type }}"
+    @disabled($disabled)
+    {{ $attributes->merge([
+        'class' => 'inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold transition ' . ($variants[$variant] ?? $variants['primary']),
+    ]) }}
+>
+    {{ $slot }}
+</button>
+```
+
+### Component Form
+
+Form component harus mengikuti pola validasi Laravel.
+
+Untuk input, minimal dukung:
+
+- `name`;
+- `label`;
+- `value`;
+- `required`;
+- `disabled`;
+- `placeholder`;
+- error dari `$errors`;
+- `old()` dari halaman pemanggil atau value yang dikirim sebagai props.
+
+Contoh pemakaian:
+
+```blade
+<x-form.input
+    name="tanggal_sk"
+    label="Tanggal SK"
+    type="date"
+    :value="old('tanggal_sk', $rankHistory->tanggal_sk ?? '')"
+    required
+/>
+```
+
+Component form tidak boleh melakukan validasi sendiri. Validasi tetap ada di FormRequest. Component hanya menampilkan state error dari backend.
+
+### Authorization di Blade
+
+Blade component boleh menerima prop seperti `can` atau memakai `@can` untuk mengatur tampilan tombol/aksi, tetapi itu hanya untuk UX.
+
+Contoh:
+
+```blade
+@can('create', App\Models\Employee::class)
+    <x-ui.button href="{{ route('pegawai.create') }}" variant="primary">
+        Tambah Pegawai
+    </x-ui.button>
+@endcan
+```
+
+Aturan penting:
+
+- component boleh menyembunyikan tombol berdasarkan permission;
+- backend tetap wajib menolak request tanpa izin;
+- jangan menaruh decision business rule kompleks di Blade component;
+- jika logic permission mulai panjang, pindahkan ke Policy, middleware, Action, atau helper yang jelas.
+
+### Data dan Query
+
+Blade component tidak boleh menjalankan query database langsung.
+
+Hindari:
+
+```blade
+@php
+    $totalPegawai = \App\Models\Employee::count();
+@endphp
+```
+
+Data harus disiapkan oleh controller/action/service lalu dikirim ke view:
+
+```php
+return view('admin.pegawai.index', [
+    'totalPegawai' => $summary->totalPegawai,
+]);
+```
+
+Component hanya menerima data siap tampil.
+
+### Alpine/JavaScript di Component
+
+Jika component membutuhkan Alpine.js:
+
+- scope `x-data` harus kecil dan jelas;
+- jangan menyimpan business rule backend di JavaScript;
+- gunakan event name yang deskriptif;
+- state UI seperti open/close, selected tab, loading indicator boleh berada di component;
+- jika logic JavaScript panjang, pindahkan ke file JS terpisah.
+
+### Dokumentasi Mini
+
+Untuk component yang dipakai luas, tambahkan komentar singkat di awal file jika props-nya tidak langsung jelas.
+
+Contoh:
+
+```blade
+{{-- Props: variant=primary|secondary|danger, size=sm|md, href optional untuk render link --}}
+```
+
+Jangan memberi komentar yang hanya mengulang nama variable.
+
 ## Audit Log Pattern
 
 Setiap mutation penting harus audit-aware:

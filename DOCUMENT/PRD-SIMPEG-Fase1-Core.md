@@ -167,7 +167,7 @@ Super Admin
                     └── Pegawai
 ```
 
-**Aturan:**
+**Aturan:** 
 - Keycloak hanya menjadi sumber autentikasi / SSO.
 - SIMPEG tetap menjadi sumber kebenaran untuk role, permission, dan otorisasi fitur.
 - Role dasar yang ada di SSO tidak dipakai sebagai sumber RBAC aplikasi; role SIMPEG hanya ditetapkan dan dibaca dari database SIMPEG.
