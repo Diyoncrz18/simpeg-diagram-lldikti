@@ -21,6 +21,28 @@ Prinsip utama:
 - response shaping tidak dicampur dengan query/business logic;
 - audit, authorization, dan masking data sensitif harus dijaga di backend.
 
+## Struktur File Wajib
+
+File baru harus ditempatkan berdasarkan surface dan domain, bukan ditaruh di root folder HTTP secara acak.
+
+```text
+app/Http/Controllers/Api/V1/{Domain}Controller.php      JSON API v1
+app/Http/Controllers/Admin/{Domain}Controller.php       Blade/admin page
+app/Http/Controllers/Auth/{Domain}Controller.php        SSO/OIDC/auth flow
+app/Http/Requests/{Domain}/{UseCase}Request.php         FormRequest per domain
+app/Actions/{Domain}/{UseCase}Action.php                satu use case
+app/Services/{Domain}/{Domain}Service.php               logic reusable/kompleks
+resources/views/admin/{domain}/*.blade.php              halaman admin
+resources/views/components/{group}/*.blade.php          UI reusable
+```
+
+Aturan:
+
+- jangan membuat controller API baru di `app/Http/Controllers/` root;
+- jangan membuat FormRequest baru di `app/Http/Requests/` root;
+- boleh menyentuh file legacy root hanya saat mempertahankan behavior lama atau memindahkannya secara eksplisit;
+- nama folder domain harus konsisten dengan domain fitur, seperti `Employee`, `Cuti`, `Import`, `History`, `HariLibur`, atau `Rbac`.
+
 ## Aturan Wajib
 
 - Tidak boleh membuat fat controller.
@@ -96,6 +118,18 @@ Contoh:
 
 Alasan: provider eksternal tidak selalu bisa digiring update URL saat API berubah dari v1 ke v2.
 
+### Route UUID
+
+Route yang memakai UUID model binding wajib membatasi parameter dengan `whereUuid(...)`.
+
+```php
+Route::get('/pegawai/{employee}', [EmployeeController::class, 'show'])
+    ->whereUuid('employee')
+    ->name('show');
+```
+
+Tujuannya agar UUID rusak menghasilkan 404 di layer route, bukan error database 500.
+
 ### Webhook Baru
 
 - Jika kontrak webhook ikut versi aplikasi, gunakan `routes/api/v1/webhooks.php`.
@@ -115,7 +149,9 @@ Controller tidak boleh berisi:
 - query panjang;
 - transaksi database kompleks;
 - kalkulasi business rule;
+- SSO/OIDC mapping;
 - audit decision;
+- notification dispatch;
 - parsing file import;
 - mapping response besar;
 - authorization inline yang tersebar.
@@ -189,6 +225,8 @@ class StoreEmployeeFamilyRequest extends FormRequest
 
 Jangan validasi manual di controller jika FormRequest bisa dipakai.
 
+Gunakan `authorize()` untuk gate mutation yang melekat pada request. Jika authorization butuh ownership/data-scope yang panjang, panggil Policy atau scoped service dari `authorize()` atau Action, jangan tulis rule panjang langsung di controller.
+
 ## Action Pattern
 
 Action mewakili satu use case aplikasi.
@@ -213,6 +251,8 @@ Action boleh melakukan:
 - payload helper calls.
 
 Action tidak boleh menjadi tempat semua logic domain jika logic tersebut dipakai ulang oleh banyak use case. Jika logic mulai berulang, pindahkan ke Service.
+
+Action juga tidak boleh dipakai untuk mengubah response contract secara diam-diam. Jika response akan dimigrasikan ke API Resource atau envelope baru, kunci kontrak lama dengan test terlebih dahulu.
 
 Contoh Action:
 
@@ -298,6 +338,13 @@ Jangan membuat component jika:
 - props terlalu banyak sampai component sulit dipahami;
 - component mencampur query database, authorization business rule, atau logic controller.
 
+Prioritas component SIMPEG:
+
+1. primitive UI yang sering muncul: button, badge, alert, card, table, modal;
+2. form control: input, select, textarea, checkbox, date input, file input;
+3. page helper: page header, filter bar, action group, empty state, pagination summary;
+4. domain display yang benar-benar berulang: status cuti, status pegawai, ringkasan notifikasi.
+
 ### Lokasi dan Penamaan
 
 Simpan Blade component di:
@@ -365,6 +412,8 @@ Gunakan slot untuk konten utama:
 </x-ui.alert>
 ```
 
+Gunakan escaped output `{{ }}` untuk data user atau data database. Jangan memakai `{!! !!}` kecuali HTML sudah disanitasi dan alasan keamanannya jelas di kode.
+
 Gunakan named slot hanya jika benar-benar perlu area khusus:
 
 ```blade
@@ -385,6 +434,7 @@ Aturan styling:
 
 - gunakan token/class design system yang sudah dipakai project;
 - variasi style dikontrol lewat props seperti `variant` dan `size`;
+- gabungkan class default dengan `$attributes->class([...])` atau `$attributes->merge([...])` agar caller masih bisa menambah atribut HTML standar;
 - jangan membuat style inline kecuali untuk nilai dinamis yang tidak bisa diwakili class;
 - jangan menyisipkan CSS panjang di file Blade halaman;
 - pastikan state `hover`, `focus`, `disabled`, dan `loading` konsisten;
@@ -410,13 +460,16 @@ Contoh pola variant:
 <button
     type="{{ $type }}"
     @disabled($disabled)
-    {{ $attributes->merge([
-        'class' => 'inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold transition ' . ($variants[$variant] ?? $variants['primary']),
+    {{ $attributes->class([
+        'inline-flex items-center justify-center rounded-md px-3 py-2 text-sm font-semibold transition',
+        $variants[$variant] ?? $variants['primary'],
     ]) }}
 >
     {{ $slot }}
 </button>
 ```
+
+Jika component bisa render `<a>` dan `<button>`, bedakan behavior secara eksplisit. Link untuk navigasi, button untuk submit/action. Jangan membuat satu component yang menebak behavior dari terlalu banyak prop.
 
 ### Component Form
 
@@ -432,6 +485,7 @@ Untuk input, minimal dukung:
 - `placeholder`;
 - error dari `$errors`;
 - `old()` dari halaman pemanggil atau value yang dikirim sebagai props.
+- atribut aksesibilitas seperti `id`, `for`, `aria-invalid`, dan `aria-describedby` saat ada error/help text.
 
 Contoh pemakaian:
 
@@ -446,6 +500,35 @@ Contoh pemakaian:
 ```
 
 Component form tidak boleh melakukan validasi sendiri. Validasi tetap ada di FormRequest. Component hanya menampilkan state error dari backend.
+
+Form Blade wajib memakai fitur Laravel untuk request state:
+
+- `@csrf` untuk semua form mutation;
+- `@method('PUT')`, `@method('PATCH')`, atau `@method('DELETE')` saat method HTML perlu spoofing;
+- `old()` untuk mempertahankan input setelah validasi gagal;
+- `@error('field')` atau error bag yang sesuai untuk pesan validasi;
+- `route(...)` untuk URL internal, bukan hardcoded path.
+
+Contoh form singkat:
+
+```blade
+<form method="POST" action="{{ route('pegawai.update', $pegawai) }}">
+    @csrf
+    @method('PATCH')
+
+    <x-form.input
+        name="email"
+        label="Email"
+        type="email"
+        :value="old('email', $pegawai->email)"
+        required
+    />
+
+    <x-ui.button type="submit" variant="primary">
+        Simpan
+    </x-ui.button>
+</form>
+```
 
 ### Authorization di Blade
 
@@ -490,6 +573,10 @@ return view('admin.pegawai.index', [
 
 Component hanya menerima data siap tampil.
 
+Blade halaman juga tidak boleh melakukan kalkulasi domain panjang. Format tampilan ringan boleh, seperti `->format('d/m/Y')`, tetapi status, eligibility, saldo cuti, dan rule akses harus disiapkan sebelum view.
+
+Untuk list besar, controller/action harus mengirim paginator atau collection yang sudah dibatasi. Jangan melakukan filtering collection besar di Blade.
+
 ### Alpine/JavaScript di Component
 
 Jika component membutuhkan Alpine.js:
@@ -499,6 +586,24 @@ Jika component membutuhkan Alpine.js:
 - gunakan event name yang deskriptif;
 - state UI seperti open/close, selected tab, loading indicator boleh berada di component;
 - jika logic JavaScript panjang, pindahkan ke file JS terpisah.
+
+Gunakan progressive enhancement: fitur utama tetap harus aman lewat backend request. Alpine hanya boleh memperbaiki pengalaman UI, bukan menggantikan validasi, authorization, audit, atau perubahan data.
+
+### Blade Layout dan Partial
+
+- Layout halaman utama simpan di `resources/views/layouts/` atau component layout yang sudah dipakai project.
+- Partial biasa boleh dipakai untuk potongan satu halaman yang belum layak jadi component reusable.
+- Jika partial mulai dipakai lintas halaman atau butuh variasi state, naikkan menjadi Blade component.
+- Hindari markup tabel/form/action button copy-paste di banyak halaman; buat component atau partial kecil.
+- Gunakan `@once`, `@push`, dan `@stack` untuk script/style per halaman agar asset tidak terduplikasi.
+
+### Aksesibilitas Blade
+
+- Label form harus terhubung ke input lewat `for` dan `id`.
+- Tombol icon-only wajib punya teks screen-reader atau `aria-label`.
+- Error validasi harus bisa dibaca pembaca layar lewat `aria-describedby`.
+- Modal/dropdown harus punya state focus dan keyboard yang aman jika dipakai untuk aksi penting.
+- Warna status tidak boleh menjadi satu-satunya pembeda; tambahkan teks atau icon yang jelas.
 
 ### Dokumentasi Mini
 
@@ -583,6 +688,8 @@ class EmployeeFamilyPayload
 
 Jangan mengubah bentuk response endpoint lama tanpa test yang mengunci kontrak lama.
 
+Sebelum migrasi response ke `JsonResource` atau envelope baru, inventarisasi shape endpoint lama: key utama, `meta`, pagination, message, status code, dan masking field sensitif. Migrasi hanya boleh dilakukan saat kontrak baru disetujui atau test membuktikan shape lama tetap sama.
+
 ## Query dan Filter Pattern
 
 List endpoint yang punya banyak filter tidak boleh membengkakkan controller.
@@ -664,7 +771,23 @@ Untuk refactor route/API:
 
 - snapshot route before/after jika refactor route;
 - pastikan URI, method, route name, middleware, controller action tidak berubah;
+- pastikan response shape, authorization behavior, dan user-visible behavior tetap sama;
 - jalankan focused tests dan `composer qa`.
+
+Backend change yang sensitif database harus diuji di PostgreSQL, bukan hanya SQLite. Contoh sensitif: UUID, JSON column, date casting, FK/index, transaction, pagination query, dan route model binding.
+
+Quality gate lokal default:
+
+```powershell
+composer qa
+```
+
+Quality gate PR/CI minimal:
+
+- asset build;
+- Pint full-project;
+- PHPStan minimal level 3;
+- test suite Laravel.
 
 Command yang umum dipakai:
 
@@ -725,9 +848,11 @@ Sebelum membuat PR, pastikan:
 - data sensitif tidak bocor;
 - permission/backend authorization diuji;
 - response contract tidak berubah diam-diam;
+- route UUID binding memakai `whereUuid(...)` jika perlu;
+- refactor membuktikan behavior lama tetap sama;
 - tests relevan pass;
 - `composer qa` pass;
-- PR body menjelaskan scope, non-scope, dan testing evidence.
+- CI wajib build, Pint, PHPStan, dan test suite pass sebelum siap merge.
 
 ## Contoh Struktur Fitur Baru
 
@@ -747,7 +872,7 @@ File yang mungkin dibuat:
 
 ```text
 app/Actions/Employees/RestoreEmployeeAction.php
-app/Http/Requests/RestoreEmployeeRequest.php
+app/Http/Requests/Employee/RestoreEmployeeRequest.php
 tests/Feature/EmployeeRestoreTest.php
 ```
 
