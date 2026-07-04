@@ -60,7 +60,7 @@ Field berikut tetap ada di desain SIMPEG, tetapi tidak tersedia pada file Excel 
 | Pengangkatan/SK | `jenis_pengangkatan`, `tmt_pengangkatan`, `no_sk_pengangkatan`, `tanggal_sk_pengangkatan`, `file_sk_pengangkatan` |
 | Riwayat | TMT pangkat, No SK pangkat, TMT jabatan, No SK jabatan, TMT KGB, gaji pokok, No SK KGB |
 | Keluarga | Data pasangan/anak dan status tunjangan |
-| Organisasi | Unit kerja dan atasan langsung |
+| Organisasi | Unit kerja dan kepala bagian |
 
 ## Aturan Import Awal
 

@@ -21,7 +21,7 @@ flowchart TD
     B --&gt;|&quot;PNS: Semua Jenis&quot;| C
     B --&gt;|&quot;PPPK: Cuti Besar\ndan CLTN Disembunyikan&quot;| C
     C{Cek Saldo\nCuti} --&gt;|&quot;Tidak Cukup&quot;| D([&quot;Ditolak\nOtomatis&quot;])
-    C --&gt;|&quot;Cukup&quot;| E[&quot;Stage 1: Atasan Langsung\nMengetahui / konfigurasi&quot;]
+    C --&gt;|&quot;Cukup&quot;| E[&quot;Stage 1: Kepala Bagian\nMengetahui / konfigurasi&quot;]
     E --&gt; F[&quot;Stage 2: Kabag/Verifikator\nMenyetujui&quot;]
     F --&gt; G[&quot;Stage 3: Pimpinan/PYBMC\nFinal&quot;]
     G --&gt;|&quot;Disetujui&quot;| H[&quot;Saldo Dikurangi Otomatis\nCarry-over Dihitung&quot;]
@@ -57,7 +57,7 @@ flowchart LR
     CK3 --&gt;|&quot;Lupa Absen Gabungan\nsudah 2x bulan ini&quot;| BLOK
     CK3 --&gt;|&quot;Izin Terlambat atau Cepat\nsudah 2x bulan ini&quot;| BLOK
     CK3 --&gt;|&quot;Masih ada kuota&quot;| FORM[&quot;Isi Form Klaim\nJenis, Tanggal, Alasan&quot;]
-    FORM --&gt; APV{Atasan\nLangsung}
+    FORM --&gt; APV{Kepala Bagian}
     APV --&gt;|&quot;Approve&quot;| OK([&quot;Kehadiran\nTercatat&quot;])
     APV --&gt;|&quot;Tolak&quot;| NOK([&quot;Notifikasi\nPenolakan&quot;])</pre></section><section class="card"><h2>5 · Surat Tugas &amp; Kalender Virtual</h2><p>Kalender terintegrasi dari semua sumber — otomatis blokir log harian pada hari dinas luar</p><pre class="mermaid">%%{init:{&quot;flowchart&quot;:{&quot;nodeSpacing&quot;:85,&quot;rankSpacing&quot;:80,&quot;padding&quot;:28},&quot;theme&quot;:&quot;dark&quot;}}%%
 flowchart LR
@@ -80,14 +80,14 @@ flowchart LR
     KV --&gt; BLK[&quot;Blokir Log Harian\npada Hari Dinas Luar&quot;]
     KV --&gt; VIEW([&quot;Tampilan Kalender\nper Pegawai atau Tim&quot;])</pre></section><section class="card"><h2>6 · Alur SKP &amp; Penilaian Kinerja</h2><p>PermenPANRB 6/2022 · PP 30/2019 — berbasis hasil kerja (RHK), bukan daftar aktivitas</p><pre class="mermaid">%%{init:{&quot;flowchart&quot;:{&quot;nodeSpacing&quot;:52,&quot;rankSpacing&quot;:60,&quot;padding&quot;:18},&quot;theme&quot;:&quot;dark&quot;}}%%
 flowchart TD
-    A([&quot;Admin / Atasan&quot;]) --&gt; B[&quot;Buat SKP Periode Baru\nper Pegawai&quot;]
+    A([&quot;Admin / Kepala Bagian&quot;]) --&gt; B[&quot;Buat SKP Periode Baru\nper Pegawai&quot;]
     B --&gt; C[&quot;Input RHK\n(Rencana Hasil Kerja)&quot;]
     C --&gt; D[&quot;Set Target, Indikator\ndan Satuan per RHK&quot;]
     D --&gt; E[Sepanjang Periode]
     E --&gt; F[&quot;Pegawai Isi Log Harian&quot;]
     F --&gt; G[&quot;Kaitkan Log ke RHK\n(Many-to-Many, opsional)&quot;]
     G --&gt; H[Akhir Periode]
-    H --&gt; I[&quot;Atasan Buka Form Evaluasi&quot;]
+    H --&gt; I[&quot;Kepala Bagian Buka Form Evaluasi&quot;]
     I --&gt; J[&quot;Nilai Hasil Kerja\nSangat Baik / Baik / Butuh Perbaikan / Kurang&quot;]
     I --&gt; K[&quot;Nilai Perilaku BerAKHLAK\n(Kriteria sama)&quot;]
     J --&gt; L[Nilai SKP Final]
@@ -118,7 +118,7 @@ flowchart LR
         J2[&quot;Diklat Fungsional\nDiklat JF Arsiparis\nPranata Komputer, dll&quot;]:::j2
         J3[&quot;Pelatihan Teknis\nBimtek, Workshop\nSeminar, Kursus&quot;]:::j3
         J4[&quot;Pelatihan SIASN\nModul SIASN BKN&quot;]:::j4
-        J5[&quot;Coaching dan Mentoring\noleh Atasan Langsung&quot;]:::j5
+        J5[&quot;Coaching dan Mentoring\noleh Kepala Bagian&quot;]:::j5
         J6[&quot;Belajar Mandiri\nE-learning, Buku&quot;]:::j6
     end
     J1 --&gt; T([&quot;Total JP\nTahun Berjalan\nper Pegawai&quot;])
@@ -142,7 +142,7 @@ flowchart TD
     SA[&quot;Super Admin\n(Semua fitur + konfigurasi sistem)&quot;] --&gt; AK
     AK[&quot;Admin Kepegawaian\n(Kelola semua data pegawai\nProses pengajuan dan verifikasi)&quot;] --&gt; PM
     PM[&quot;Pimpinan\n(Approve cuti dan klaim\nDashboard semua pegawai)&quot;] --&gt; AL
-    AL[&quot;Atasan Langsung\n(Approve cuti dan klaim\nbawahan langsung)&quot;] --&gt; PG
+    AL[&quot;Kepala Bagian\n(Approve cuti dan klaim\nbawahan langsung)&quot;] --&gt; PG
     PG[&quot;Pegawai\n(Lihat data sendiri\nAjukan cuti dan self-service)&quot;]</pre></section><section class="card"><h2>10 · Roadmap Pengembangan SIMPEG</h2><p>4 fase — Core harus stabil dan dipakai sebelum Advanced dikerjakan</p><pre class="mermaid">%%{init:{&quot;flowchart&quot;:{&quot;nodeSpacing&quot;:90,&quot;rankSpacing&quot;:80,&quot;padding&quot;:25},&quot;theme&quot;:&quot;dark&quot;}}%%
 flowchart LR
     F1[&quot;Fase 1: Core\n \nSetup + Keycloak SSO\nSeed Reference Tables\nRBAC Roles dan Permissions\nData Pegawai Lengkap\nRiwayat Kepangkatan, Jabatan\nKGB, Disiplin, Pengangkatan\nImport Excel/CSV awal\nEWS (KP, KGB, Pensiun, PPPK)\nModul Cuti + Approval\nNotifikasi In-App dan Email\nAudit Log\nDashboard Dasar&quot;]:::f1

@@ -91,19 +91,19 @@ sequenceDiagram
 
     rect rgb(241, 245, 249)
       actor Pegawai
-      actor Atasan as Atasan Langsung
+      actor KepalaBagian as Kepala Bagian
       actor Kabag as Kabag/Verifikator
       actor Pimpinan as Pimpinan/PYBMC
 
       Pegawai->>Browser: Submit pengajuan cuti
       Browser->>App: POST /cuti
-      App->>DB: Validasi saldo, hari kerja, jenis cuti, atasan
-      App->>DB: Simpan leave_requests status menunggu atasan
+      App->>DB: Validasi saldo, hari kerja, jenis cuti, kepala bagian
+      App->>DB: Simpan leave_requests status menunggu kepala bagian
       App->>DB: Catat audit log pengajuan
-      App->>Queue: Kirim notifikasi ke Atasan
+      App->>Queue: Kirim notifikasi ke Kepala Bagian
       Queue->>Mail: Email/notifikasi jika channel aktif
 
-      Atasan->>Browser: Setujui/tunda stage 1
+      Kepala Bagian->>Browser: Setujui/tunda stage 1
       Browser->>App: POST /cuti/{id}/approve
       App->>DB: Simpan approval stage 1
       App->>App: Tentukan stage berikutnya dan skip jika approver sama

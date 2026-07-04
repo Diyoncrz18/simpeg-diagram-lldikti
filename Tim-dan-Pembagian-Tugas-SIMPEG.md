@@ -210,7 +210,7 @@ Sprint 4 dibuat 3 minggu karena cuti punya dependensi business rule, role approv
 
 | Urutan | Durasi | Vertical Slice | Fokus Bersama | Pembagian Kerja | Output Selesai |
 |--------|--------|----------------|---------------|-----------------|----------------|
-| 4.1 | Hari 1-5 | Setup aturan cuti (US-4.10, US-4.11, US-4.12, US-4.3) | Atasan, approver, hari kerja, jenis cuti, dan saldo siap | Dion validasi aturan LLDIKTI; Adithian buat UI assign/saldo dummy; Jordan buat tabel dan service saldo/approver; Grantly bantu kalkulasi hari kerja dan QA aturan; Adriel review PR kritis | Admin bisa assign atasan/approver dan saldo cuti terhitung |
+| 4.1 | Hari 1-5 | Setup aturan cuti (US-4.10, US-4.11, US-4.12, US-4.3) | Kepala Bagian, approver, hari kerja, jenis cuti, dan saldo siap | Dion validasi aturan LLDIKTI; Adithian buat UI assign/saldo dummy; Jordan buat tabel dan service saldo/approver; Grantly bantu kalkulasi hari kerja dan QA aturan; Adriel review PR kritis | Admin bisa assign kepala bagian/approver dan saldo cuti terhitung |
 | 4.2 | Hari 6-10 | Pengajuan & daftar cuti pegawai (US-4.1, US-4.2) | Pegawai bisa ajukan cuti dan melihat status | Adithian buat form cuti dan daftar status dummy; Jordan buat controller validasi saldo dan submit; Grantly QA pengajuan valid/invalid; Adriel review PR flow pegawai | Pengajuan cuti masuk ke sistem dan status awal tampil |
 | 4.3 | Hari 11-15 | Approval stage + timeline (US-4.4, US-4.5, US-4.6, US-4.7) | Approval berjenjang dan timeline terlihat | Adithian buat daftar approval dan timeline; Jordan buat state machine approval; Grantly QA E2E approve/tunda/tolak dan skip approver duplikat; Adriel review/merge bertahap | Cuti end-to-end siap demo dari pengajuan sampai approval final |
 
@@ -227,7 +227,7 @@ Sprint 4 dibuat 3 minggu karena cuti punya dependensi business rule, role approv
 | Urutan | Durasi | Vertical Slice | Fokus Bersama | Pembagian Kerja | Output Selesai |
 |--------|--------|----------------|---------------|-----------------|----------------|
 | 6.1 | Hari 1-4 | Dashboard admin & pegawai (US-8.1, US-8.2) | Ringkasan data utama tampil sebagai KPI/chart | Dion validasi metrik; Adithian buat dashboard dummy; Jordan buat query agregasi; Grantly QA angka dashboard; Adriel review UI/chart | Dashboard admin dan pegawai memakai real data |
-| 6.2 | Hari 5-7 | Dashboard atasan + reference tables (US-8.3, US-8.5) | Atasan melihat bawahan dan admin kelola master data | Adithian buat dashboard atasan dan CRUD reference UI; Jordan buat policy/query; Grantly QA role access/reference update; Adriel review PR | Dashboard atasan dan reference tables siap |
+| 6.2 | Hari 5-7 | Dashboard Kepala Bagian + reference tables (US-8.3, US-8.5) | Kepala Bagian melihat bawahan dan admin kelola master data | Adithian buat dashboard kepala bagian dan CRUD reference UI; Jordan buat policy/query; Grantly QA role access/reference update; Adriel review PR | Dashboard Kepala Bagian dan reference tables siap |
 | 6.3 | Hari 8-10 | Laporan & export (US-9.1, US-9.2, US-9.3, US-9.4) | Export pegawai dan cuti ke Excel/PDF | Adithian siapkan halaman filter/export; Jordan buat query laporan; Grantly bantu export Excel dan QA file output; Adriel bantu layout PDF/review merge | Export Excel/PDF berjalan dan hasil file diverifikasi |
 
 ### Sprint 7 — Stabilization, Regression, UAT, Go-Live Prep (Minggu 14-16)

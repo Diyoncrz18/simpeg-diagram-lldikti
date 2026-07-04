@@ -393,7 +393,7 @@
       <h2>Aktor Sistem</h2>
       <div class="grid">
         <div class="actor"><strong>Pegawai</strong> Mengakses profil, cuti pribadi, saldo cuti, notifikasi, dan EWS pribadi.</div>
-        <div class="actor"><strong>Atasan Langsung</strong> Melihat bawahan dan dapat menjadi approver pada alur dinamis.</div>
+        <div class="actor"><strong>Kepala Bagian</strong> Melihat bawahan dan dapat menjadi approver pada alur dinamis.</div>
         <div class="actor"><strong>Kabag / Verifikator</strong> Menjadi verifikator approval cuti pada alur awal.</div>
         <div class="actor"><strong>Pimpinan</strong> Approval final, dashboard pimpinan, data read-only, dan laporan.</div>
         <div class="actor"><strong>Admin Kepegawaian</strong> Mengelola data pegawai, import, cuti, EWS, audit, dashboard, dan laporan.</div>
@@ -421,7 +421,7 @@
         <pre class="mermaid">
 flowchart LR
     Pegawai["Pegawai"]
-    Atasan["Atasan Langsung"]
+    KepalaBagian["Kepala Bagian"]
     Kabag["Kabag / Verifikator"]
     Pimpinan["Pimpinan"]
     Admin["Admin Kepegawaian"]
@@ -451,7 +451,7 @@ flowchart LR
             UC_Family(["Kelola data keluarga"])
             UC_SoftDelete(["Nonaktifkan / restore pegawai"])
             UC_HardDelete(["Hapus permanen pegawai"])
-            UC_AssignSupervisor(["Assign atasan langsung"])
+            UC_AssignSupervisor(["Assign kepala bagian"])
         end
 
         subgraph IMPORT["Import Data Excel/CSV"]
@@ -503,7 +503,7 @@ flowchart LR
         subgraph DASH["Dashboard"]
             UC_DashboardAdmin(["Dashboard admin / pimpinan"])
             UC_DashboardPegawai(["Dashboard pegawai"])
-            UC_DashboardAtasan(["Dashboard atasan"])
+            UC_DashboardKepalaBagian(["Dashboard Kepala Bagian"])
         end
 
         subgraph REPORT["Laporan dan Export"]
@@ -521,7 +521,7 @@ flowchart LR
     end
 
     Pegawai --> UC_Login
-    Atasan --> UC_Login
+    KepalaBagian --> UC_Login
     Kabag --> UC_Login
     Pimpinan --> UC_Login
     Admin --> UC_Login
@@ -580,11 +580,11 @@ flowchart LR
     Pegawai --> UC_EmailNotif
     Pegawai --> UC_DashboardPegawai
 
-    Atasan --> UC_DashboardAtasan
-    Atasan --> UC_VerifyLeave
-    Atasan --> UC_DetailPegawai
-    Atasan --> UC_EWSSubordinate
-    Atasan --> UC_LeaveTimeline
+    KepalaBagian --> UC_DashboardKepalaBagian
+    KepalaBagian --> UC_VerifyLeave
+    KepalaBagian --> UC_DetailPegawai
+    KepalaBagian --> UC_EWSSubordinate
+    KepalaBagian --> UC_LeaveTimeline
 
     Kabag --> UC_VerifyLeave
     Kabag --> UC_LeaveTimeline
@@ -685,7 +685,7 @@ flowchart LR
         <pre class="mermaid">
 flowchart LR
     Pegawai["Pegawai"]
-    Atasan["Atasan Langsung"]
+    KepalaBagian["Kepala Bagian"]
     Kabag["Kabag / Verifikator"]
     Pimpinan["Pimpinan / Pejabat Pemberi Cuti"]
     Admin["Admin Kepegawaian"]
@@ -696,7 +696,7 @@ flowchart LR
         Seragam(["Alur awal seragam"])
         Dinamis(["Alur dinamis per pegawai"])
         Skip(["Skip jika approver sama"])
-        Verifikasi(["Verifikasi oleh Kabag / Atasan"])
+        Verifikasi(["Verifikasi oleh Kabag / Kepala Bagian"])
         Final(["Approval final oleh pimpinan"])
         Timeline(["Lihat timeline approval"])
         Saldo(["Update saldo cuti"])
@@ -712,7 +712,7 @@ flowchart LR
     Final --> Saldo
     Saldo --> Notif
     Pegawai --> Timeline
-    Atasan --> Dinamis
+    KepalaBagian --> Dinamis
     Kabag --> Verifikasi
     Pimpinan --> Final
     Admin --> Config
@@ -786,7 +786,7 @@ flowchart LR
     Scheduler["Scheduler Sistem"]
     Admin["Admin Kepegawaian"]
     Pegawai["Pegawai"]
-    Atasan["Atasan Langsung"]
+    KepalaBagian["Kepala Bagian"]
     Pimpinan["Pimpinan"]
 
     subgraph EWS["Early Warning System"]
@@ -821,7 +821,7 @@ flowchart LR
     Admin --> List
     Pimpinan --> List
     Pegawai --> Personal
-    Atasan --> Subordinate
+    KepalaBagian --> Subordinate
         </pre>
       </div>
     </section>

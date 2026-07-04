@@ -3,7 +3,7 @@
 
 > Dokumen ini berisi daftar issues yang siap dipindahkan ke GitHub Issues / Notion Board.
 > Setiap issue diturunkan dari User Stories dan dipecah menjadi task teknis yang actionable.
-> Sinkron dengan PRD-SIMPEG-Fase1-Core.md v1.1: Keycloak hanya untuk SSO, RBAC internal aplikasi, approval cuti mendukung skip approver duplikat, PostgreSQL development via container, production diarahkan ke Podman, dan email development dapat memakai Mailpit.
+> Sinkron dengan PRD-SIMPEG-Fase1-Core.md v1.2: Keycloak hanya untuk SSO, RBAC internal aplikasi, approval cuti memakai chain dinamis per pegawai/unit, status cuti memakai label resmi, PostgreSQL development via container, production diarahkan ke Podman, notifikasi channel-configurable, dan laporan mendukung export nominatif Excel custom.
 
 ---
 
@@ -162,7 +162,7 @@ Role dasar dari SSO tidak menjadi sumber otorisasi fitur; Super Admin menetapkan
 **Tasks:**
 - [ ] Buat migration tabel `employees` (jika belum):
   - Tambah kolom `keycloak_id` (nullable, unique)
-  - Tambah kolom `role_id` atau role enum awal: super_admin, admin_kepegawaian, pimpinan, atasan_langsung, pegawai
+  - Tambah kolom `role_id` atau role enum awal: super_admin, admin_kepegawaian, pimpinan, kepala_bagian, pegawai
 - [ ] Buat migration RBAC internal:
   - `roles`
   - `permissions`
@@ -218,7 +218,7 @@ Setup sistem audit log menggunakan package `owen-it/laravel-auditing` agar semua
   - Record: old_values, new_values, user_id, ip_address, user_agent
 - [ ] Buat custom events untuk:
   - LOGIN / LOGOUT
-  - APPROVE / POSTPONE (cuti)
+  - VERIFY / DECIDE / CHANGE_REQUESTED / DEFER / NOT_APPROVED (cuti)
   - IMPORT (Excel/CSV)
 - [ ] Buat `AuditService` helper untuk log custom events
 - [ ] Pastikan tabel `audits` tidak bisa di-delete via aplikasi (immutable)
@@ -228,7 +228,7 @@ Setup sistem audit log menggunakan package `owen-it/laravel-auditing` agar semua
 - [ ] AC-1: Semua CRUD tercatat otomatis
 - [ ] AC-2: Record berisi user_id, event, old_values, new_values, ip, user_agent
 - [ ] AC-3: Immutable (tidak bisa edit/hapus via app)
-- [ ] AC-4: Custom events untuk login/logout/approve/import
+- [ ] AC-4: Custom events untuk login/logout/verify/decide/import
 
 ---
 
@@ -251,7 +251,7 @@ Setup notification system Laravel menggunakan database channel.
   - Channel: database
   - Method `toDatabase()` → return title, message, link, type
 - [ ] Buat notification classes:
-  - `CutiSubmittedNotification` — ke atasan langsung
+  - `CutiSubmittedNotification` — ke kepala bagian
   - `CutiApprovedNotification` — ke pegawai
   - `CutiPostponedNotification` — ke pegawai
   - `EwsAlertNotification` — ke admin/pegawai
@@ -397,13 +397,15 @@ CRUD untuk tabel reference hari libur nasional dan cuti bersama.
 | **Dependensi** | Issue #1 |
 
 **Deskripsi:**
-Buat semua migration dan seeder untuk 11 reference tables.
+Buat semua migration dan seeder untuk reference tables Fase 1.
 
 **Tasks:**
 - [ ] `ref_golongan` — I/a s/d IV/e (17 records)
 - [ ] `ref_jenis_jabatan` — Struktural, Fungsional Tertentu, Fungsional Umum, Pimpinan Tinggi
+- [ ] `ref_jabatan` — nama jabatan resmi per jenis jabatan, optional eselon/default BUP
+- [ ] `ref_status_pegawai` — Aktif, Nonaktif, Pensiun, Mutasi, CLTN, Perpanjangan CLTN, Tugas Belajar, Pemberhentian Sementara, Wajib Militer, PNS Dinyatakan Hilang
 - [ ] `ref_eselon` — I.a s/d V (jika relevan)
-- [ ] `ref_unit_kerja` — (perlu konfirmasi dari LLDIKTI, isi placeholder dulu)
+- [ ] `ref_unit_kerja` — hierarkis (`parent_id`, `level`, `jenis_unit`) untuk Kepala Lembaga, Bagian Umum, Tim Kerja, urusan/sub-unit
 - [ ] `ref_jenis_pegawai` — PNS, PPPK
 - [ ] `ref_jenis_cuti` — Tahunan, Sakit, Melahirkan, Besar, Alasan Penting, CLTN
 - [ ] `ref_jenjang_pendidikan` — SD, SMP, SMA, D3, D4/S1, S2, S3
@@ -411,6 +413,7 @@ Buat semua migration dan seeder untuk 11 reference tables.
 - [ ] `ref_status_kawin` — Belum Kawin, Kawin, Cerai Hidup, Cerai Mati
 - [ ] `ref_hubungan_keluarga` — Suami, Istri, Anak
 - [ ] `ref_bup` — Batas Usia Pensiun per jenis jabatan (sesuai PP 49/2018)
+- [ ] `ref_notification_channels` — in_app, email, whatsapp_business (future/configurable)
 - [ ] Buat seeder: `php artisan db:seed --class=ReferenceTableSeeder`
 - [ ] Test: seeder bisa dijalankan ulang tanpa error (idempotent)
 
@@ -458,19 +461,19 @@ Buat migration untuk semua tabel terkait pegawai.
 
 **Tasks:**
 - [ ] Migration `employees`:
-  - Data utama sesuai Excel: nama_lengkap, email_pribadi, nip (unique), tanggal_lahir, jenis_pegawai/status_kepegawaian, golongan_terakhir, pangkat_terakhir, jabatan_terakhir, kelas_jabatan, pendidikan_terakhir, prodi_pendidikan_terakhir, tanggal_pensiun, person_label, person_formula_label, profil_status
+  - Data utama sesuai Excel: nama_lengkap, email_pribadi, nip (unique), tanggal_lahir, jenis_pegawai/status_kepegawaian, status_pegawai_id (FK), status_keterangan, golongan/pangkat/jabatan/kelas snapshot awal, pendidikan_terakhir, prodi_pendidikan_terakhir, tanggal_pensiun, person_label, person_formula_label, profil_status
   - Data pelengkap profil: nik, no_kk, tempat_lahir, jenis_kelamin, agama_id, status_kawin_id, golongan_darah, foto_path
   - Data kontak: alamat, no_hp, no_telepon_rumah
   - Data pengangkatan: jenis_pengangkatan, tmt_pengangkatan, no_sk_pengangkatan, tanggal_sk_pengangkatan, file_sk_pengangkatan
   - Auth: keycloak_id (nullable), role
-  - Supervisor: atasan_langsung_id (FK self-referencing, nullable)
+  - Supervisor: kepala_bagian_id (FK self-referencing, nullable)
   - Kinerja: is_kinerja_baik (boolean, default true)
   - Kalkulasi: tanggal_kenaikan_pangkat_berikutnya, tanggal_kgb_berikutnya, tanggal_pensiun
   - SoftDeletes, timestamps
 - [ ] Migration `rank_histories` (riwayat kepangkatan):
   - employee_id (FK), golongan_id (FK ref_golongan), tmt_pangkat, no_sk, tanggal_sk, file_sk, is_latest (bool), timestamps
 - [ ] Migration `position_histories` (riwayat jabatan):
-  - employee_id, nama_jabatan, jenis_jabatan_id (FK), unit_kerja_id (FK), tmt_jabatan, no_sk, tanggal_sk, file_sk, is_latest, timestamps
+  - employee_id, jabatan_id (FK ref_jabatan), jenis_jabatan_id (FK), unit_kerja_id (FK ref_unit_kerja hierarkis), kelas_jabatan, tmt_jabatan, no_sk, tanggal_sk, file_sk, is_latest, timestamps
 - [ ] Migration `kgb_histories` (riwayat KGB):
   - employee_id, tmt_kgb, gaji_pokok, no_sk, tanggal_sk, file_sk, is_latest, timestamps
 - [ ] Migration `discipline_records` (hukuman disiplin):
@@ -601,7 +604,7 @@ Form edit data pegawai dengan validasi dan audit trail.
   - Tab 9: Data Pengangkatan
 - [ ] Tampilkan info kalkulasi: tanggal naik pangkat, tanggal KGB, tanggal pensiun
 - [ ] Tampilkan flag "Kinerja Baik" (toggle)
-- [ ] Tampilkan atasan langsung
+- [ ] Tampilkan kepala bagian
 - [ ] Tombol "Edit" → ke form edit
 
 ---
@@ -827,33 +830,37 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 **Tasks:**
 - [ ] Migration `leave_requests`:
-  - employee_id, jenis_cuti_id (FK), tanggal_mulai, tanggal_selesai, jumlah_hari_kerja, alasan, file_lampiran, status (enum), current_stage (int 1-3), timestamps
-- [ ] Migration `leave_approvals`:
-  - leave_request_id, stage (1/2/3), approver_id, aksi (enum: approve/postpone), komentar, acted_at, timestamps
+  - employee_id, jenis_cuti_id (FK), tanggal_mulai, tanggal_selesai, jumlah_hari_kerja, alasan, file_lampiran, workflow_status, final_decision_status, qr_token, generated_document_path, external_approval, timestamps
+- [ ] Migration `leave_approval_chains`:
+  - scope_type (global/unit/employee), scope_id nullable, step_order, step_type, approver_employee_id, is_active, timestamps
+- [ ] Migration `leave_approval_steps`:
+  - leave_request_id, step_order, step_type, approver_id, decision_status (`Disetujui`/`Perubahan`/`Ditangguhkan`/`Tidak Disetujui`), keterangan, acted_at, timestamps
 - [ ] Migration `leave_balances`:
-  - employee_id, tahun (int), jatah_awal, carry_over, terpakai, sisa, timestamps
-- [ ] Migration `approval_config`:
-  - stage (1/2/3), role, approver_id, timestamps
+  - employee_id, tahun (int), jatah_dasar, carry_over_n1, hak_tambahan_n2_n1, terpakai, sisa, timestamps
+- [ ] Migration `leave_balance_adjustments`:
+  - employee_id, tahun, adjustment_days, reason, created_by, timestamps
+- [ ] Migration `leave_documents`:
+  - leave_request_id, document_path, qr_token, verification_payload, external_document_path, timestamps
 - [ ] Buat semua model dengan relationships
 
 ---
 
-## Issue #27 · Assign Atasan Langsung per Pegawai
+## Issue #27 · Assign Kepala Bagian per Pegawai
 
 | Field | Detail |
 |-------|--------|
-| **Story** | US-4.11 · Assign Atasan Langsung |
+| **Story** | US-4.11 · Assign Kepala Bagian |
 | **Labels** | `epic:cuti`, `type:feature`, `sprint:4`, `priority:P0` |
 | **Assignee** | Jordan Sutarto |
 | **Story Points** | 3 |
 | **Dependensi** | Issue #13 |
 
 **Tasks:**
-- [ ] Di halaman detail pegawai, section "Atasan Langsung"
+- [ ] Di halaman detail pegawai, section "Kepala Bagian"
 - [ ] Dropdown: semua pegawai (kecuali diri sendiri)
-- [ ] Simpan ke `employees.atasan_langsung_id`
-- [ ] Riwayat perubahan atasan tersimpan
-- [ ] Satu pegawai = satu atasan langsung aktif
+- [ ] Simpan ke `employees.kepala_bagian_id`
+- [ ] Riwayat perubahan kepala bagian tersimpan
+- [ ] Satu pegawai = satu kepala bagian aktif
 - [ ] Audit log
 
 ---
@@ -870,10 +877,11 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 **Tasks:**
 - [ ] Halaman konfigurasi approval chain cuti (Super Admin only)
-- [ ] Dropdown: pilih approver default Kabag/verifikator dan Pimpinan/PYBMC
-- [ ] Simpan urutan approval agar bisa dikembangkan per pegawai/unit
-- [ ] Tambahkan flag/logic skip jika approver pada dua stage adalah orang yang sama
-- [ ] Simpan ke tabel `approval_config`
+- [ ] Konfigurasi chain per pegawai/unit: Kepala Bagian, Ketua Tim Kerja, satu atau lebih verifikator, Kabag/Kepegawaian, Pimpinan/PYBMC
+- [ ] Ketua Tim Kerja dapat dipilih sebagai verifikator tanpa role baru
+- [ ] Simpan urutan approval per pegawai/unit
+- [ ] Tambahkan flag/logic skip jika approver pada dua step adalah orang yang sama
+- [ ] Simpan ke tabel `leave_approval_chains`
 - [ ] Audit log
 
 ---
@@ -914,16 +922,18 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 - [ ] Validasi:
   - Jenis cuti sesuai jenis pegawai (PNS/PPPK)
   - Saldo cukup (untuk cuti tahunan)
-  - Pegawai harus punya atasan langsung
+  - Pegawai harus punya approval chain aktif
   - Tanggal valid
-- [ ] Setelah submit: status = "Menunggu Atasan Langsung", current_stage = 1
-- [ ] Kirim notifikasi ke atasan langsung (in-app + email)
+  - Tanggal mulai/selesai tidak boleh lintas tahun kalender
+- [ ] Setelah submit: status = "Menunggu [step pertama approval chain]"
+- [ ] Snapshot approval chain ke `leave_approval_steps`
+- [ ] Kirim notifikasi ke pihak pertama pada chain (channel mengikuti konfigurasi)
 
 **Tasks Frontend (Adithian):**
 - [ ] Form: jenis cuti (dropdown), tanggal mulai, tanggal selesai, alasan, upload lampiran
 - [ ] Kalkulasi hari kerja realtime (AJAX ke Issue #29)
 - [ ] Validasi saldo client-side
-- [ ] Error message jika belum punya atasan
+- [ ] Error message jika belum punya kepala bagian
 
 ---
 
@@ -939,28 +949,26 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 **Tasks Backend 2 (Grantly):**
 - [ ] Buat `LeaveApprovalService`:
-  - `approve(leaveRequest, approver)`:
-    - Stage 1 → status "Menunggu Kabag/Verifikator" atau stage berikutnya yang dikonfigurasi
-    - Stage 2 → status "Menunggu Pimpinan/PYBMC" atau stage berikutnya yang dikonfigurasi
-    - Stage final → status "Disetujui", kurangi saldo cuti, notifikasi ke pegawai
-    - Jika approver stage berikutnya sama dengan approver saat ini, skip stage duplikat
-  - `postpone(leaveRequest, approver, alasan)`:
-    - Status "Ditunda oleh [role]", saldo TIDAK dikurangi, notifikasi ke pegawai
-  - Validasi: approver harus sesuai stage
+  - `decide(leaveRequest, actor, decisionStatus, keterangan)`:
+    - Validasi actor adalah approver/verifikator pada step aktif
+    - `Disetujui` pada step non-final → lanjut ke step berikutnya yang valid
+    - `Disetujui` pada step final → status final `Disetujui`, kurangi saldo cuti, generate dokumen QR, notifikasi ke pegawai
+    - `Perubahan`, `Ditangguhkan`, `Tidak Disetujui` → keterangan wajib, saldo tidak dikurangi, status dan alasan tampil di timeline
+    - Jika approver step berikutnya sama dengan approver saat ini, skip step duplikat
 - [ ] Buat `LeaveApprovalController`:
   - `index()` — daftar pengajuan pending untuk approver
-  - `approve($id)` — setujui
-  - `postpone($id)` — tunda (alasan wajib)
+  - `decision($id)` — simpan keputusan/rekomendasi
 - [ ] Audit log untuk setiap aksi
-- [ ] Saldo cuti: hanya dikurangi setelah stage final approve (cuti tahunan saja)
+- [ ] Saldo cuti: hanya dikurangi setelah keputusan final `Disetujui` (cuti tahunan saja)
+- [ ] Generate formulir cuti dan halaman verifikasi QR
 
 **Tasks Frontend (Adithian):**
 - [ ] Halaman "Pengajuan Cuti Bawahan" — daftar pending
 - [ ] Detail: nama, jenis cuti, tanggal, hari, alasan, lampiran
-- [ ] Tombol "Setujui" dan "Tunda"
-- [ ] Klik "Tunda" → muncul textarea alasan (wajib)
-- [ ] TIDAK ada tombol "Tolak"
-- [ ] Badge status berwarna (kuning/hijau/merah)
+- [ ] Tombol/aksi: "Disetujui", "Perubahan", "Ditangguhkan", "Tidak Disetujui"
+- [ ] Aksi selain "Disetujui" → textarea keterangan wajib
+- [ ] Tidak ada tombol formal "Tolak"; gunakan "Tidak Disetujui"
+- [ ] Badge status berwarna untuk menunggu/disetujui/perubahan/ditangguhkan/tidak disetujui
 
 ---
 
@@ -976,10 +984,10 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 **Tasks:**
 - [ ] Buat `LeaveBalanceController@show` — saldo pegawai yang login
-- [ ] Tampilkan: jatah, carry-over, total, terpakai, sisa
+- [ ] Tampilkan: jatah dasar 12 hari, carry-over N-1 maksimal 6, hak tambahan N-2/N-1, total, terpakai, sisa
 - [ ] Riwayat penggunaan cuti tahun berjalan
 - [ ] Data diperbarui real-time setelah cuti disetujui
-- [ ] Buat seeder: inisialisasi saldo 2026 untuk semua pegawai (jatah = 12)
+- [ ] Buat seeder/input awal saldo 2026 untuk semua pegawai (jatah dasar = 12) + saldo/riwayat N-1/N-2 jika tersedia
 
 ---
 
@@ -1002,6 +1010,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
   - Saat riwayat pangkat ditambahkan → `tmt_pangkat + 4 tahun`
   - Saat riwayat KGB ditambahkan → `tmt_kgb + 2 tahun`
   - Saat jabatan ditambahkan → `tanggal_lahir + BUP`
+  - Saat data pengangkatan pertama tersedia → milestone Satyalancana 10/20/30 tahun
 - [ ] Register sebagai Model Observer atau Event Listener
 - [ ] Simpan hasil ke kolom di tabel `employees`
 - [ ] Juga jalankan saat import CSV selesai (batch)
@@ -1021,12 +1030,13 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 **Tasks:**
 - [ ] Buat migration `ews_alerts`:
-  - employee_id, jenis_event, tanggal_target, sisa_hari, is_eligible, notified_at, trigger_days (H-90/H-60/etc), tahun, timestamps
+  - employee_id, jenis_event, tanggal_target, sisa_hari, is_eligible, notified_at, trigger_days (H-90/H-60/etc), tahun, followup_status, handled_at, handled_by, handled_note, timestamps
 - [ ] Buat Artisan command `app:run-ews`:
   - Cek semua pegawai aktif
-  - 4 trigger: kenaikan pangkat, KGB, pensiun, kontrak PPPK
-  - Threshold: H-90/H-60/H-30 (pangkat), H-60/H-30/H-14 (KGB), H-1thn/H-6bln/H-3bln (pensiun), H-6bln/H-3bln/H-1bln (PPPK)
+  - 5 trigger: kenaikan pangkat, KGB, pensiun, kontrak PPPK, Satyalancana
+  - Threshold: H-90/H-60/H-30 (pangkat), H-60/H-30/H-14 (KGB), H-1thn/H-6bln/H-3bln (pensiun), H-6bln/H-3bln/H-1bln (PPPK), H-180/H-90/H-30 (Satyalancana)
   - Eligibility pangkat: 4 tahun + no disiplin aktif + kinerja baik
+  - Eligibility Satyalancana: masa kerja 10/20/30 tahun + flag/catatan kelayakan manual
   - No duplicate: cek `ews_alerts` sebelum kirim
   - Kirim notifikasi ke admin + pegawai bersangkutan
 - [ ] Register di scheduler: `$schedule->command('app:run-ews')->dailyAt('07:00');`
@@ -1050,7 +1060,8 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 - [ ] Tabel: Nama, NIP, Jenis Event, Tanggal Target, Sisa Hari, Eligibility
 - [ ] Urut dari sisa hari terkecil
 - [ ] Warna baris: 🔴 <30 hari, 🟡 30-90 hari, 🟢 >90 hari
-- [ ] Filter: jenis event
+- [ ] Filter: jenis event dan status tindak lanjut
+- [ ] Aksi: tandai `ditangani` / `tidak_perlu` dengan catatan
 - [ ] Klik nama → detail pegawai
 - [ ] Akses: Admin, Super Admin, Pimpinan
 
@@ -1068,6 +1079,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 **Tasks:**
 - [ ] Toggle "Kinerja Baik" di halaman detail pegawai
+- [ ] Flag/catatan kelayakan Satyalancana di halaman detail pegawai
 - [ ] AJAX update tanpa reload halaman
 - [ ] Tooltip: "Flag ini menggantikan penilaian SKP yang belum tersedia di Fase 1"
 - [ ] Jika false → tidak eligible kenaikan pangkat di EWS
@@ -1086,8 +1098,9 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 | **Dependensi** | Issue #6 |
 
 **Tasks Backend 1 (Jordan):**
-- [ ] Konfigurasi Laravel Mail di `.env`: Mailpit untuk development, email operasional LLDIKTI untuk production
-- [ ] Tambahkan mail channel ke semua notification classes
+- [ ] Konfigurasi Laravel Mail di `.env`: Mailpit untuk development, email operasional/Gmail resmi LLDIKTI untuk production
+- [ ] Tambahkan notification dispatcher yang membaca `ref_notification_channels`
+- [ ] Tambahkan mail channel ke notification classes melalui dispatcher, bukan hardcoded di domain service
 - [ ] Queue: dispatch email via queue (non-blocking)
 - [ ] Retry: maks 3x jika gagal
 - [ ] Log error jika semua retry gagal
@@ -1096,7 +1109,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 - [ ] Buat email template HTML responsive (`resources/views/emails/`)
 - [ ] Template: judul, detail singkat, tombol "Lihat di SIMPEG"
 - [ ] Bahasa Indonesia
-- [ ] Template untuk: cuti submitted, approved, postponed, EWS alert
+- [ ] Template untuk: cuti submitted, keputusan cuti (`Disetujui`/`Perubahan`/`Ditangguhkan`/`Tidak Disetujui`), EWS alert
 
 ---
 
@@ -1176,11 +1189,11 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 ---
 
-## Issue #41 · Dashboard Atasan Langsung
+## Issue #41 · Dashboard Kepala Bagian
 
 | Field | Detail |
 |-------|--------|
-| **Story** | US-8.3 · Dashboard Atasan |
+| **Story** | US-8.3 · Dashboard Kepala Bagian |
 | **Labels** | `epic:dashboard`, `type:feature`, `sprint:6`, `priority:P1` |
 | **Assignee** | Adithian Gunawan |
 | **Story Points** | 5 |
@@ -1188,7 +1201,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 **Tasks:**
 - [ ] Daftar bawahan langsung
-- [ ] Pengajuan cuti pending (quick action: Setujui/Tunda)
+- [ ] Pengajuan cuti pending (quick action sesuai label resmi keputusan cuti)
 - [ ] EWS bawahan
 - [ ] Klik nama → detail ringkas (read-only)
 
@@ -1198,7 +1211,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 | Field | Detail |
 |-------|--------|
-| **Story** | US-9.1 + US-9.2 · Export Pegawai |
+| **Story** | US-9.1 + US-9.1B + US-9.2 · Export Pegawai |
 | **Labels** | `epic:laporan`, `type:feature`, `sprint:6`, `priority:P0` |
 | **Assignee** | Grantly Sorongan (Excel) + Adriel Walintukan (PDF) |
 | **Story Points** | 6 |
@@ -1209,6 +1222,11 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 - [ ] Kolom: No, NIP, Nama, Golongan, Jabatan, Unit Kerja, Jenis, Status
 - [ ] Mengikuti filter aktif
 - [ ] Nama file: `Daftar_Pegawai_LLDIKTI_XVI_{tanggal}.xlsx`
+- [ ] Buat `CustomEmployeeExport`:
+  - Pilihan kolom dari whitelist aman
+  - Filter status pegawai, unit/tim kerja, jenis pegawai, golongan, jabatan, periode pensiun
+  - Output Excel saja
+  - Urutan kolom mengikuti pilihan user
 
 **Tasks PDF (Adriel):**
 - [ ] Buat Blade view untuk PDF (`exports/employees-pdf.blade.php`)
@@ -1256,10 +1274,10 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 **Tasks:**
 - [ ] Tabel daftar pengajuan cuti pegawai: jenis, tanggal, hari, status, tanggal ajuan
-- [ ] Badge warna status (kuning/hijau/merah)
+- [ ] Badge warna status untuk menunggu, disetujui, perubahan, ditangguhkan, tidak disetujui
 - [ ] Filter: tahun, status
 - [ ] Klik baris → detail + timeline approval
-- [ ] Timeline visual vertikal: stage, nama approver, aksi, waktu, komentar
+- [ ] Timeline visual vertikal: step, nama approver/verifikator, aksi, waktu, keterangan
 - [ ] Pagination
 
 ---
@@ -1280,7 +1298,8 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 - [ ] Search: nama/NIP
 - [ ] Halaman kelola saldo cuti semua pegawai
 - [ ] Koreksi manual saldo (alasan wajib)
-- [ ] Auto carry-over awal tahun (scheduler 1 Januari)
+- [ ] Auto carry-over awal tahun (scheduler 1 Januari): N-1 maksimal 6 hari, N-2/N-1 tidak mengambil cuti dapat mencapai 24 hari
+- [ ] Input/koreksi saldo awal dan riwayat N-1/N-2
 - [ ] Audit log koreksi
 
 ---
@@ -1296,7 +1315,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 | **Dependensi** | Issue #11 |
 
 **Tasks:**
-- [ ] CRUD untuk: ref_golongan, ref_jenis_jabatan, ref_eselon, ref_unit_kerja, ref_jenjang_pendidikan, ref_bup
+- [ ] CRUD untuk: ref_golongan, ref_jenis_jabatan, ref_jabatan, ref_status_pegawai, ref_eselon, ref_unit_kerja hierarkis, ref_jenjang_pendidikan, ref_bup, ref_notification_channels
 - [ ] Validasi: tidak bisa hapus item yang sedang dipakai
 - [ ] Soft delete jika sudah dipakai
 - [ ] Audit log
@@ -1380,7 +1399,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 **Tasks:**
 - [ ] Super Admin / Admin Kepegawaian → Dashboard Admin
 - [ ] Pimpinan → Dashboard Pimpinan
-- [ ] Atasan Langsung → Dashboard Atasan
+- [ ] Kepala Bagian → Dashboard Kepala Bagian
 - [ ] Pegawai → Dashboard Pribadi
 - [ ] Implementasi di AuthController callback
 
@@ -1423,9 +1442,9 @@ Full end-to-end testing seluruh sistem sebelum go-live.
 - [ ] **CRUD Pegawai:** Tambah → edit → detail → daftar → search → filter → sort
 - [ ] **Riwayat:** Tambah pangkat → is_latest update → TMT terhitung → tampil di detail
 - [ ] **Import Excel/CSV:** Download template → upload → preview → validasi → import → verify data
-- [ ] **Cuti E2E:** Ajukan → approval stage 1 → stage 2 → stage 3 → saldo berkurang → notifikasi diterima
-- [ ] **Cuti Edge Cases:** Saldo habis, tanggal weekend, PPPK jenis cuti terbatas
-- [ ] **EWS:** Jalankan scheduler manual → verify alert muncul → notifikasi terkirim → no duplicate
+- [ ] **Cuti E2E:** Ajukan → step verifikasi dinamis → keputusan final `Disetujui` → saldo berkurang → dokumen QR muncul → notifikasi diterima
+- [ ] **Cuti Edge Cases:** Saldo habis, tanggal weekend, lintas tahun kalender, PPPK jenis cuti terbatas, keputusan `Perubahan`/`Ditangguhkan`/`Tidak Disetujui`
+- [ ] **EWS:** Jalankan scheduler manual → verify alert termasuk Satyalancana muncul → notifikasi terkirim → no duplicate → alert bisa ditandai ditangani/tidak perlu
 - [ ] **Dashboard:** Semua widget menampilkan data akurat
 - [ ] **Export:** Excel + PDF untuk pegawai dan cuti
 - [ ] **Audit Log:** Setiap operasi tercatat → diff view akurat

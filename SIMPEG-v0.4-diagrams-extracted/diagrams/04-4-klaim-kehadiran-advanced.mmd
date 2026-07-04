@@ -8,6 +8,6 @@ flowchart LR
     CK3 -->|"Lupa Absen Gabungan\nsudah 2x bulan ini"| BLOK
     CK3 -->|"Izin Terlambat atau Cepat\nsudah 2x bulan ini"| BLOK
     CK3 -->|"Masih ada kuota"| FORM["Isi Form Klaim\nJenis, Tanggal, Alasan"]
-    FORM --> APV{Atasan\nLangsung}
+    FORM --> APV{Kepala Bagian}
     APV -->|"Approve"| OK(["Kehadiran\nTercatat"])
     APV -->|"Tolak"| NOK(["Notifikasi\nPenolakan"])

@@ -34,7 +34,7 @@
   <main class="wrap">
     <section>
       <h2>Status Pengajuan Cuti</h2>
-      <p>Status mengikuti alur Atasan Langsung -> Kabag/Verifikator -> Pimpinan/PYBMC. Jika approver pada stage berikutnya sama dengan approver sebelumnya, engine boleh melakukan skip sesuai konfigurasi.</p>
+      <p>Status mengikuti alur Kepala Bagian -> Kabag/Verifikator -> Pimpinan/PYBMC. Jika approver pada stage berikutnya sama dengan approver sebelumnya, engine boleh melakukan skip sesuai konfigurasi.</p>
       <div class="diagram">
         <pre class="mermaid">
 stateDiagram-v2
@@ -42,12 +42,12 @@ stateDiagram-v2
     Draft --> Validasi: submit pengajuan
     Validasi --> Draft: data belum lengkap
     Validasi --> MenungguAtasan: saldo, jenis cuti, hari kerja valid
-    Validasi --> GagalValidasi: tidak punya atasan / saldo tidak cukup
+    Validasi --> GagalValidasi: tidak punya kepala bagian / saldo tidak cukup
     GagalValidasi --> Draft: perbaiki data
 
-    MenungguAtasan --> DitundaAtasan: tunda + alasan
-    DitundaAtasan --> Draft: pegawai revisi / ajukan ulang
-    MenungguAtasan --> TentukanStage2: disetujui stage 1
+    MenungguKepalaBagian --> DitundaAtasan: tunda + alasan
+    DitundaKepalaBagian --> Draft: pegawai revisi / ajukan ulang
+    MenungguKepalaBagian --> TentukanStage2: disetujui stage 1
 
     TentukanStage2 --> MenungguKabag: approver stage 2 berbeda
     TentukanStage2 --> TentukanStage3: skip stage 2 karena approver sama
@@ -70,7 +70,7 @@ stateDiagram-v2
     Selesai --> [*]
 
     note right of MenungguAtasan
-      Stage 1: Atasan Langsung
+      Stage 1: Kepala Bagian
       aksi: mengetahui atau tunda
     end note
 

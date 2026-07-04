@@ -3,8 +3,8 @@
 
 | Field | Detail |
 |-------|--------|
-| **Versi Dokumen** | 1.1 |
-| **Tanggal** | 14 Juni 2026 |
+| **Versi Dokumen** | 1.2 |
+| **Tanggal** | 4 Juli 2026 |
 | **Domain** | Disiapkan LLDIKTI saat tahap deployment |
 | **Fase** | 1 — Core / Fondasi |
 | **Target Go-Live** | Sebelum 1 September 2026 |
@@ -20,10 +20,17 @@ PRD ini menjadi **sumber kebenaran utama** untuk Fase 1. Keputusan meeting tekni
 3. Server dan domain production disiapkan oleh LLDIKTI ketika sistem mendekati tahap deployment.
 4. Database development menggunakan PostgreSQL 17 melalui container.
 5. Production diprioritaskan menggunakan Podman karena pertimbangan keamanan.
-6. Email production menggunakan email operasional LLDIKTI; development dapat memakai Mailpit.
-7. Approval cuti Fase 1 diawali dengan alur seragam melalui Kabag/verifikator sebelum pimpinan, dengan desain tetap mendukung approval dinamis dan skip approver yang sama.
-8. BUP tidak di-hardcode; usia pensiun dihitung dari referensi jabatan / jenis jabatan.
-9. Sample data pegawai, referensi jabatan, pangkat, golongan, dan data mentah lainnya disediakan oleh bagian kepegawaian LLDIKTI.
+6. Notifikasi tidak boleh mengunci channel ke in-app/email saja; Fase 1 menyediakan in-app dan email, dengan arsitektur channel-configurable agar WhatsApp Business dapat ditambahkan saat layanan/credential tersedia.
+7. Approval cuti tidak boleh hardcoded 3 stage seragam. Rantai verifikasi/approval harus dinamis per pegawai/unit, dapat memuat 1, 2, 3, atau lebih verifikator, dan dapat menunjuk pegawai tertentu seperti Ketua Tim Kerja tanpa membuat role baru.
+8. Keputusan cuti mengikuti label resmi pada formulir: `Disetujui`, `Perubahan`, `Ditangguhkan`, dan `Tidak Disetujui`. Istilah formal `Ditolak` tidak digunakan pada keputusan cuti.
+9. Cuti tahunan tidak boleh lintas tahun kalender; periode Desember–Januari harus dipecah menjadi dua pengajuan terpisah. Kuota tahunan 12 hari dengan carry-over maksimal 6 hari dari N-1, kecuali pegawai tidak mengambil cuti tahunan dua tahun berturut-turut sehingga total tahun berjalan dapat mencapai 24 hari.
+10. Pengajuan cuti yang selesai diproses harus dapat menghasilkan formulir cuti resmi dengan QR Code verifikasi SIMPEG. Tanda tangan elektronik tersertifikasi belum wajib di Fase 1.
+11. Struktur organisasi menggunakan `ref_unit_kerja` hierarkis (`parent_id`, `level`) untuk memuat Kepala Lembaga, Kepala Bagian Umum, Tim Kerja, urusan/sub-unit, dan kemungkinan level yang lebih dalam.
+12. Status pegawai dan jabatan harus berbasis reference table, bukan enum/free text. Status pegawai menyimpan keterangan perubahan; jabatan dipilih dari `ref_jabatan` dan `kelas_jabatan` disimpan di riwayat jabatan.
+13. EWS menambahkan Satyalancana 10/20/30 tahun dan setiap alert harus punya status tindak lanjut agar tidak muncul terus setelah ditangani.
+14. Laporan menambahkan export nominatif Excel yang customizable: pengguna memilih kolom dan filter baris; PDF custom tidak masuk Fase 1.
+15. BUP tidak di-hardcode; usia pensiun dihitung dari referensi jabatan / jenis jabatan.
+16. Sample data pegawai, referensi jabatan, pangkat, golongan, struktur unit, saldo cuti awal, dan data mentah lainnya disediakan oleh bagian kepegawaian LLDIKTI.
 
 ---
 
@@ -64,12 +71,12 @@ SIMPEG adalah Sistem Informasi Kepegawaian yang dikembangkan untuk LLDIKTI Wilay
 - **Autentikasi SSO** via Keycloak yang sudah tersedia di LLDIKTI XVI.
 - **Data Pegawai Terpusat** — seluruh data pegawai (~46 orang) tersimpan dalam satu database.
 - **Import Excel/CSV** — migrasi data awal dari spreadsheet yang sudah ada.
-- **Manajemen Cuti** — pengajuan digital dengan approval seragam awal, dapat dikonfigurasi dinamis.
-- **Early Warning System** — notifikasi otomatis untuk kenaikan pangkat, KGB, pensiun, dan kontrak PPPK.
-- **Notifikasi** — in-app real-time dan email via queue.
+- **Manajemen Cuti** — pengajuan digital dengan rantai verifikasi/approval dinamis, status keputusan resmi, saldo tahunan, dan formulir cuti ber-QR Code.
+- **Early Warning System** — notifikasi otomatis untuk kenaikan pangkat, KGB, pensiun, kontrak PPPK, dan Satyalancana.
+- **Notifikasi** — in-app dan email via queue, dengan desain channel-configurable untuk penambahan WA Business.
 - **Audit Log** — pencatatan semua perubahan data.
 - **Dashboard** — ringkasan data kepegawaian untuk pimpinan dan admin.
-- **Laporan & Export** — daftar pegawai dan rekap cuti ke PDF/Excel.
+- **Laporan & Export** — daftar pegawai, rekap cuti, riwayat kepangkatan, dan export nominatif Excel customizable.
 
 ---
 
@@ -116,14 +123,14 @@ Pengelolaan data kepegawaian di LLDIKTI Wilayah XVI masih dilakukan secara manua
 | 2 | Data Pegawai | Input oleh admin, view oleh pegawai |
 | 3 | Riwayat Kepegawaian | Kepangkatan, Jabatan, KGB, Disiplin (append-only) |
 | 4 | Import Excel/CSV | Migrasi data awal dari spreadsheet |
-| 5 | Manajemen Cuti | 6 jenis cuti, approval awal seragam + dukungan approval dinamis |
-| 6 | Early Warning System | 4 trigger otomatis, scheduler harian |
-| 7 | Notifikasi | In-app real-time + email via queue |
+| 5 | Manajemen Cuti | 6 jenis cuti, approval/verifikasi dinamis, status keputusan resmi, formulir cuti QR |
+| 6 | Early Warning System | 5 trigger otomatis, scheduler harian, lifecycle alert |
+| 7 | Notifikasi | In-app + email via queue, channel-configurable untuk WA Business |
 | 8 | Audit Log | Semua operasi CRUD + approval + login/logout |
 | 9 | Dashboard | 7 widget untuk pimpinan dan admin |
-| 10 | Laporan & Export | Daftar nominatif + rekap cuti + riwayat kepangkatan ke PDF/Excel |
+| 10 | Laporan & Export | Daftar nominatif + rekap cuti + riwayat kepangkatan ke PDF/Excel, plus nominatif Excel custom |
 | 11 | Soft Delete | Flag-based deletion; tidak ada penghapusan permanen di aplikasi |
-| 12 | Reference Tables | 11 tabel master data (seed) |
+| 12 | Reference Tables | Master data hierarkis dan referensi pegawai/jabatan/status/unit yang dapat dikelola |
 
 **Tidak Termasuk (Out of Scope Fase 1):**
 
@@ -133,6 +140,7 @@ Pengelolaan data kepegawaian di LLDIKTI Wilayah XVI masih dilakukan secara manua
 | Pending changes (approval perubahan data) | Fase 2 | Slide 5 |
 | Klaim kehadiran | Fase 2 | Slide 8 |
 | Surat tugas | Fase 2 | — |
+| Notifikasi WhatsApp Business production | Fase 2 / setelah layanan tersedia | Hasil meeting teknis |
 | Kalender virtual / Kalender tim | Fase 2 | Slide 10 |
 | Log harian (catat kegiatan harian) | Fase 2 | Slide 8 |
 | SKP & penilaian kinerja | Fase 3 | Slide 9 |
@@ -143,6 +151,7 @@ Pengelolaan data kepegawaian di LLDIKTI Wilayah XVI masih dilakukan secara manua
 | Integrasi API SIASN / BKN | Fase 4 | Slide 10 |
 | Laporan pemenuhan 20 JP | Fase 3 | Slide 10 |
 | Laporan data untuk SIASN | Fase 4 | Slide 10 |
+| Modul khusus Dosen DPK | Fase 4 / modul terpisah | Hasil meeting teknis |
 
 ### 3.3 Target Pengguna
 
@@ -163,7 +172,7 @@ Pengelolaan data kepegawaian di LLDIKTI Wilayah XVI masih dilakukan secara manua
 Super Admin
   └── Admin Kepegawaian
         └── Pimpinan
-              └── Atasan Langsung
+              └── Kepala Bagian
                     └── Pegawai
 ```
 
@@ -179,11 +188,13 @@ Super Admin
 
 ### 4.2 Definisi Role & Hak Akses
 
+> **Catatan RBAC vs approval:** Role aplikasi tetap sederhana untuk Fase 1. Kewenangan sebagai verifikator/approver cuti tidak harus menjadi role baru; sistem approval cuti dapat menunjuk pegawai tertentu pada chain, misalnya Ketua Tim Kerja, selama pegawai tersebut aktif dan memiliki akun SIMPEG.
+
 #### Super Admin
 
 | Hak Akses | Detail |
 |-----------|--------|
-| Konfigurasi Sistem | Kelola reference tables, konfigurasi EWS, hari libur nasional |
+| Konfigurasi Sistem | Kelola reference tables, konfigurasi EWS, hari libur nasional, channel notifikasi, dan chain approval cuti |
 | User Management | Assign role ke user, mapping user Keycloak ↔ pegawai |
 | Semua Fitur Admin | Semua yang bisa dilakukan Admin Kepegawaian |
 | Soft Delete & Restore | Menonaktifkan data tanpa menghapus permanen, serta memulihkan data jika dibutuhkan |
@@ -196,8 +207,8 @@ Super Admin
 | Data Pegawai | CRUD semua data pegawai (create, read, update, soft-delete) |
 | Riwayat | Tambah riwayat kepangkatan, jabatan, KGB, disiplin (append-only) |
 | Import Excel/CSV | Upload dan mapping data dari Excel/CSV |
-| Set Supervisor | Assign atasan langsung per pegawai |
-| Cuti | Lihat semua pengajuan cuti, kelola saldo cuti |
+| Set Supervisor | Assign kepala bagian per pegawai |
+| Cuti | Lihat semua pengajuan cuti, kelola saldo cuti, input saldo awal/prior year, upload dokumen cuti eksternal |
 | EWS | Lihat semua peringatan, update flag kinerja |
 | Notifikasi | Terima notifikasi EWS |
 | Dokumen | Upload/kelola dokumen dan SK pegawai |
@@ -208,17 +219,27 @@ Super Admin
 | Hak Akses | Detail |
 |-----------|--------|
 | Dashboard | Akses dashboard dengan data semua pegawai |
-| Cuti | Approver Stage 3 (final) — PYBMC |
+| Cuti | Pejabat final/PYBMC untuk pegawai internal sesuai konfigurasi chain |
 | Data Pegawai | Read-only semua data pegawai |
 | Laporan | Generate dan export laporan |
 
-#### Atasan Langsung
+#### Kepala Bagian
 
 | Hak Akses | Detail |
 |-----------|--------|
 | Cuti | Approver Stage 1 — Mengetahui (hanya bawahan langsung) |
 | Data Pegawai | Read-only data bawahan langsung |
 | Notifikasi | Terima notifikasi pengajuan cuti dari bawahan |
+
+#### Verifikator Cuti / Ketua Tim Kerja
+
+| Hak Akses | Detail |
+|-----------|--------|
+| Cuti | Menjadi pihak mengetahui/verifikator jika ditunjuk pada chain approval cuti |
+| Data Pegawai | Read-only terbatas pada data yang diperlukan untuk memverifikasi cuti |
+| Notifikasi | Terima notifikasi pengajuan cuti yang menunggu tindakan verifikasi |
+
+> **Catatan:** Ini bukan role wajib baru. Verifikator cuti dapat tetap memiliki role utama `Pegawai` atau `Kepala Bagian`; kewenangan verifikasi muncul dari tabel konfigurasi approval cuti.
 
 #### Pegawai
 
@@ -228,16 +249,20 @@ Super Admin
 | Cuti | Ajukan cuti, lihat status pengajuan, lihat saldo cuti |
 | Notifikasi | Terima notifikasi EWS pribadi dan status cuti |
 
-### 4.3 Mekanisme Set Supervisor
+### 4.3 Mekanisme Set Supervisor & Approval Chain
 
-Admin Kepegawaian meng-assign atasan langsung per pegawai. Mapping ini menentukan:
-- Siapa yang menjadi approver Stage 1 cuti pegawai tersebut.
+Admin Kepegawaian meng-assign kepala bagian per pegawai. Mapping ini menentukan:
+- Siapa yang menjadi pihak default pertama pada chain cuti pegawai tersebut.
 - Siapa yang melihat data pegawai tersebut sebagai "bawahan langsung".
 
 **Aturan:**
-- Setiap pegawai harus memiliki tepat satu atasan langsung.
-- Atasan langsung bisa memiliki banyak bawahan.
+- Setiap pegawai harus memiliki tepat satu kepala bagian.
+- Kepala bagian bisa memiliki banyak bawahan.
 - Admin bisa mengubah mapping kapan saja (perubahan tercatat di audit log).
+- Approval chain cuti tidak boleh hanya bergantung pada role. Chain dapat dikonfigurasi per pegawai atau unit, berisi urutan pihak mengetahui/verifikator/final approver.
+- Jumlah verifikator fleksibel: 1, 2, 3, atau lebih sesuai kebutuhan LLDIKTI.
+- Pegawai yang sama tidak boleh diminta menyetujui dua langkah berurutan; sistem harus otomatis melewati langkah duplikat atau mencegah konfigurasi yang tidak valid.
+- Untuk cuti Kepala Lembaga sendiri, approval internal SIMPEG tidak berlaku sebagai keputusan final. Fase 1 cukup menyediakan pencatatan oleh Admin Kepegawaian dengan upload dokumen eksternal yang sudah disetujui oleh jalur kementerian/pejabat di atasnya.
 
 ---
 
@@ -475,7 +500,7 @@ Modul ini menyimpan dan mengelola seluruh data kepegawaian secara terpusat. Di F
 
 > **Catatan penyesuaian format Excel:** File `daftar_pegawai.xlsx` sheet `Pegawai` menjadi acuan import awal. Header yang tersedia: `No`, `Nama Pegawai`, `Email Pegawai`, `Golongan`, `Jabatan`, `Kelas Jabatan`, `NIP`, `Nomor Telepon`, `Pangkat`, `Pendidikan Terakhir`, `Pensiun`, `Person`, `Person Formula`, `Prodi Pendidikan Terakhir`, `Status Kepegawaian`, dan `Tanggal Lahir`. Mapping detail tersedia di `Mapping-Data-Pegawai-Excel-SIMPEG.md`.
 >
-> Struktur di bawah tetap menjadi target profil lengkap SIMPEG. Untuk import awal dari Excel, field yang tidak tersedia seperti NIK, No. KK, tempat lahir, alamat, data SK, TMT, keluarga, unit kerja, dan atasan langsung boleh kosong dulu dan ditandai sebagai profil belum lengkap.
+> Struktur di bawah tetap menjadi target profil lengkap SIMPEG. Untuk import awal dari Excel, field yang tidak tersedia seperti NIK, No. KK, tempat lahir, alamat, data SK, TMT, keluarga, unit kerja, dan kepala bagian boleh kosong dulu dan ditandai sebagai profil belum lengkap.
 
 #### Data Pribadi
 
@@ -493,12 +518,13 @@ Modul ini menyimpan dan mengelola seluruh data kepegawaian secara terpusat. Di F
 | `status_perkawinan` | ref_status_kawin_id | Ya untuk profil lengkap | FK ke ref_status_kawin; belum tersedia di Excel awal |
 | `golongan_darah` | enum | Tidak | A / B / AB / O |
 | `foto` | string(path) | Tidak | Path ke file foto |
-| `jenis_pegawai` | enum | Ya | PNS / PPPK / CPNS |
-| `status_aktif` | enum | Ya | Aktif / Non-Aktif / Pensiun / Mutasi |
-| `golongan_terakhir` | string(20) | Ya untuk import Excel | Snapshot dari kolom `Golongan`; dapat dinormalisasi ke `ref_golongan` |
-| `pangkat_terakhir` | string(100) | Tidak | Snapshot dari kolom `Pangkat`; boleh kosong untuk PPPK/CPNS |
-| `jabatan_terakhir` | string(255) | Ya untuk import Excel | Snapshot dari kolom `Jabatan` |
-| `kelas_jabatan` | string(10) | Ya untuk import Excel | Dari kolom `Kelas Jabatan` |
+| `jenis_pegawai` | enum/ref | Ya | PNS / PPPK / CPNS; dapat dibuat reference bila LLDIKTI ingin menambah kategori |
+| `status_pegawai_id` | ref_status_pegawai_id | Ya | FK ke `ref_status_pegawai`; default `Aktif` |
+| `status_keterangan` | text | Tidak | Keterangan/alasan saat status pegawai berubah, misalnya CLTN, tugas belajar, atau pemberhentian sementara |
+| `golongan_terakhir` | derived/snapshot | Ya untuk import Excel | Diturunkan dari riwayat kepangkatan terbaru berdasarkan TMT; snapshot import awal boleh disimpan sementara |
+| `pangkat_terakhir` | derived/snapshot | Tidak | Diturunkan dari riwayat kepangkatan terbaru; boleh kosong untuk PPPK/CPNS |
+| `jabatan_terakhir` | derived/snapshot | Ya untuk import Excel | Diturunkan dari riwayat jabatan terbaru berdasarkan TMT dan `ref_jabatan` |
+| `kelas_jabatan_terakhir` | derived/snapshot | Ya untuk import Excel | Diturunkan dari riwayat jabatan terbaru; nilai kelas disimpan pada riwayat jabatan, bukan pada master jabatan |
 | `pendidikan_terakhir` | string(20) | Ya untuk import Excel | Contoh: D3, S1, S2 |
 | `prodi_pendidikan_terakhir` | string(255) | Ya untuk import Excel | Dari kolom `Prodi Pendidikan Terakhir` |
 | `tanggal_pensiun` | date | Tidak | Dari kolom `Pensiun`; jika kosong dihitung dari BUP setelah referensi final tersedia |
@@ -551,15 +577,21 @@ Modul ini menyimpan dan mengelola seluruh data kepegawaian secara terpusat. Di F
 
 | Field | Tipe | Wajib | Keterangan |
 |-------|------|-------|------------|
-| `nama_jabatan` | string(255) | Ya | |
-| `jenis_jabatan_id` | ref_jenis_jabatan_id | Ya | FK ke ref_jenis_jabatan |
+| `jabatan_id` | ref_jabatan_id | Ya | FK ke `ref_jabatan`; nama jabatan tidak diinput free text |
+| `jenis_jabatan_id` | ref_jenis_jabatan_id | Ya | FK ke ref_jenis_jabatan; dapat diisi otomatis dari `ref_jabatan` |
 | `eselon_id` | ref_eselon_id | Tidak | FK ke ref_eselon |
 | `unit_kerja_id` | ref_unit_kerja_id | Ya | FK ke ref_unit_kerja |
+| `kelas_jabatan` | string(10) | Tidak | Disimpan di riwayat karena kelas jabatan bisa berbeda walau nama jabatan sama |
 | `tmt_jabatan` | date | Ya | |
 | `no_sk` | string(100) | Ya | |
 | `tanggal_sk` | date | Ya | |
 | `file_sk` | string(path) | Tidak | |
 | `is_latest` | boolean | Ya | |
+
+**Aturan riwayat jabatan:**
+- Data utama pegawai menampilkan jabatan/golongan terkini dari riwayat terbaru berdasarkan TMT, bukan hasil edit manual terpisah.
+- Satu pegawai hanya punya satu jabatan aktif/terkini pada satu waktu. Jika pegawai pindah dari fungsional ke struktural, jabatan aktif berubah dan jabatan lama tetap tersimpan sebagai riwayat.
+- Upload SK menjadi bukti pendukung, tetapi sistem tidak melakukan parsing isi SK di Fase 1.
 
 #### Data KGB (Riwayat — Append-Only)
 
@@ -617,12 +649,12 @@ Modul ini menyimpan dan mengelola seluruh data kepegawaian secara terpusat. Di F
 | Storage | `storage/app/public/{pegawai_id}/{kategori}/` |
 | Validasi | MIME type check (tidak hanya ekstensi) |
 
-### 7.5 Set Supervisor (Assign Atasan Langsung)
+### 7.5 Set Supervisor (Assign Kepala Bagian)
 
 | Field | Tipe | Wajib | Keterangan |
 |-------|------|-------|------------|
 | `pegawai_id` | UUID | Ya | Pegawai yang di-assign |
-| `atasan_langsung_id` | UUID | Ya | FK ke pegawai yang menjadi atasan |
+| `kepala_bagian_id` | UUID | Ya | FK ke pegawai yang menjadi kepala bagian |
 | `tanggal_mulai` | date | Ya | Sejak kapan berlaku |
 | `tanggal_berakhir` | date | Tidak | Null = masih berlaku |
 
@@ -683,13 +715,15 @@ Format import awal mengikuti file `daftar_pegawai.xlsx` sheet `Pegawai`. Sistem 
 
 Modul cuti mendigitalisasi seluruh proses pengajuan dan persetujuan cuti sesuai PP 11/2017 jo PP 17/2020. Terdapat 6 jenis cuti dengan perbedaan hak antara PNS dan PPPK.
 
-Berdasarkan meeting teknis, Fase 1 menggunakan alur approval awal yang seragam: atasan langsung mengetahui, Kabag/verifikator memverifikasi atau menyetujui, lalu pimpinan / pejabat pemberi cuti memberikan keputusan akhir. Struktur data dan engine approval tetap harus mendukung konfigurasi dinamis per pegawai untuk tahap lanjutan.
+Berdasarkan meeting teknis terbaru, Fase 1 harus memakai engine approval cuti yang dinamis. Pengajuan dapat melalui kepala bagian, satu atau lebih verifikator, Ketua Tim Kerja bila ditunjuk, Kabag/Kepegawaian, dan final approver/PYBMC sesuai konfigurasi per pegawai/unit. Kepegawaian/verifikator wajib dapat memeriksa hak cuti, saldo, kelayakan, dan kelengkapan sebelum keputusan final.
+
+Ketua Tim Kerja tidak memerlukan role baru. Jika perlu mengetahui atau memverifikasi cuti pegawai pada tim kerja substansi, Ketua Tim cukup ditunjuk sebagai salah satu step dalam approval chain. Untuk cuti pegawai internal biasa, final PYBMC tetap Kepala Lembaga sesuai konfigurasi. Untuk cuti Kepala Lembaga sendiri, SIMPEG Fase 1 hanya mencatat dan mengarsipkan dokumen persetujuan eksternal dari jalur kementerian/pejabat yang lebih tinggi.
 
 ### 9.2 Jenis Cuti
 
 | Jenis Cuti | PNS | PPPK | Kuota / Aturan |
 |------------|:---:|:----:|---------------|
-| Cuti Tahunan | ✅ | ✅ | 12 hari kerja per tahun, carry-over ke tahun berikutnya |
+| Cuti Tahunan | ✅ | ✅ | 12 hari kerja per tahun, carry-over mengikuti aturan N-1/N-2 |
 | Cuti Sakit | ✅ | ✅ | Sesuai PP, surat dokter diperlukan (sesuai ketentuan) |
 | Cuti Melahirkan | ✅ | ✅ | 3 bulan (anak ke-1 s.d. ke-3 sesuai PP) |
 | Cuti Karena Alasan Penting | ✅ | ✅ | Sesuai PP, untuk kebutuhan mendesak keluarga |
@@ -705,56 +739,63 @@ Berdasarkan meeting teknis, Fase 1 menggunakan alur approval awal yang seragam: 
 > **Sehingga** saya tidak perlu mengurus berkas fisik.
 
 **Acceptance Criteria:**
-1. Form pengajuan cuti dengan field: jenis cuti, tanggal mulai, tanggal selesai, alasan.
+1. Form pengajuan cuti dengan field: jenis cuti, tanggal mulai, tanggal selesai, alasan, dan lampiran opsional.
 2. Jenis cuti yang ditampilkan sesuai status kepegawaian (PPPK: tanpa Cuti Besar dan CLTN).
 3. Sistem otomatis **menghitung jumlah hari kerja** (exclude Sabtu, Minggu, hari libur nasional, cuti bersama).
-4. Validasi saldo cuti: jika saldo tidak cukup (untuk cuti tahunan), pengajuan **ditolak otomatis** dengan pesan.
-5. Upload lampiran opsional (misal: surat dokter untuk cuti sakit).
-6. Setelah submit, status pengajuan = "Menunggu Atasan Langsung".
-7. Notifikasi terkirim ke Atasan Langsung.
+4. Sistem menolak submit jika satu pengajuan melewati tahun kalender. Jika cuti berlangsung Desember–Januari, pegawai harus membuat dua pengajuan terpisah.
+5. Validasi saldo cuti: jika saldo tidak cukup (untuk cuti tahunan), form tidak bisa di-submit dan sistem menampilkan pesan validasi. Ini bukan status keputusan `Tidak Disetujui`.
+6. Upload lampiran opsional (misal: surat dokter untuk cuti sakit).
+7. Setelah submit, status pengajuan = "Menunggu [step pertama sesuai chain]".
+8. Notifikasi terkirim ke pihak pertama dalam approval chain.
 
-#### US-CUT-02: Approval Stage 1 — Atasan Langsung (Mengetahui)
+#### US-CUT-02: Verifikasi / Mengetahui oleh Step Approval
 
-> **Sebagai** Atasan Langsung,
-> **Saya ingin** mengetahui pengajuan cuti bawahan saya,
-> **Sehingga** saya bisa menandai bahwa saya mengetahui.
+> **Sebagai** pihak yang ditunjuk dalam approval chain,
+> **Saya ingin** memeriksa pengajuan cuti yang menunggu tindakan saya,
+> **Sehingga** setiap pertimbangan/verifikasi tercatat sebelum keputusan final.
 
 **Acceptance Criteria:**
-1. Atasan Langsung melihat daftar pengajuan cuti bawahan yang menunggu tindakan.
+1. Pengguna hanya melihat pengajuan cuti yang sedang menunggu tindakan dirinya pada chain.
 2. Detail pengajuan: nama pegawai, jenis cuti, tanggal, jumlah hari, alasan.
-3. Opsi tindakan: **"Setujui"** atau **"Tunda"** (TIDAK ada opsi "Tolak" — sesuai PP).
-4. Jika "Tunda": wajib mengisi alasan penundaan.
-5. Jika "Setujui": status berubah ke "Menunggu Kabag/verifikator" atau stage berikutnya yang dikonfigurasi, notifikasi terkirim ke approver berikutnya.
-6. Jika "Tunda": notifikasi penundaan terkirim ke pegawai beserta alasan.
-7. Jika Atasan Langsung juga menjadi approver pada stage berikutnya, sistem melakukan skip agar orang yang sama tidak menyetujui dua kali.
+3. Opsi tindakan mengikuti label resmi formulir: **"Disetujui"**, **"Perubahan"**, **"Ditangguhkan"**, dan **"Tidak Disetujui"**.
+4. Untuk step non-final, aksi disimpan sebagai rekomendasi/pertimbangan/verifikasi dan dapat menentukan apakah flow lanjut ke step berikutnya atau perlu tindak lanjut pegawai/admin.
+5. `Perubahan`, `Ditangguhkan`, dan `Tidak Disetujui` wajib mengisi keterangan/alasan.
+6. `Disetujui` tidak wajib mengisi keterangan.
+7. Jika step yang sama menunjuk pegawai yang sudah bertindak di step sebelumnya, sistem melewati step duplikat atau menolak konfigurasi tersebut.
+8. Semua tindakan dan keterangan tampil di timeline dan tercatat di audit log.
 
-#### US-CUT-03: Approval Stage 2 — Kabag/Verifikator (Menyetujui)
+#### US-CUT-03: Verifikasi Kepegawaian
 
-> **Sebagai** Kabag/verifikator yang dikonfigurasi,
-> **Saya ingin** menyetujui pengajuan cuti yang sudah diketahui atasan langsung,
-> **Sehingga** proses persetujuan berjalan sesuai prosedur.
+> **Sebagai** Admin Kepegawaian/verifikator,
+> **Saya ingin** memverifikasi hak cuti, saldo, dan kelengkapan pengajuan,
+> **Sehingga** pimpinan menerima pengajuan yang sudah jelas status kelayakannya.
 
 **Acceptance Criteria:**
-1. Sama dengan Stage 1, tapi penerima adalah Kabag/verifikator yang dikonfigurasi.
-2. Opsi: **"Setujui"** atau **"Tunda"**.
-3. Jika "Setujui": status berubah ke "Menunggu Pimpinan/PYBMC" atau stage final yang dikonfigurasi.
-4. Jika "Tunda": notifikasi ke pegawai.
-5. Jika Kabag/verifikator juga merupakan pejabat pemberi cuti final, sistem dapat skip stage final sesuai konfigurasi.
+1. Verifikator dapat melihat saldo tahun berjalan, sisa N-1/N-2, cuti bersama, dan riwayat cuti tahunan pegawai.
+2. Verifikator dapat memberi rekomendasi `Disetujui`, `Perubahan`, `Ditangguhkan`, atau `Tidak Disetujui`.
+3. Rekomendasi selain `Disetujui` wajib memuat keterangan yang terlihat oleh pegawai, admin, dan approver berikutnya.
+4. Jika verifikator merekomendasikan tidak lanjut, status dan alasan tetap disimpan sebagai bagian dari riwayat keputusan.
+5. Chain dapat memiliki lebih dari satu verifikator dan urutannya mengikuti konfigurasi.
 
-#### US-CUT-04: Approval Stage 3 — Pimpinan/PYBMC (Final)
+#### US-CUT-04: Keputusan Final Pimpinan/PYBMC
 
 > **Sebagai** Pimpinan/PYBMC,
-> **Saya ingin** memberikan persetujuan akhir pengajuan cuti,
+> **Saya ingin** memberikan keputusan akhir pengajuan cuti,
 > **Sehingga** cuti bisa resmi berlaku.
 
 **Acceptance Criteria:**
-1. Final approval oleh Pimpinan/PYBMC yang dikonfigurasi.
-2. Opsi: **"Setujui"** atau **"Tunda"**.
-3. Jika "Setujui":
-   - Status berubah ke "Disetujui".
+1. Final approver mengikuti konfigurasi approval chain; default untuk pegawai internal biasa adalah Kepala Lembaga/PYBMC.
+2. Opsi keputusan final: **"Disetujui"**, **"Perubahan"**, **"Ditangguhkan"**, dan **"Tidak Disetujui"**.
+3. Jika "Disetujui":
+   - Status keputusan final menjadi `Disetujui`.
    - Saldo cuti tahunan **dikurangi otomatis** (jika cuti tahunan).
    - Notifikasi persetujuan terkirim ke pegawai.
-4. Jika "Tunda": notifikasi ke pegawai.
+   - Sistem menghasilkan formulir cuti resmi dengan QR Code verifikasi.
+4. Jika `Perubahan`, `Ditangguhkan`, atau `Tidak Disetujui`:
+   - Keterangan wajib diisi.
+   - Saldo cuti tidak dikurangi.
+   - Notifikasi terkirim ke pegawai beserta alasan/keterangan.
+5. Keputusan final dan identitas pejabat final tampil pada halaman verifikasi QR.
 
 #### US-CUT-05: Lihat Status Pengajuan Cuti
 
@@ -764,9 +805,10 @@ Berdasarkan meeting teknis, Fase 1 menggunakan alur approval awal yang seragam: 
 
 **Acceptance Criteria:**
 1. Daftar semua pengajuan cuti saya (aktif dan riwayat).
-2. Status ditampilkan jelas: Menunggu Atasan Langsung / Menunggu Kabag/verifikator / Menunggu Pimpinan/PYBMC / Disetujui / Ditunda.
-3. Timeline approval: siapa yang sudah approve/tunda, kapan, komentar.
-4. Filter berdasarkan status dan tahun.
+2. Status proses ditampilkan jelas: Draft / Menunggu [nama step] / Perlu Perubahan / Ditangguhkan / Selesai.
+3. Keputusan final ditampilkan dengan label resmi: Disetujui / Perubahan / Ditangguhkan / Tidak Disetujui.
+4. Timeline approval: siapa yang sudah bertindak, peran dalam chain, rekomendasi/keputusan, waktu, dan keterangan.
+5. Filter berdasarkan status dan tahun.
 
 #### US-CUT-06: Lihat Saldo Cuti
 
@@ -775,8 +817,9 @@ Berdasarkan meeting teknis, Fase 1 menggunakan alur approval awal yang seragam: 
 > **Sehingga** saya tahu berapa hari cuti yang tersisa.
 
 **Acceptance Criteria:**
-1. Tampilkan saldo cuti tahunan: total, terpakai, sisa, carry-over dari tahun lalu.
-2. Riwayat penggunaan cuti tahun berjalan.
+1. Tampilkan saldo cuti tahunan: jatah dasar 12 hari, carry-over N-1, hak tambahan jika memenuhi aturan N-2/N-1, total tersedia, terpakai, dan sisa.
+2. Tampilkan riwayat penggunaan cuti tahun berjalan dan dua tahun sebelumnya yang memengaruhi carry-over.
+3. Admin dapat mengisi/koreksi saldo awal dan riwayat N-1/N-2 saat setup awal dengan alasan dan audit log.
 
 ### 9.4 Aturan Bisnis Cuti
 
@@ -784,9 +827,18 @@ Berdasarkan meeting teknis, Fase 1 menggunakan alur approval awal yang seragam: 
 
 | Aturan | Detail |
 |--------|--------|
-| Mekanisme | Sisa cuti tahunan yang tidak terpakai bisa dibawa ke tahun berikutnya |
-| Batas carry-over | Sesuai PP 11/2017 (maks yang ditentukan peraturan) |
+| Jatah dasar | 12 hari kerja per tahun |
+| Carry-over N-1 | Jika tahun sebelumnya masih ada sisa, maksimal 6 hari dapat dibawa ke tahun berjalan |
+| Kondisi N-2 dan N-1 tidak mengambil cuti | Jika pegawai tidak mengambil cuti tahunan selama dua tahun berturut-turut, total hak tahun berjalan dapat mencapai 24 hari |
+| Kondisi mengambil cuti pada salah satu dari N-2/N-1 | Carry-over tetap maksimal 6 hari, bukan 12 |
 | Reset | Dihitung ulang otomatis di awal tahun (1 Januari) |
+| Setup awal | Admin Kepegawaian dapat menginput saldo/riwayat tahun sebelumnya agar kalkulasi awal akurat |
+
+#### Batas Tahun Kalender
+
+- Satu pengajuan cuti tidak boleh melewati tahun kalender.
+- Jika pegawai ingin cuti dari Desember sampai Januari, sistem harus meminta dua pengajuan: satu untuk tahun berjalan dan satu untuk tahun berikutnya.
+- Validasi ini mencegah kebingungan reset kuota dan carry-over.
 
 #### Kalkulasi Hari Kerja
 
@@ -804,15 +856,25 @@ Cuti bersama otomatis mengurangi saldo cuti tahunan (sesuai kebijakan yang berla
 #### Status Flow Pengajuan Cuti
 
 ```
-[Draft] → [Menunggu Atasan Langsung] → [Menunggu Kabag/Verifikator] → [Menunggu Pimpinan/PYBMC] → [Disetujui]
-                    │                           │                          │
-                    ▼                           ▼                          ▼
-               [Ditunda]                   [Ditunda]                  [Ditunda]
+[Draft] → [Menunggu Step 1] → [Menunggu Step 2..n] → [Menunggu Final PYBMC] → [Selesai]
+              │                      │                         │
+              ├─ Perubahan           ├─ Perubahan              ├─ Perubahan
+              ├─ Ditangguhkan        ├─ Ditangguhkan           ├─ Ditangguhkan
+              └─ Tidak Disetujui     └─ Tidak Disetujui        └─ Tidak Disetujui
 ```
 
-**Catatan konfigurasi:** Jika approver pada dua stage adalah orang yang sama, stage duplikat harus dilewati otomatis. Urutan approver harus dapat diatur agar tidak terjadi approval terbalik, misalnya Ketua Tim → Kabag → Pimpinan.
+**Catatan konfigurasi:** Jika approver pada dua step adalah orang yang sama, step duplikat harus dilewati otomatis atau dicegah saat konfigurasi. Urutan approver harus dapat diatur agar tidak terjadi approval terbalik, misalnya Kepala Bagian → Ketua Tim → Kepegawaian/Kabag → Pimpinan.
 
-**Catatan:** Status "Ditunda" bukan akhir dari flow. Pegawai bisa mengajukan ulang atau menunggu hingga cuti disetujui.
+**Catatan keputusan:** Istilah formal `Ditolak` tidak dipakai. Untuk keputusan negatif, gunakan `Tidak Disetujui`.
+
+#### Dokumen Cuti & QR Verification
+
+- Setelah pengajuan selesai diproses, sistem menghasilkan formulir cuti resmi sesuai format LLDIKTI.
+- Formulir memuat QR Code yang mengarah ke halaman verifikasi SIMPEG.
+- Halaman verifikasi menampilkan minimal: nama pegawai, jenis cuti, tanggal cuti, status keputusan, tanggal keputusan, pejabat final/approver, dan identitas instansi LLDIKTI Wilayah XVI.
+- QR Code tidak menggantikan tanda tangan elektronik tersertifikasi. Fase 1 cukup menyediakan verifikasi digital berbasis halaman SIMPEG.
+- Lampiran pendukung dari pegawai tetap opsional sesuai jenis cuti.
+- Untuk cuti Kepala Lembaga atau kasus approval eksternal, Admin Kepegawaian dapat mengunggah scan dokumen yang sudah disetujui di luar SIMPEG; sistem menandainya sebagai `external_approval`.
 
 ---
 
@@ -867,6 +929,18 @@ EWS adalah scheduler otomatis yang berjalan setiap hari untuk memeriksa momen pe
 | **Penerima** | Pegawai PPPK bersangkutan + Admin Kepegawaian |
 | **Khusus** | Hanya untuk pegawai dengan jenis_pegawai = PPPK |
 
+#### Satyalancana Karya Satya
+
+| Aspek | Detail |
+|-------|--------|
+| **Dasar** | Masa kerja pegawai berdasarkan TMT pengangkatan pertama |
+| **Rumus** | TMT pengangkatan pertama + 10 / 20 / 30 tahun |
+| **Interval notifikasi** | H-180, H-90, H-30 sebelum milestone |
+| **Syarat eligibility** | Masa kerja terpenuhi dan flag kelayakan/pertimbangan manual dari Admin Kepegawaian |
+| **Penerima** | Pegawai bersangkutan + Admin Kepegawaian |
+
+**Catatan Fase 1:** Karena kelayakan Satyalancana dapat mempertimbangkan aspek kinerja/SKP dan data administratif lain yang belum seluruhnya dimodelkan, sistem menyediakan flag manual `is_satyalancana_eligible` atau catatan pertimbangan setara yang dapat diisi Admin Kepegawaian.
+
 ### 10.3 User Stories
 
 #### US-EWS-01: Scheduler EWS Harian
@@ -877,10 +951,11 @@ EWS adalah scheduler otomatis yang berjalan setiap hari untuk memeriksa momen pe
 
 **Acceptance Criteria:**
 1. Laravel scheduler berjalan setiap hari pukul 07:00 WITA.
-2. Sistem memeriksa semua pegawai aktif terhadap 4 trigger di atas.
+2. Sistem memeriksa semua pegawai aktif terhadap 5 trigger di atas.
 3. Jika ada pegawai yang memenuhi kriteria interval, buat notifikasi.
 4. Notifikasi tidak duplikat (jika notifikasi H-90 sudah dikirim, tidak kirim ulang H-90 keesokan harinya).
 5. Log eksekusi scheduler dicatat (waktu mulai, waktu selesai, jumlah notifikasi yang dihasilkan).
+6. Alert memiliki status tindak lanjut (`aktif`, `ditangani`, `tidak_perlu`, `kedaluwarsa`) agar alert yang sudah selesai tidak terus muncul.
 
 #### US-EWS-02: Dashboard EWS
 
@@ -890,9 +965,10 @@ EWS adalah scheduler otomatis yang berjalan setiap hari untuk memeriksa momen pe
 
 **Acceptance Criteria:**
 1. Halaman daftar EWS aktif, diurutkan dari yang paling mendesak.
-2. Informasi: nama pegawai, jenis event, tanggal target, sisa hari.
+2. Informasi: nama pegawai, jenis event, tanggal target, sisa hari, status tindak lanjut.
 3. Filter berdasarkan jenis event.
 4. Indikator warna: merah (< 30 hari), kuning (30-90 hari), hijau (> 90 hari).
+5. Admin dapat menandai alert sebagai ditangani/tidak perlu dengan catatan.
 
 #### US-EWS-03: Update Flag Kinerja
 
@@ -914,6 +990,7 @@ tanggal_kenaikan_pangkat_berikutnya = tmt_pangkat_terakhir + 4 tahun
 tanggal_kgb_berikutnya = tmt_kgb_terakhir + 2 tahun
 tanggal_pensiun = tanggal_lahir + maks_usia_pensiun_pada_jabatan
 tanggal_kontrak_berakhir = tanggal_berakhir_kontrak (langsung dari data)
+tanggal_satyalancana = tmt_pengangkatan_pertama + 10/20/30 tahun
 ```
 
 Kalkulasi ini dijalankan ulang setiap kali:
@@ -926,28 +1003,31 @@ Kalkulasi ini dijalankan ulang setiap kali:
 
 ### 11.1 Deskripsi
 
-Notifikasi dikirim melalui 2 channel: in-app (real-time) dan email (via queue). Notifikasi dipicu oleh events di modul lain (cuti, EWS, dll).
+Notifikasi dipicu oleh events di modul lain (cuti, EWS, import, audit penting, dll). Fase 1 mengirim notifikasi melalui in-app dan email via queue, tetapi implementasi tidak boleh mengunci channel hanya ke dua opsi tersebut. Sistem harus memakai konfigurasi channel agar WhatsApp Business atau channel lain dapat ditambahkan saat layanan/credential tersedia.
 
 ### 11.2 Channel Notifikasi
 
-| Channel | Mekanisme | Keterangan |
-|---------|-----------|------------|
-| **In-App** | Database-backed, polling/SSE | Tampil di bell icon di navbar, badge count |
-| **Email** | SMTP via Laravel Mail + Queue | Development dapat memakai Mailpit; production memakai email operasional LLDIKTI |
+| Channel | Status Fase 1 | Mekanisme | Keterangan |
+|---------|---------------|-----------|------------|
+| **In-App** | Wajib | Database-backed, polling/SSE | Tampil di bell icon di navbar, badge count |
+| **Email** | Wajib bila credential tersedia | SMTP/Gmail resmi via Laravel Mail + Queue | Development dapat memakai Mailpit; production memakai email operasional LLDIKTI atau Gmail credential yang disediakan |
+| **WhatsApp Business** | Disiapkan sebagai konfigurasi/future channel | Adapter/service terpisah | Tidak wajib production di Fase 1; aktif bila LLDIKTI menyediakan layanan/library/credential |
+
+**Aturan:** Event notifikasi memilih channel berdasarkan konfigurasi. Kode domain tidak boleh memanggil SMTP/WA langsung; gunakan dispatcher/notification service agar channel bisa dinyalakan/dimatikan per event.
 
 ### 11.3 Jenis Notifikasi
 
 | Event | Penerima | In-App | Email | Keterangan |
 |-------|----------|:------:|:-----:|------------|
-| Cuti diajukan | Atasan Langsung | ✅ | ✅ | Bawahan mengajukan cuti |
-| Cuti disetujui (stage 1) | Kabag/verifikator | ✅ | ✅ | Lanjut ke stage 2 atau stage berikutnya |
-| Cuti disetujui (stage 2) | Pimpinan/PYBMC | ✅ | ✅ | Lanjut ke final approval |
-| Cuti disetujui (final) | Pegawai | ✅ | ✅ | Cuti resmi berlaku |
-| Cuti ditunda | Pegawai | ✅ | ✅ | Beserta alasan penundaan |
+| Cuti diajukan | Step pertama approval chain | ✅ | ✅ | Pegawai mengajukan cuti |
+| Cuti menunggu verifikasi berikutnya | Verifikator/approver berikutnya | ✅ | ✅ | Lanjut sesuai chain dinamis |
+| Cuti keputusan final `Disetujui` | Pegawai | ✅ | ✅ | Cuti resmi berlaku dan formulir QR tersedia |
+| Cuti `Perubahan` / `Ditangguhkan` / `Tidak Disetujui` | Pegawai | ✅ | ✅ | Beserta alasan/keterangan |
 | EWS: Kenaikan Pangkat | Pegawai + Admin | ✅ | ✅ | H-90, H-60, H-30 |
 | EWS: KGB | Pegawai + Admin | ✅ | ✅ | H-60, H-30, H-14 |
 | EWS: Pensiun | Pegawai + Admin | ✅ | ✅ | H-1thn, H-6bln, H-3bln |
 | EWS: Kontrak PPPK | Pegawai + Admin | ✅ | ✅ | H-6bln, H-3bln, H-1bln |
+| EWS: Satyalancana | Pegawai + Admin | ✅ | ✅ | H-180, H-90, H-30 |
 | Data pegawai diubah | Admin (pembuat) | ✅ | ❌ | Konfirmasi audit trail |
 
 ### 11.4 User Stories
@@ -987,6 +1067,8 @@ Notifikasi dikirim melalui 2 channel: in-app (real-time) dan email (via queue). 
 | `title` | string | Judul notifikasi |
 | `body` | text | Isi detail notifikasi |
 | `data` | json | Data tambahan (link, ID referensi) |
+| `channels` | json | Channel yang dipakai untuk event ini |
+| `delivery_status` | json | Status pengiriman per channel, termasuk retry/error |
 | `is_read` | boolean | Status baca |
 | `read_at` | timestamp | Waktu dibaca |
 | `created_at` | timestamp | Waktu dibuat |
@@ -1007,7 +1089,7 @@ Setiap perubahan data di SIMPEG dicatat dalam audit log yang immutable. Audit lo
 | **Update** | Edit data pribadi, update saldo cuti |
 | **Soft Delete** | Nonaktifkan pegawai |
 | **Restore** | Aktifkan kembali data pegawai non-aktif |
-| **Approve / Tunda Cuti** | Setiap stage approval |
+| **Verifikasi / Keputusan Cuti** | Setiap step approval, rekomendasi, keputusan final, dan perubahan status |
 | **Login** | Login berhasil via Keycloak |
 | **Logout** | Logout manual atau session timeout |
 | **Import Excel/CSV** | Setiap batch import |
@@ -1046,7 +1128,7 @@ Setiap perubahan data di SIMPEG dicatat dalam audit log yang immutable. Audit lo
 | `id` | UUID | PK |
 | `user_id` | UUID | FK ke pegawai yang melakukan aksi |
 | `user_name` | string | Snapshot nama user (untuk readability) |
-| `event` | enum | CREATE / UPDATE / DELETE / SOFT_DELETE / RESTORE / LOGIN / LOGOUT / APPROVE / POSTPONE / IMPORT |
+| `event` | enum | CREATE / UPDATE / DELETE / SOFT_DELETE / RESTORE / LOGIN / LOGOUT / VERIFY / DECIDE / CHANGE_REQUESTED / DEFER / NOT_APPROVED / IMPORT / CONFIG_UPDATE |
 | `auditable_type` | string | Nama model/tabel (misal: `Employee`, `LeaveRequest`) |
 | `auditable_id` | UUID | ID record yang diubah |
 | `old_values` | json | Data sebelum perubahan |
@@ -1070,7 +1152,7 @@ Dashboard menyajikan ringkasan informasi kepegawaian secara visual. Akses dan da
 | Super Admin | Dashboard Admin (semua data) + konfigurasi sistem |
 | Admin Kepegawaian | Dashboard Admin (semua data) |
 | Pimpinan | Dashboard Pimpinan (semua data, read-only) |
-| Atasan Langsung | Dashboard Atasan (data bawahan langsung) |
+| Kepala Bagian | Dashboard Kepala Bagian (data bawahan langsung) |
 | Pegawai | Dashboard Pribadi (data sendiri) |
 
 ### 13.3 Widget Dashboard Admin / Pimpinan
@@ -1148,7 +1230,7 @@ Dashboard menyajikan ringkasan informasi kepegawaian secara visual. Akses dan da
 
 ### 14.1 Deskripsi
 
-Fase 1 menyediakan export laporan dasar ke format PDF dan Excel.
+Fase 1 menyediakan export laporan dasar ke format PDF dan Excel. Selain export fixed, Fase 1 menambahkan export nominatif Excel customizable agar Admin/Pimpinan dapat memilih kolom dan filter baris tanpa menunggu format laporan baru.
 
 ### 14.2 Laporan yang Tersedia
 
@@ -1163,6 +1245,16 @@ Fase 1 menyediakan export laporan dasar ke format PDF dan Excel.
 | **Filter** | Per unit kerja, per golongan, per jenis pegawai |
 | **Sorting** | Nama, NIP, Golongan |
 | **Akses** | Admin Kepegawaian, Pimpinan |
+
+#### L1b: Daftar Nominatif Custom Excel (Fase 1)
+
+| Aspek | Detail |
+|-------|--------|
+| **Format** | Excel (.xlsx) saja |
+| **Isi** | Kolom dipilih pengguna dari daftar kolom yang diizinkan, misalnya NIP, nama, status, jabatan, unit, golongan, pendidikan, tanggal pensiun |
+| **Filter** | Filter baris berdasarkan field yang didukung, misalnya status = Tugas Belajar, unit kerja, jenis pegawai, golongan, jabatan |
+| **Akses** | Admin Kepegawaian, Pimpinan |
+| **Batasan** | PDF custom tidak masuk Fase 1 karena kompleksitas layout |
 
 #### L2: Rekap Cuti (Fase 1)
 
@@ -1207,6 +1299,19 @@ Fase 1 menyediakan export laporan dasar ke format PDF dan Excel.
 4. Excel berisi data mentah yang bisa diolah lebih lanjut.
 5. File ter-download otomatis ke browser.
 
+#### US-LAP-01B: Export Nominatif Custom ke Excel
+
+> **Sebagai** Admin Kepegawaian/Pimpinan,
+> **Saya ingin** memilih kolom dan filter pegawai sebelum export Excel,
+> **Sehingga** saya bisa membuat laporan nominatif sesuai kebutuhan tanpa mengubah kode.
+
+**Acceptance Criteria:**
+1. Halaman export custom menampilkan daftar kolom yang boleh dipilih.
+2. Pengguna dapat memilih satu atau lebih filter baris, misalnya status pegawai, unit/tim kerja, jenis pegawai, golongan, jabatan, atau periode pensiun.
+3. Output hanya Excel `.xlsx`.
+4. Export mengikuti urutan kolom yang dipilih pengguna.
+5. Sistem menolak kolom sensitif yang tidak diizinkan untuk laporan.
+
 #### US-LAP-02: Export Rekap Cuti
 
 > **Sebagai** Admin Kepegawaian,
@@ -1243,7 +1348,7 @@ Fase 1 menyediakan export laporan dasar ke format PDF dan Excel.
 │ nip              │  │  │ employee_id (FK)     │
 │ nik              │  ├──│ nama_anggota         │
 │ no_kk            │  │  │ hubungan             │
-│ nama_lengkap     │  │  │ hubungan             │
+│ nama_lengkap     │  │  │ nik                  │
 │ tempat_lahir     │  │  │ tanggal_lahir        │
 │ tanggal_lahir    │  │  │ status_tunjangan     │
 │ jenis_kelamin    │  │  └──────────────────────┘
@@ -1252,13 +1357,14 @@ Fase 1 menyediakan export laporan dasar ke format PDF dan Excel.
 │ golongan_darah   │  │  │  rank_histories      │
 │ foto             │  │  │  (Kepangkatan)       │
 │ jenis_pegawai    │  │  │──────────────────────│
-│ status_aktif     │  ├──│ id (PK, UUID)        │
-│ alamat           │  │  │ employee_id (FK)     │
-│ no_hp            │  │  │ golongan_id (FK)     │
-│ email_pribadi    │  │  │ tmt_pangkat          │
-│ is_kinerja_baik  │  │  │ no_sk                │
-│ keycloak_id      │  │  │ is_latest            │
-│ role             │  │  └──────────────────────┘
+│ status_pegawai_id│  ├──│ id (PK, UUID)        │
+│ status_keterangan│  │  │ employee_id (FK)     │
+│ alamat           │  │  │ golongan_id (FK)     │
+│ no_hp            │  │  │ tmt_pangkat          │
+│ email_pribadi    │  │  │ no_sk                │
+│ is_kinerja_baik  │  │  │ is_latest            │
+│ keycloak_id      │  │  └──────────────────────┘
+│ role             │  │
 │ deleted_at       │  │
 │ created_at       │  │  ┌──────────────────────┐
 │ updated_at       │  │  │  position_histories  │
@@ -1266,9 +1372,10 @@ Fase 1 menyediakan export laporan dasar ke format PDF dan Excel.
                       │  │──────────────────────│
                       ├──│ id (PK, UUID)        │
                       │  │ employee_id (FK)     │
-                      │  │ nama_jabatan         │
+                      │  │ jabatan_id (FK)      │
                       │  │ jenis_jabatan_id(FK) │
                       │  │ unit_kerja_id (FK)   │
+                      │  │ kelas_jabatan        │
                       │  │ tmt_jabatan          │
                       │  │ is_latest            │
                       │  └──────────────────────┘
@@ -1332,31 +1439,41 @@ Fase 1 menyediakan export laporan dasar ke format PDF dan Excel.
 ### 15.2 Tabel Cuti
 
 ```
-┌───────────────────────┐     ┌──────────────────────┐
-│    leave_requests     │     │  leave_approvals     │
-│───────────────────────│     │──────────────────────│
-│ id (PK, UUID)         │     │ id (PK, UUID)        │
-│ employee_id (FK)      │──┐  │ leave_request_id(FK) │
-│ jenis_cuti_id (FK)    │  │  │ approver_id (FK)     │
-│ tanggal_mulai         │  │  │ stage (1/2/3)        │
-│ tanggal_selesai       │  ├──│ action (APPROVE/     │
-│ jumlah_hari_kerja     │  │  │         POSTPONE)    │
-│ alasan                │  │  │ komentar             │
-│ lampiran_path         │  │  │ acted_at             │
-│ status                │  │  └──────────────────────┘
-│ created_at            │  │
-│ updated_at            │  │  ┌──────────────────────┐
-└───────────────────────┘  │  │  leave_balances      │
-                           │  │──────────────────────│
-                           └──│ id (PK, UUID)        │
-                              │ employee_id (FK)     │
-                              │ tahun                │
-                              │ jatah_awal           │
-                              │ carry_over           │
-                              │ terpakai             │
-                              │ sisa                 │
-                              └──────────────────────┘
+┌────────────────────────┐     ┌──────────────────────────┐
+│    leave_requests      │     │  leave_approval_steps    │
+│────────────────────────│     │──────────────────────────│
+│ id (PK, UUID)          │     │ id (PK, UUID)            │
+│ employee_id (FK)       │──┐  │ leave_request_id (FK)    │
+│ jenis_cuti_id (FK)     │  │  │ step_order               │
+│ tanggal_mulai          │  │  │ step_type                │
+│ tanggal_selesai        │  ├──│ approver_id (FK)         │
+│ jumlah_hari_kerja      │  │  │ decision_status          │
+│ alasan                 │  │  │ keterangan              │
+│ lampiran_path          │  │  │ acted_at                 │
+│ workflow_status        │  │  └──────────────────────────┘
+│ final_decision_status  │  │
+│ qr_token               │  │  ┌──────────────────────────┐
+│ generated_document_path│  │  │  leave_balances          │
+└────────────────────────┘  │  │──────────────────────────│
+                            └──│ id (PK, UUID)            │
+                               │ employee_id (FK)         │
+                               │ tahun                    │
+                               │ jatah_dasar              │
+                               │ carry_over_n1            │
+                               │ hak_tambahan_n2_n1       │
+                               │ terpakai                 │
+                               │ sisa                     │
+                               └──────────────────────────┘
 ```
+
+| Tabel | Catatan |
+|-------|---------|
+| `leave_approval_chains` | Template/konfigurasi chain per pegawai/unit; memuat urutan step, tipe step, dan pegawai approver/verifikator |
+| `leave_approval_steps` | Snapshot chain per pengajuan agar perubahan konfigurasi tidak mengubah riwayat pengajuan lama |
+| `leave_documents` | Menyimpan metadata formulir cuti, QR token, path PDF, dan dokumen eksternal bila `external_approval = true` |
+| `leave_balance_adjustments` | Menyimpan koreksi saldo manual beserta alasan dan audit trail |
+
+`decision_status` dan `final_decision_status` hanya memakai label resmi: `Disetujui`, `Perubahan`, `Ditangguhkan`, `Tidak Disetujui`. Keterangan wajib untuk semua selain `Disetujui`.
 
 ### 15.3 Tabel EWS & Notifikasi
 
@@ -1370,7 +1487,9 @@ Fase 1 menyediakan export laporan dasar ke format PDF dan Excel.
 │ target_date          │     │ title                │
 │ interval_days        │     │ body                 │
 │ notified_at          │     │ data (json)          │
-│ is_processed         │     │ is_read              │
+│ followup_status      │     │ channels (json)      │
+│ handled_at           │     │ delivery_status(json)│
+│ handled_by           │     │ is_read              │
 │ created_at           │     │ read_at              │
 └──────────────────────┘     │ created_at           │
                              └──────────────────────┘
@@ -1391,6 +1510,8 @@ Fase 1 menyediakan export laporan dasar ke format PDF dan Excel.
 │ created_at           │
 └──────────────────────┘
 ```
+
+`ews_alerts.type` mencakup `KENAIKAN_PANGKAT`, `KGB`, `BUP`, `KONTRAK_PPPK`, dan `SATYALANCANA`. `followup_status` minimal mendukung `aktif`, `ditangani`, `tidak_perlu`, dan `kedaluwarsa`.
 
 ### 15.4 Tabel Supervisor Mapping
 
@@ -1414,7 +1535,7 @@ Keycloak tidak menyimpan role dan permission aplikasi. Setelah login SSO berhasi
 
 | Tabel | Field Utama | Keterangan |
 |-------|-------------|------------|
-| `roles` | `id`, `name`, `guard_name`, `description` | Daftar role aplikasi: Super Admin, Admin Kepegawaian, Pimpinan, Atasan Langsung, Pegawai |
+| `roles` | `id`, `name`, `guard_name`, `description` | Daftar role aplikasi: Super Admin, Admin Kepegawaian, Pimpinan, Kepala Bagian, Pegawai |
 | `permissions` | `id`, `name`, `module`, `description` | Daftar permission per modul/aksi |
 | `role_permissions` | `role_id`, `permission_id` | Pivot permission yang dimiliki role |
 | `employee_roles` / `employees.role_id` | `employee_id`, `role_id` | Fase awal dapat memakai satu role utama per pegawai; pivot disiapkan bila perlu ekspansi |
@@ -1425,7 +1546,7 @@ Keycloak tidak menyimpan role dan permission aplikasi. Setelah login SSO berhasi
 
 ## 16. Reference Tables (Seed Data)
 
-11 tabel master data yang harus di-seed saat setup awal:
+Master data berikut menjadi seed awal dan harus dapat dikelola oleh Super Admin/Admin yang berwenang. Jumlah record dapat bertambah tanpa perubahan kode.
 
 ### 16.1 ref_golongan
 
@@ -1456,10 +1577,45 @@ Keycloak tidak menyimpan role dan permission aplikasi. Setelah login SSO berhasi
 | 1 | Struktural | 60 | Dapat disesuaikan berdasarkan jabatan detail |
 | 2 | Fungsional Tertentu | 58 / 60 | Mengikuti jenjang atau jabatan detail |
 | 3 | Fungsional Umum / Pelaksana | 58 | Default umum |
+| 4 | Jabatan Akademik / Dosen | 65 / 70 | Disiapkan untuk modul Dosen DPK di fase berikutnya |
 
-> Field `maks_usia_pensiun` wajib tersedia agar EWS pensiun tidak mengunci usia pensiun secara statis di kode.
+> Field `maks_usia_pensiun` wajib tersedia agar EWS pensiun tidak mengunci usia pensiun secara statis di kode. Untuk jabatan yang lebih detail, nilai BUP dapat dioverride oleh `ref_jabatan` atau `ref_bup`.
 
-### 16.3 ref_eselon
+### 16.3 ref_jabatan
+
+`nama_jabatan` harus dipilih dari reference, bukan free text.
+
+| Field | Tipe | Keterangan |
+|-------|------|------------|
+| `id` | UUID | PK |
+| `jenis_jabatan_id` | FK | Kategori jabatan untuk dependent select |
+| `nama_jabatan` | string | Nama resmi jabatan |
+| `eselon_id` | FK nullable | Untuk jabatan struktural |
+| `default_bup` | integer nullable | Override BUP bila berbeda dari jenis jabatan |
+| `is_active` | boolean | Bisa dinonaktifkan tanpa menghapus riwayat |
+
+Contoh kategori: Fungsional Umum/Pelaksana, Fungsional Tertentu, Struktural, dan Jabatan Akademik/Dosen untuk pengembangan Dosen DPK di fase berikutnya. Untuk dosen, referensi jabatan akademik dapat memuat Asisten Ahli, Lektor, Lektor Kepala, dan Guru Besar.
+
+### 16.4 ref_status_pegawai
+
+Status pegawai tidak boleh berupa enum hardcoded. Seed awal minimal:
+
+| Kode | Nama | Kelompok |
+|------|------|----------|
+| AKTIF | Aktif | Aktif |
+| NONAKTIF | Nonaktif | Nonaktif |
+| PENSIUN | Pensiun | Nonaktif |
+| MUTASI | Mutasi | Nonaktif |
+| CLTN | Cuti Luar Tanggungan Negara | Nonaktif |
+| PERPANJANGAN_CLTN | Perpanjangan CLTN | Nonaktif |
+| TUGAS_BELAJAR | Tugas Belajar | Aktif/khusus |
+| PEMBERHENTIAN_SEMENTARA | Pemberhentian Sementara | Nonaktif |
+| WAJIB_MILITER | Wajib Militer | Nonaktif/khusus |
+| HILANG | PNS Dinyatakan Hilang | Nonaktif/khusus |
+
+Setiap perubahan status pegawai wajib dapat menyimpan `status_keterangan` dan tercatat di audit log.
+
+### 16.5 ref_eselon
 
 | Kode | Nama |
 |------|------|
@@ -1472,7 +1628,33 @@ Keycloak tidak menyimpan role dan permission aplikasi. Setelah login SSO berhasi
 | IV.a | Eselon IV.a |
 | IV.b | Eselon IV.b |
 
-### 16.4 ref_jenis_cuti
+### 16.6 ref_unit_kerja
+
+`ref_unit_kerja` harus hierarkis dan tidak mengunci istilah "unit kerja" saja. UI boleh memakai label "Unit/Tim Kerja".
+
+| Field | Tipe | Keterangan |
+|-------|------|------------|
+| `id` | UUID | PK |
+| `parent_id` | UUID nullable | FK ke `ref_unit_kerja.id`; null untuk root |
+| `level` | integer | Level hierarki untuk sorting/tampilan |
+| `nama` | string | Nama unit/tim/urusan |
+| `jenis_unit` | enum/string | Contoh: lembaga, bagian, tim_kerja, urusan, sub_unit |
+| `is_active` | boolean | Soft disable |
+
+Contoh struktur awal:
+
+| Level | Nama | Parent |
+|:----:|------|--------|
+| 0 | Kepala Lembaga | null |
+| 1 | Kepala Bagian Umum | Kepala Lembaga |
+| 1 | Ketua Tim Kerja Substansi | Kepala Lembaga |
+| 2 | Urusan Organisasi Tata Laksana dan SDM | Kepala Bagian Umum |
+| 2 | Urusan Keuangan | Kepala Bagian Umum |
+| 2 | Urusan Humas / Layanan Pendukung | Kepala Bagian Umum |
+
+Daftar final nama tim kerja, urusan, dan sub-unit mengikuti data bagian kepegawaian LLDIKTI.
+
+### 16.7 ref_jenis_cuti
 
 | ID | Nama | Khusus PNS |
 |----|------|:----------:|
@@ -1483,7 +1665,7 @@ Keycloak tidak menyimpan role dan permission aplikasi. Setelah login SSO berhasi
 | 5 | Cuti Besar | Ya |
 | 6 | Cuti Luar Tanggungan Negara (CLTN) | Ya |
 
-### 16.5 ref_agama
+### 16.8 ref_agama
 
 | ID | Nama |
 |----|------|
@@ -1494,14 +1676,14 @@ Keycloak tidak menyimpan role dan permission aplikasi. Setelah login SSO berhasi
 | 5 | Buddha |
 | 6 | Konghucu |
 
-### 16.6 ref_jenis_kelamin
+### 16.9 ref_jenis_kelamin
 
 | ID | Kode | Nama |
 |----|------|------|
 | 1 | L | Laki-laki |
 | 2 | P | Perempuan |
 
-### 16.7 ref_status_perkawinan
+### 16.10 ref_status_perkawinan
 
 | ID | Nama |
 |----|------|
@@ -1509,7 +1691,7 @@ Keycloak tidak menyimpan role dan permission aplikasi. Setelah login SSO berhasi
 | 2 | Menikah |
 | 3 | Duda / Janda |
 
-### 16.8 ref_jenjang_pendidikan
+### 16.11 ref_jenjang_pendidikan
 
 | ID | Nama |
 |----|------|
@@ -1523,16 +1705,7 @@ Keycloak tidak menyimpan role dan permission aplikasi. Setelah login SSO berhasi
 | 8 | S2 / Profesi |
 | 9 | S3 |
 
-### 16.9 ref_unit_kerja
-
-> **Catatan:** Daftar ini perlu dikonfirmasi ke pihak LLDIKTI XVI (lihat pertanyaan B1 di dokumen pertanyaan).
-
-| ID | Nama | Keterangan |
-|----|------|------------|
-| 1 | Bagian Umum | *Perlu konfirmasi* |
-| 2 | ... | *Perlu konfirmasi* |
-
-### 16.10 ref_hari_libur
+### 16.12 ref_hari_libur
 
 | Field | Tipe | Keterangan |
 |-------|------|------------|
@@ -1544,7 +1717,7 @@ Keycloak tidak menyimpan role dan permission aplikasi. Setelah login SSO berhasi
 
 > Diinput manual oleh Admin/Super Admin setiap awal tahun berdasarkan SKB Menteri.
 
-### 16.11 ref_bup (Batas Usia Pensiun)
+### 16.13 ref_bup (Batas Usia Pensiun)
 
 Reference ini dipakai bila aturan BUP perlu lebih detail dari `ref_jenis_jabatan.maks_usia_pensiun`.
 Hasil meeting menyepakati bahwa BUP tidak di-hardcode di aplikasi.
@@ -1559,6 +1732,18 @@ Hasil meeting menyepakati bahwa BUP tidak di-hardcode di aplikasi.
 | Struktural (Eselon I-II) | 60 |
 
 > **Catatan:** Data BUP final mengikuti daftar jabatan yang diberikan oleh bagian kepegawaian LLDIKTI. Bila ada jabatan dengan usia pensiun berbeda, Admin harus dapat memperbaruinya melalui reference table.
+
+### 16.14 ref_notification_channels
+
+| Field | Tipe | Keterangan |
+|-------|------|------------|
+| `id` | UUID | PK |
+| `code` | string | `in_app`, `email`, `whatsapp_business`, dll |
+| `name` | string | Nama channel |
+| `is_enabled` | boolean | Aktif/nonaktif |
+| `config` | json | Konfigurasi aman; credential sensitif tetap di `.env`/secret manager |
+
+Channel notifikasi harus bisa dinyalakan/dimatikan tanpa mengubah kode domain.
 
 ---
 
@@ -1623,9 +1808,12 @@ Meskipun Fase 1 menggunakan Laravel Blade (server-side rendering), semua logika 
 | GET | `/cuti` | LeaveController@index | All (filtered by role) |
 | POST | `/cuti` | LeaveController@store | Pegawai |
 | GET | `/cuti/{id}` | LeaveController@show | Related parties |
-| POST | `/cuti/{id}/approve` | LeaveController@approve | Approver |
-| POST | `/cuti/{id}/postpone` | LeaveController@postpone | Approver |
+| POST | `/cuti/{id}/decision` | LeaveDecisionController@store | Current step actor |
+| GET | `/cuti/{id}/document` | LeaveDocumentController@show | Related parties |
+| GET | `/cuti/verify/{token}` | LeaveVerificationController@show | Public |
 | GET | `/cuti/saldo` | LeaveBalanceController@show | Pegawai (self) |
+| GET | `/admin/cuti/saldo` | LeaveBalanceController@index | Admin |
+| POST | `/admin/cuti/saldo/{employeeId}/adjust` | LeaveBalanceController@adjust | Admin |
 
 #### EWS Routes
 
@@ -1650,6 +1838,7 @@ Meskipun Fase 1 menggunakan Laravel Blade (server-side rendering), semua logika 
 | POST | `/import/preview` | ImportController@preview | Admin |
 | POST | `/import/execute` | ImportController@execute | Admin |
 | GET | `/export/pegawai` | ExportController@employees | Admin+ |
+| POST | `/export/pegawai/custom` | ExportController@customEmployees | Admin+ |
 | GET | `/export/cuti` | ExportController@leaves | Admin+ |
 
 #### Dashboard & Audit Routes
@@ -1670,6 +1859,10 @@ Meskipun Fase 1 menggunakan Laravel Blade (server-side rendering), semua logika 
 | DELETE | `/admin/hari-libur/{id}` | HolidayController@destroy | SuperAdmin |
 | GET | `/admin/supervisor` | SupervisorController@index | Admin |
 | POST | `/admin/supervisor` | SupervisorController@store | Admin |
+| GET | `/admin/approval-chain/cuti` | LeaveApprovalConfigController@index | SuperAdmin |
+| POST | `/admin/approval-chain/cuti` | LeaveApprovalConfigController@store | SuperAdmin |
+| GET | `/admin/notification-channels` | NotificationChannelController@index | SuperAdmin |
+| PUT | `/admin/notification-channels/{id}` | NotificationChannelController@update | SuperAdmin |
 
 ---
 
@@ -1751,8 +1944,11 @@ Meskipun Fase 1 menggunakan Laravel Blade (server-side rendering), semua logika 
 3. **Role dan permission dikelola di SIMPEG** — Keycloak tidak menjadi sumber otorisasi fitur aplikasi.
 4. **Data pegawai awal tersedia dalam CSV/Excel** — sample dapat digunakan untuk import awal, tetapi field lengkap tetap mengikuti struktur PRD.
 5. **Server/hosting dan domain production disiapkan LLDIKTI pada tahap deployment** — development tidak menunggu server production.
-6. **Email production menggunakan email operasional LLDIKTI** — selama development testing email dapat memakai Mailpit.
-7. **Referensi jabatan, pangkat, golongan, unit kerja, dan BUP disediakan bagian kepegawaian** — sistem menyediakan struktur dan CRUD reference.
+6. **Email production menggunakan email operasional LLDIKTI/Gmail resmi** — selama development testing email dapat memakai Mailpit.
+7. **WhatsApp Business belum wajib aktif di Fase 1** — sistem hanya menyiapkan desain channel-configurable sampai layanan/credential disediakan.
+8. **Referensi jabatan, pangkat, golongan, unit kerja hierarkis, status pegawai, dan BUP disediakan bagian kepegawaian** — sistem menyediakan struktur dan CRUD reference.
+9. **Saldo cuti awal dan riwayat N-1/N-2 disediakan/diinput Admin Kepegawaian** — dibutuhkan agar carry-over tahun berjalan akurat.
+10. **Format formulir cuti resmi dan konten halaman QR diverifikasi LLDIKTI** — tim pengembang menyediakan generator dan halaman verifikasi.
 
 ### 20.2 Batasan
 
@@ -1761,6 +1957,8 @@ Meskipun Fase 1 menggunakan Laravel Blade (server-side rendering), semua logika 
 3. **Tim magang** — PRD ditulis dengan detail teknis yang cukup untuk developer junior.
 4. **Fase 1 saja** — fitur di luar scope Fase 1 tidak diimplementasikan.
 5. **Tidak ada login manual** — autentikasi sepenuhnya via Keycloak.
+6. **Dosen DPK belum menjadi modul operasional Fase 1** — struktur jabatan disiapkan agar tidak menutup pengembangan, tetapi alur khusus dosen dibuat di fase berikutnya.
+7. **Tanda tangan elektronik tersertifikasi belum wajib** — QR Code verifikasi SIMPEG menjadi mekanisme verifikasi dokumen cuti Fase 1.
 
 ### 20.3 Dependensi
 
@@ -1769,9 +1967,12 @@ Meskipun Fase 1 menggunakan Laravel Blade (server-side rendering), semua logika 
 | Trait/fungsi Keycloak, Client ID, Client Secret, URL Keycloak, akun testing SSO | Tim IT LLDIKTI XVI |
 | Server/hosting production | Tim IT LLDIKTI XVI |
 | Domain & SSL production | Tim IT LLDIKTI XVI |
-| User/password email operasional production | Tim IT LLDIKTI XVI |
+| User/password email operasional production atau Gmail resmi | Tim IT LLDIKTI XVI |
+| Layanan/library/credential WhatsApp Business jika ingin diaktifkan | Tim IT LLDIKTI XVI |
 | Data pegawai awal (CSV/Excel) | Admin Kepegawaian LLDIKTI XVI |
-| Daftar unit kerja, jabatan, pangkat, golongan, dan BUP | Admin Kepegawaian LLDIKTI XVI |
+| Daftar unit/tim kerja hierarkis, jabatan, pangkat, golongan, status pegawai, dan BUP | Admin Kepegawaian LLDIKTI XVI |
+| Saldo cuti awal, riwayat cuti N-1/N-2, dan aturan koreksi saldo awal | Admin Kepegawaian LLDIKTI XVI |
+| Format formulir cuti resmi dan narasi verifikasi QR | Admin Kepegawaian LLDIKTI XVI |
 | Daftar hari libur nasional 2026 | Admin / Super Admin |
 
 ---
@@ -1787,11 +1988,12 @@ Untuk transparansi, berikut fitur yang direncanakan di fase berikutnya:
 - Surat tugas
 - Kalender virtual (per pegawai / per tim)
 - Log harian
+- Aktivasi penuh WhatsApp Business notification bila layanan/credential sudah tersedia
 
 ### Fase 3 — Kinerja
 - SKP & Rencana Hasil Kerja (RHK)
 - Log harian ↔ RHK (many-to-many)
-- Evaluasi kinerja oleh atasan
+- Evaluasi kinerja oleh kepala bagian
 - Riwayat pelatihan
 - Tracker 20 JP pengembangan kompetensi
 - Arsip dokumen (modul terpisah)
@@ -1802,6 +2004,7 @@ Untuk transparansi, berikut fitur yang direncanakan di fase berikutnya:
 - Asesmen kompetensi
 - Ekspor data ke format SIASN (CSV/JSON BKN)
 - Integrasi API SIASN (jika akses tersedia)
+- Modul khusus Dosen DPK dan jabatan akademik bila diprioritaskan LLDIKTI
 
 ---
 
@@ -1813,6 +2016,7 @@ Untuk transparansi, berikut fitur yang direncanakan di fase berikutnya:
 | **PP 49/2018** | Manajemen PPPK — BUP, kontrak PPPK, pembatasan jenis cuti |
 | **PP 94/2021** | Disiplin PNS — jenis hukuman, dampak terhadap eligibility kenaikan pangkat |
 | **PP 99/2000** | Kenaikan Pangkat — syarat 4 tahun TMT, syarat kinerja baik |
+| **Ketentuan Satyalancana Karya Satya** | EWS milestone masa kerja 10/20/30 tahun; detail eligibility divalidasi Admin Kepegawaian |
 
 > **Disclaimer:** Referensi regulasi berdasarkan yang disebutkan di dokumen sumber (paparan dan diagram). Tidak diklaim sebagai daftar lengkap semua regulasi terkait kepegawaian ASN.
 
@@ -1836,6 +2040,8 @@ Untuk transparansi, berikut fitur yang direncanakan di fase berikutnya:
 | **PNS** | Pegawai Negeri Sipil |
 | **PPPK** | Pegawai Pemerintah dengan Perjanjian Kerja |
 | **PYBMC** | Pejabat Yang Berwenang Memberikan Cuti |
+| **QR Verification** | Halaman verifikasi SIMPEG yang dibuka dari QR Code pada dokumen cuti |
+| **Satyalancana** | Tanda kehormatan masa kerja ASN; di Fase 1 digunakan sebagai trigger EWS 10/20/30 tahun |
 | **RBAC** | Role-Based Access Control |
 | **SIASN** | Sistem Informasi ASN (BKN) |
 | **SIMPEG** | Sistem Informasi Manajemen Kepegawaian |

@@ -89,7 +89,7 @@
   <main class="wrap">
     <section>
       <h2>Acuan Requirement</h2>
-      <p>Diagram ini mengikuti PRD Fase 1/Core: Keycloak hanya untuk SSO, role dan permission dikelola internal SIMPEG, import awal mengikuti `daftar_pegawai.xlsx`, approval cuti berjalan melalui Atasan Langsung, Kabag/Verifikator, dan Pimpinan/PYBMC, serta semua perubahan penting dicatat di audit log.</p>
+      <p>Diagram ini mengikuti PRD Fase 1/Core: Keycloak hanya untuk SSO, role dan permission dikelola internal SIMPEG, import awal mengikuti `daftar_pegawai.xlsx`, approval cuti berjalan melalui Kepala Bagian, Kabag/Verifikator, dan Pimpinan/PYBMC, serta semua perubahan penting dicatat di audit log.</p>
       <div class="diagram">
         <pre class="mermaid">
 flowchart TD
@@ -122,11 +122,11 @@ flowchart TD
 
     RoleGate -- "Pegawai" --> EmployeeHome["Dashboard pegawai"]
     EmployeeHome --> LeaveRequest["Ajukan cuti"]
-    LeaveRequest --> CheckBalance["Validasi saldo, jenis cuti, hari kerja, dan atasan langsung"]
-    CheckBalance --> SubmitLeave["Submit cuti: status menunggu atasan langsung"]
+    LeaveRequest --> CheckBalance["Validasi saldo, jenis cuti, hari kerja, dan kepala bagian"]
+    CheckBalance --> SubmitLeave["Submit cuti: status menunggu kepala bagian"]
 
-    SubmitLeave --> SupervisorAction["Atasan Langsung mengetahui / tunda"]
-    RoleGate -- "Atasan Langsung" --> SupervisorAction
+    SubmitLeave --> SupervisorAction["Kepala Bagian mengetahui / tunda"]
+    RoleGate -- "Kepala Bagian" --> SupervisorAction
     SupervisorAction --> Stage2{"Lanjut stage 2 atau ditunda?"}
     Stage2 -- "Ditunda" --> NotifyEmployee1["Notifikasi ke pegawai"]
     Stage2 -- "Lanjut" --> VerifierAction["Kabag/Verifikator menyetujui / tunda"]
@@ -160,7 +160,7 @@ flowchart TD
         </pre>
       </div>
       <div class="note">
-        <strong>Catatan:</strong> Import awal tidak memblokir field yang belum tersedia di Excel seperti NIK, No. KK, unit kerja, atasan langsung, dan data SK. Field tersebut dilengkapi setelah import atau melalui file tambahan.
+        <strong>Catatan:</strong> Import awal tidak memblokir field yang belum tersedia di Excel seperti NIK, No. KK, unit kerja, kepala bagian, dan data SK. Field tersebut dilengkapi setelah import atau melalui file tambahan.
       </div>
     </section>
   </main>

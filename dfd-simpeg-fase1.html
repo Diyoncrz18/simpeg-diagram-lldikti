@@ -40,7 +40,7 @@
 flowchart LR
     Pegawai["Pegawai"] --> P1["P1 Auth SSO dan RBAC"]
     Admin["Admin Kepegawaian"] --> P1
-    Atasan["Atasan Langsung"] --> P1
+    KepalaBagian["Kepala Bagian"] --> P1
     Pimpinan["Pimpinan/PYBMC"] --> P1
     P1 <--> Keycloak["External: Keycloak SSO"]
     P1 --> D1[("D1 Employees + Role")]
@@ -57,7 +57,7 @@ flowchart LR
     P3 --> D7
 
     Pegawai --> P4["P4 Pengajuan Cuti"]
-    Atasan --> P5["P5 Approval Cuti"]
+    KepalaBagian --> P5["P5 Approval Cuti"]
     Pimpinan --> P5
     P4 --> D3[("D3 Leave Requests + Leave Balances")]
     P5 --> D3
@@ -80,7 +80,7 @@ flowchart LR
     P7 --> SMTP["External: SMTP/Mailpit"]
     P7 --> Pegawai
     P7 --> Admin
-    P7 --> Atasan
+    P7 --> KepalaBagian
     P7 --> Pimpinan
 
     Admin --> P8["P8 Dashboard dan Laporan"]

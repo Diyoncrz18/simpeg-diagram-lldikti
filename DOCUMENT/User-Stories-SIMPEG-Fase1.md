@@ -3,12 +3,12 @@
 
 | Field | Detail |
 |-------|--------|
-| **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.1 |
-| **Tanggal** | 14 Juni 2026 |
-| **Total User Stories** | 52 |
+| **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.2 |
+| **Tanggal** | 4 Juli 2026 |
+| **Total User Stories** | 53 |
 | **Total Epics** | 9 |
 
-> **Catatan sinkronisasi PRD 1.1:** Keycloak digunakan hanya untuk SSO/login. Role dan permission dikelola di database SIMPEG. Approval cuti Fase 1 diawali dengan alur seragam, tetapi engine tetap harus mendukung approval dinamis dan skip approver yang sama. Email development dapat memakai Mailpit, sedangkan email production memakai email operasional LLDIKTI.
+> **Catatan sinkronisasi PRD 1.2:** Keycloak digunakan hanya untuk SSO/login. Role dan permission dikelola di database SIMPEG. Approval cuti memakai chain dinamis per pegawai/unit, status keputusan resmi (`Disetujui`, `Perubahan`, `Ditangguhkan`, `Tidak Disetujui`), cuti tahunan tidak boleh lintas tahun, EWS menambahkan Satyalancana, notifikasi harus channel-configurable, dan laporan mendukung export nominatif Excel custom.
 
 ---
 
@@ -50,13 +50,13 @@ Setiap story mengikuti format:
 | E1 | Autentikasi & SSO | 5 | 18 |
 | E2 | Manajemen Data Pegawai | 10 | 47 |
 | E3 | Import Data Excel/CSV | 4 | 19 |
-| E4 | Manajemen Cuti | 12 | 52 |
-| E5 | Early Warning System (EWS) | 5 | 24 |
+| E4 | Manajemen Cuti | 12 | 56 |
+| E5 | Early Warning System (EWS) | 5 | 26 |
 | E6 | Notifikasi | 4 | 16 |
 | E7 | Audit Log | 3 | 11 |
 | E8 | Dashboard | 5 | 26 |
-| E9 | Laporan & Export | 4 | 13 |
-| | **Total** | **52** | **226** |
+| E9 | Laporan & Export | 5 | 16 |
+| | **Total** | **53** | **235** |
 
 ---
 
@@ -155,7 +155,7 @@ Setiap story mengikuti format:
 
 - [ ] AC-1: Halaman "Kelola Akses User" menampilkan daftar pegawai beserta status mapping (Terhubung / Belum Terhubung).
 - [ ] AC-2: Super Admin bisa mengisi Keycloak ID atau email Keycloak untuk setiap pegawai.
-- [ ] AC-3: Super Admin bisa menetapkan satu role internal per pegawai: Super Admin, Admin Kepegawaian, Pimpinan, Atasan Langsung, atau Pegawai.
+- [ ] AC-3: Super Admin bisa menetapkan satu role internal per pegawai: Super Admin, Admin Kepegawaian, Pimpinan, Kepala Bagian, atau Pegawai.
 - [ ] AC-4: Perubahan role langsung berlaku pada login berikutnya.
 - [ ] AC-5: Perubahan mapping dan role dicatat di audit log.
 - [ ] AC-6: Validasi: satu akun Keycloak hanya bisa di-mapping ke satu pegawai.
@@ -183,7 +183,7 @@ Setiap story mengikuti format:
 
 - [ ] AC-1: Super Admin dan Admin Kepegawaian → Dashboard Admin.
 - [ ] AC-2: Pimpinan → Dashboard Pimpinan.
-- [ ] AC-3: Atasan Langsung → Dashboard Atasan (daftar bawahan + pengajuan pending).
+- [ ] AC-3: Kepala Bagian → Dashboard Kepala Bagian (daftar bawahan + pengajuan pending).
 - [ ] AC-4: Pegawai → Dashboard Pribadi (profil ringkas + saldo cuti).
 
 ---
@@ -207,7 +207,7 @@ Setiap story mengikuti format:
 **Acceptance Criteria:**
 
 - [ ] AC-1: Form input multi-step atau tabbed:
-  - Tab 1: Data Utama (nama, email pegawai, NIP, status kepegawaian, tanggal lahir, golongan, pangkat, jabatan, kelas jabatan, pendidikan terakhir, prodi pendidikan terakhir, tanggal pensiun)
+  - Tab 1: Data Utama (nama, email pegawai, NIP, status pegawai dari `ref_status_pegawai`, keterangan status, tanggal lahir, golongan/pangkat terkini dari riwayat, jabatan dari `ref_jabatan`, kelas jabatan dari riwayat, pendidikan terakhir, prodi pendidikan terakhir, tanggal pensiun)
   - Tab 2: Data Pelengkap (NIK, No. KK, tempat lahir, jenis kelamin, agama, status kawin, golongan darah, foto)
   - Tab 3: Data Kontak (alamat, no HP, no telepon rumah)
   - Tab 4: Data Pengangkatan (jenis pengangkatan, TMT, no SK, tanggal SK, upload file SK)
@@ -216,7 +216,7 @@ Setiap story mengikuti format:
 - [ ] AC-3a: Validasi No. KK — format 16 digit (opsional, boleh kosong).
 - [ ] AC-4: Upload foto: maks 10MB, format JPG/PNG, preview sebelum simpan.
 - [ ] AC-5: Semua field bertanda wajib harus terisi sebelum bisa disimpan.
-- [ ] AC-6: Setelah simpan, pegawai berstatus "Aktif" dan muncul di daftar pegawai.
+- [ ] AC-6: Setelah simpan, pegawai memakai status default `Aktif` dari `ref_status_pegawai` dan muncul di daftar pegawai.
 - [ ] AC-7: Audit log mencatat: user yang menambahkan, timestamp, dan seluruh data yang dimasukkan.
 - [ ] AC-8: Tampilkan notifikasi sukses: *"Data pegawai [Nama] berhasil ditambahkan."*
 
@@ -265,7 +265,7 @@ Setiap story mengikuti format:
 
 - [ ] AC-1: Tabel daftar pegawai menampilkan kolom: Foto (thumbnail), Nama, NIP, Golongan, Jabatan, Unit Kerja, Jenis Pegawai, Status.
 - [ ] AC-2: Search bar — bisa mencari berdasarkan nama atau NIP.
-- [ ] AC-3: Filter dropdown: golongan, unit kerja, jenis pegawai (PNS/PPPK), status (Aktif/Non-Aktif).
+- [ ] AC-3: Filter dropdown: golongan, unit/tim kerja hierarkis, jenis pegawai (PNS/PPPK), dan status dari `ref_status_pegawai`.
 - [ ] AC-4: Sorting: klik header kolom untuk sort ascending/descending.
 - [ ] AC-5: Pagination: 10 / 25 / 50 baris per halaman (user bisa memilih).
 - [ ] AC-6: Klik nama pegawai membuka halaman detail pegawai.
@@ -304,7 +304,7 @@ Setiap story mengikuti format:
 - [ ] AC-3: Tombol "Edit" untuk mengedit data pribadi dan kontak.
 - [ ] AC-4: Menampilkan informasi kalkulasi otomatis: tanggal kenaikan pangkat berikutnya, tanggal KGB berikutnya, tanggal pensiun.
 - [ ] AC-5: Menampilkan flag "Kinerja Baik" (toggle, bisa diubah admin — US-5.4).
-- [ ] AC-6: Menampilkan atasan langsung yang di-assign.
+- [ ] AC-6: Menampilkan kepala bagian yang di-assign.
 
 ---
 
@@ -586,11 +586,12 @@ Setiap story mengikuti format:
   - Upload lampiran (opsional, maks 10MB, PDF/JPG/PNG).
 - [ ] AC-2: Sistem otomatis menghitung jumlah hari kerja (exclude Sabtu, Minggu, hari libur nasional, cuti bersama).
 - [ ] AC-3: Tampilkan jumlah hari kerja secara real-time saat tanggal dipilih.
-- [ ] AC-4: Validasi saldo: jika jenis cuti = Cuti Tahunan dan saldo tidak cukup → tampilkan pesan error, form tidak bisa di-submit.
-- [ ] AC-5: Setelah submit:
-  - Status = "Menunggu Atasan Langsung".
-  - Notifikasi in-app + email terkirim ke atasan langsung pegawai.
-- [ ] AC-6: Pegawai tidak bisa mengajukan cuti jika belum memiliki atasan langsung yang di-assign.
+- [ ] AC-4: Validasi tanggal: satu pengajuan tidak boleh melewati tahun kalender; periode Desember–Januari harus dibuat sebagai dua pengajuan.
+- [ ] AC-5: Validasi saldo: jika jenis cuti = Cuti Tahunan dan saldo tidak cukup → tampilkan pesan error, form tidak bisa di-submit.
+- [ ] AC-6: Setelah submit:
+  - Status = "Menunggu [step pertama approval chain]".
+  - Notifikasi in-app + email terkirim ke pihak pertama pada chain.
+- [ ] AC-7: Pegawai tidak bisa mengajukan cuti jika belum memiliki approval chain aktif atau pihak pertama tidak valid.
 
 ---
 
@@ -612,9 +613,11 @@ Setiap story mengikuti format:
 
 - [ ] AC-1: Tabel daftar pengajuan: Jenis Cuti, Tanggal Mulai, Tanggal Selesai, Jumlah Hari, Status, Tanggal Pengajuan.
 - [ ] AC-2: Status ditampilkan dengan warna badge:
-  - Kuning: Menunggu (stage 1/2/3)
+  - Kuning: Menunggu step approval/verifikasi
   - Hijau: Disetujui
-  - Merah: Ditunda
+  - Biru: Perubahan
+  - Oranye: Ditangguhkan
+  - Merah: Tidak Disetujui
 - [ ] AC-3: Klik baris membuka detail pengajuan + timeline approval.
 - [ ] AC-4: Filter: tahun, status.
 - [ ] AC-5: Pagination.
@@ -639,16 +642,17 @@ Setiap story mengikuti format:
 
 - [ ] AC-1: Tampilkan informasi saldo cuti tahunan:
   - Jatah tahun ini: 12 hari
-  - Carry-over dari tahun lalu: X hari
+  - Carry-over N-1: maks 6 hari
+  - Hak tambahan N-2/N-1 jika dua tahun berturut-turut tidak mengambil cuti
   - Total tersedia: Y hari
   - Sudah terpakai: Z hari
   - Sisa: (Y - Z) hari
-- [ ] AC-2: Tampilkan riwayat penggunaan cuti tahun berjalan (daftar cuti yang sudah disetujui).
+- [ ] AC-2: Tampilkan riwayat penggunaan cuti tahun berjalan, N-1, dan N-2 yang memengaruhi carry-over.
 - [ ] AC-3: Data saldo diperbarui secara real-time setelah cuti disetujui.
 
 ---
 
-### US-4.4 · Approval Stage 1 — Atasan Langsung (Mengetahui)
+### US-4.4 · Approval/Verifikasi Step 1 — Kepala Bagian atau Pihak Pertama
 
 | Field | Detail |
 |-------|--------|
@@ -658,7 +662,7 @@ Setiap story mengikuti format:
 | **Modul** | Cuti — Approval |
 | **Dependensi** | US-4.1 |
 
-> **Sebagai** Atasan Langsung,
+> **Sebagai** Kepala Bagian,
 > **Saya ingin** melihat dan menindaklanjuti pengajuan cuti bawahan saya,
 > **Sehingga** proses approval bisa berjalan tepat waktu.
 
@@ -666,23 +670,20 @@ Setiap story mengikuti format:
 
 - [ ] AC-1: Halaman "Pengajuan Cuti Bawahan" menampilkan daftar pengajuan yang menunggu tindakan saya.
 - [ ] AC-2: Detail pengajuan: nama pegawai, jenis cuti, tanggal mulai–selesai, jumlah hari, alasan, lampiran.
-- [ ] AC-3: Dua tombol aksi: **"Setujui"** dan **"Tunda"**.
-- [ ] AC-4: Klik "Setujui" → konfirmasi → status berubah menjadi "Menunggu Kabag/verifikator" atau stage berikutnya yang dikonfigurasi → notifikasi terkirim ke approver berikutnya.
-- [ ] AC-5: Klik "Tunda" → muncul form textarea "Alasan Penundaan" (wajib diisi) → status berubah menjadi "Ditunda oleh Atasan Langsung" → notifikasi ke pegawai.
-- [ ] AC-6: **Tidak ada tombol "Tolak"** (sesuai PP 11/2017).
+- [ ] AC-3: Opsi aksi memakai label resmi: **"Disetujui"**, **"Perubahan"**, **"Ditangguhkan"**, dan **"Tidak Disetujui"**.
+- [ ] AC-4: Klik "Disetujui" → konfirmasi → status berubah ke step berikutnya yang dikonfigurasi → notifikasi terkirim ke approver/verifikator berikutnya.
+- [ ] AC-5: Klik "Perubahan", "Ditangguhkan", atau "Tidak Disetujui" → muncul textarea keterangan wajib → status dan keterangan tersimpan → notifikasi ke pegawai.
+- [ ] AC-6: Tidak ada tombol formal "Tolak"; keputusan negatif memakai label **"Tidak Disetujui"**.
 - [ ] AC-7: Audit log mencatat aksi approval/penundaan.
-- [ ] AC-8: Atasan Langsung hanya melihat pengajuan dari pegawai yang di-assign kepadanya (bukan semua pegawai).
-- [ ] AC-9: Jika atasan langsung juga menjadi approver pada stage berikutnya, sistem otomatis skip stage duplikat agar orang yang sama tidak menyetujui dua kali.
-- [ ] AC-10: Pengajuan yang berstatus "Ditunda" tetap aktif dan muncul di halaman daftar pengajuan approver tersebut dengan status **"Ditunda — Menunggu Tindakan Lanjut"**.
-- [ ] AC-11: Approver yang telah memilih "Tunda" dapat membuka kembali pengajuan yang sama dan mengubah keputusannya menjadi **"Setujui"** kapan saja selama pengajuan belum dibatalkan.
-- [ ] AC-12: Saat approver mengubah "Tunda" → "Setujui", status pengajuan kembali ke alur normal — lanjut ke stage berikutnya atau final approve sesuai konfigurasi approval chain.
-- [ ] AC-13: Perubahan keputusan dari "Tunda" → "Setujui" dicatat di audit log beserta timestamp dan komentar (opsional).
-- [ ] AC-14: Notifikasi terkirim ke approver berikutnya (atau ke pegawai jika ini stage final) saat keputusan diubah menjadi "Setujui".
-- [ ] AC-15: Tidak ada batas waktu kadaluarsa untuk pengajuan berstatus "Ditunda" — pengajuan menunggu tanpa auto-expire.
+- [ ] AC-8: Kepala Bagian hanya melihat pengajuan dari pegawai yang di-assign kepadanya (bukan semua pegawai).
+- [ ] AC-9: Jika kepala bagian juga menjadi approver pada step berikutnya, sistem otomatis skip step duplikat agar orang yang sama tidak menyetujui dua kali.
+- [ ] AC-10: Pengajuan berstatus "Perubahan" atau "Ditangguhkan" tetap terlihat di timeline sampai ada tindak lanjut sesuai keputusan.
+- [ ] AC-11: Perubahan rekomendasi/keputusan dicatat di audit log beserta timestamp dan komentar.
+- [ ] AC-12: Notifikasi terkirim ke step berikutnya atau pegawai sesuai status terbaru.
 
 ---
 
-### US-4.5 · Approval Stage 2 — Kabag/Verifikator (Menyetujui)
+### US-4.5 · Verifikasi Kepegawaian / Step Lanjutan
 
 | Field | Detail |
 |-------|--------|
@@ -692,27 +693,22 @@ Setiap story mengikuti format:
 | **Modul** | Cuti — Approval |
 | **Dependensi** | US-4.4 |
 
-> **Sebagai** Kabag/verifikator yang dikonfigurasi,
-> **Saya ingin** menyetujui atau menunda pengajuan cuti yang sudah diketahui atasan langsung,
+> **Sebagai** verifikator/Kepegawaian yang dikonfigurasi,
+> **Saya ingin** menyetujui atau menunda pengajuan cuti yang sudah diketahui kepala bagian,
 > **Sehingga** proses approval berlanjut ke tahap akhir.
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Sama dengan US-4.4, tetapi hanya menampilkan pengajuan yang sudah melewati stage 1.
-- [ ] AC-2: Opsi: "Setujui" → lanjut ke stage final yang dikonfigurasi, atau "Tunda" (alasan wajib).
-- [ ] AC-3: Notifikasi terkirim sesuai aksi.
-- [ ] AC-4: Audit log tercatat.
-- [ ] AC-5: Jika Kabag/verifikator juga merupakan pejabat pemberi cuti final, stage final dapat di-skip sesuai konfigurasi approval.
-- [ ] AC-6: Pengajuan yang berstatus "Ditunda" tetap aktif dan muncul di halaman daftar pengajuan approver tersebut dengan status **"Ditunda — Menunggu Tindakan Lanjut"**.
-- [ ] AC-7: Approver yang telah memilih "Tunda" dapat membuka kembali pengajuan yang sama dan mengubah keputusannya menjadi **"Setujui"** kapan saja selama pengajuan belum dibatalkan.
-- [ ] AC-8: Saat approver mengubah "Tunda" → "Setujui", status pengajuan kembali ke alur normal — lanjut ke stage berikutnya atau final approve sesuai konfigurasi approval chain.
-- [ ] AC-9: Perubahan keputusan dari "Tunda" → "Setujui" dicatat di audit log beserta timestamp dan komentar (opsional).
-- [ ] AC-10: Notifikasi terkirim ke approver berikutnya (atau ke pegawai jika ini stage final) saat keputusan diubah menjadi "Setujui".
-- [ ] AC-11: Tidak ada batas waktu kadaluarsa untuk pengajuan berstatus "Ditunda" — pengajuan menunggu tanpa auto-expire.
+- [ ] AC-1: Sama dengan US-4.4, tetapi hanya menampilkan pengajuan yang sudah sampai pada step saya.
+- [ ] AC-2: Verifikator dapat melihat saldo tahun berjalan, carry-over N-1, riwayat N-2/N-1, dan lampiran.
+- [ ] AC-3: Opsi aksi: "Disetujui", "Perubahan", "Ditangguhkan", atau "Tidak Disetujui"; semua selain "Disetujui" wajib keterangan.
+- [ ] AC-4: Notifikasi terkirim sesuai aksi.
+- [ ] AC-5: Audit log tercatat.
+- [ ] AC-6: Chain mendukung lebih dari satu verifikator dan skip otomatis jika pegawai yang sama muncul berurutan.
 
 ---
 
-### US-4.6 · Approval Stage 3 — Pimpinan/PYBMC (Final)
+### US-4.6 · Keputusan Final Pimpinan/PYBMC
 
 | Field | Detail |
 |-------|--------|
@@ -728,23 +724,20 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Menampilkan pengajuan yang sudah melewati stage 1 dan 2, beserta catatan/komentar dari approver sebelumnya.
-- [ ] AC-2: Opsi: "Setujui" atau "Tunda" (alasan wajib).
-- [ ] AC-3: Jika "Setujui":
+- [ ] AC-1: Menampilkan pengajuan yang sudah melewati step sebelumnya, beserta catatan/komentar dari approver/verifikator sebelumnya.
+- [ ] AC-2: Opsi keputusan final: "Disetujui", "Perubahan", "Ditangguhkan", atau "Tidak Disetujui".
+- [ ] AC-3: Jika "Disetujui":
   - Status menjadi **"Disetujui"**.
   - Saldo cuti tahunan **dikurangi otomatis** sebesar jumlah hari kerja (hanya untuk cuti tahunan).
   - Notifikasi "Cuti Anda Disetujui" terkirim ke pegawai (in-app + email).
-- [ ] AC-4: Jika "Tunda":
-  - Status menjadi **"Ditunda oleh Pimpinan/PYBMC"**.
+  - Sistem menghasilkan formulir cuti resmi dengan QR Code verifikasi.
+- [ ] AC-4: Jika "Perubahan", "Ditangguhkan", atau "Tidak Disetujui":
+  - Keterangan wajib diisi.
   - Saldo cuti **tidak** dikurangi.
-  - Notifikasi "Cuti Anda Ditunda" + alasan terkirim ke pegawai.
+  - Notifikasi status + keterangan terkirim ke pegawai.
 - [ ] AC-5: Audit log mencatat aksi beserta komentar.
 - [ ] AC-6: Stage final mengikuti konfigurasi approval chain; default awal adalah Pimpinan / PYBMC.
-- [ ] AC-7: Pengajuan yang berstatus "Ditunda" tetap aktif dan muncul di halaman daftar pengajuan Pimpinan/PYBMC dengan status **"Ditunda — Menunggu Tindakan Lanjut"**.
-- [ ] AC-8: Pimpinan/PYBMC yang telah memilih "Tunda" dapat membuka kembali pengajuan yang sama dan mengubah keputusannya menjadi **"Setujui"** kapan saja selama pengajuan belum dibatalkan.
-- [ ] AC-9: Saat keputusan diubah "Tunda" → "Setujui" pada stage final: status menjadi **"Disetujui"**, saldo cuti tahunan dikurangi otomatis (jika cuti tahunan), dan notifikasi "Cuti Anda Disetujui" terkirim ke pegawai.
-- [ ] AC-10: Perubahan keputusan dari "Tunda" → "Setujui" dicatat di audit log beserta timestamp dan komentar (opsional).
-- [ ] AC-11: Tidak ada batas waktu kadaluarsa untuk pengajuan berstatus "Ditunda" — pengajuan menunggu tanpa auto-expire.
+- [ ] AC-7: Untuk cuti Kepala Lembaga sendiri, Admin Kepegawaian dapat mencatat approval eksternal dan upload dokumen yang sudah disetujui.
 
 ---
 
@@ -766,7 +759,7 @@ Setiap story mengikuti format:
 
 - [ ] AC-1: Halaman detail pengajuan cuti menampilkan info lengkap (jenis, tanggal, alasan, lampiran).
 - [ ] AC-2: Timeline visual (vertikal) menampilkan setiap stage:
-  - Stage, nama approver, aksi (Setujui/Tunda), waktu aksi, komentar.
+  - Step, nama approver/verifikator, aksi (`Disetujui`/`Perubahan`/`Ditangguhkan`/`Tidak Disetujui`), waktu aksi, keterangan.
   - Stage yang belum diproses ditampilkan sebagai "Menunggu".
 - [ ] AC-3: Akses: pegawai yang mengajukan + semua approver di chain + Admin.
 
@@ -816,9 +809,10 @@ Setiap story mengikuti format:
 - [ ] AC-2: Admin bisa melakukan **koreksi manual** saldo cuti (misal: menambah/mengurangi carry-over) dengan alasan wajib.
 - [ ] AC-3: Koreksi manual tercatat di audit log.
 - [ ] AC-4: Setiap awal tahun (1 Januari), sistem otomatis:
-  - Menghitung carry-over dari sisa tahun sebelumnya.
+  - Menghitung carry-over N-1 maksimal 6 hari.
+  - Menghitung hak tambahan jika pegawai tidak mengambil cuti tahunan pada N-2 dan N-1.
   - Membuat record `leave_balances` baru untuk tahun berjalan.
-  - Mengisi `jatah_awal` = 12 + carry-over.
+  - Mengisi total hak sesuai jatah dasar + carry-over/hak tambahan.
 
 ---
 
@@ -839,15 +833,15 @@ Setiap story mengikuti format:
 **Acceptance Criteria:**
 
 - [ ] AC-1: Halaman konfigurasi approval chain cuti.
-- [ ] AC-2: Dropdown untuk memilih approver default: Kabag/verifikator dan Pimpinan/PYBMC.
+- [ ] AC-2: Admin dapat mengatur chain per pegawai/unit: kepala bagian, Ketua Tim Kerja, satu atau lebih verifikator, Kabag/Kepegawaian, dan Pimpinan/PYBMC.
 - [ ] AC-3: Perubahan konfigurasi tercatat di audit log.
 - [ ] AC-4: Konfigurasi langsung berlaku untuk pengajuan cuti baru.
-- [ ] AC-5: Sistem mendukung konfigurasi dinamis per pegawai/unit pada tahap lanjutan.
-- [ ] AC-6: Sistem melakukan skip otomatis jika approver pada dua stage adalah orang yang sama.
+- [ ] AC-5: Ketua Tim Kerja dapat dipilih sebagai verifikator tanpa perlu role baru.
+- [ ] AC-6: Sistem melakukan skip otomatis jika approver pada dua step adalah orang yang sama.
 
 ---
 
-### US-4.11 · Assign Atasan Langsung per Pegawai
+### US-4.11 · Assign Kepala Bagian per Pegawai
 
 | Field | Detail |
 |-------|--------|
@@ -858,15 +852,15 @@ Setiap story mengikuti format:
 | **Dependensi** | US-2.1 |
 
 > **Sebagai** Admin Kepegawaian,
-> **Saya ingin** menetapkan atasan langsung untuk setiap pegawai,
-> **Sehingga** pengajuan cuti bawahan otomatis diarahkan ke atasan yang benar.
+> **Saya ingin** menetapkan kepala bagian untuk setiap pegawai,
+> **Sehingga** pengajuan cuti bawahan otomatis diarahkan ke kepala bagian yang benar.
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Di halaman detail pegawai, bagian "Atasan Langsung" menampilkan atasan yang saat ini di-assign.
-- [ ] AC-2: Tombol "Ubah Atasan Langsung" membuka form: dropdown semua pegawai (kecuali diri sendiri), tanggal mulai berlaku.
-- [ ] AC-3: Satu pegawai hanya bisa memiliki satu atasan langsung aktif.
-- [ ] AC-4: Riwayat perubahan atasan langsung tersimpan (tanggal_mulai, tanggal_berakhir).
+- [ ] AC-1: Di halaman detail pegawai, bagian "Kepala Bagian" menampilkan kepala bagian yang saat ini di-assign.
+- [ ] AC-2: Tombol "Ubah Kepala Bagian" membuka form: dropdown semua pegawai (kecuali diri sendiri), tanggal mulai berlaku.
+- [ ] AC-3: Satu pegawai hanya bisa memiliki satu kepala bagian aktif.
+- [ ] AC-4: Riwayat perubahan kepala bagian tersimpan (tanggal_mulai, tanggal_berakhir).
 - [ ] AC-5: Audit log mencatat perubahan.
 
 ---
@@ -892,6 +886,7 @@ Setiap story mengikuti format:
 - [ ] AC-3: Hasil kalkulasi ditampilkan real-time di form pengajuan cuti saat user memilih tanggal mulai dan selesai.
 - [ ] AC-4: Jika tanggal mulai atau selesai jatuh pada weekend/libur, tampilkan peringatan.
 - [ ] AC-5: Hasil kalkulasi disimpan di `jumlah_hari_kerja` saat submit.
+- [ ] AC-6: Jika tanggal mulai dan selesai berada pada tahun kalender berbeda, tampilkan error dan instruksi membuat dua pengajuan.
 
 ---
 
@@ -909,20 +904,22 @@ Setiap story mengikuti format:
 
 > **Sebagai** sistem,
 > **Saya ingin** menjalankan pengecekan otomatis setiap hari terhadap semua pegawai aktif,
-> **Sehingga** notifikasi kenaikan pangkat, KGB, pensiun, dan kontrak PPPK terkirim tepat waktu.
+> **Sehingga** notifikasi kenaikan pangkat, KGB, pensiun, kontrak PPPK, dan Satyalancana terkirim tepat waktu.
 
 **Acceptance Criteria:**
 
 - [ ] AC-1: Laravel scheduler berjalan setiap hari pukul 07:00 WITA (configurable).
-- [ ] AC-2: Cek semua pegawai aktif terhadap 4 trigger:
+- [ ] AC-2: Cek semua pegawai aktif terhadap 5 trigger:
   - **Kenaikan Pangkat**: TMT pangkat terakhir + 4 tahun → cek H-90, H-60, H-30.
   - **KGB**: TMT KGB terakhir + 2 tahun → cek H-60, H-30, H-14.
   - **Pensiun (BUP)**: Tanggal lahir + BUP per jabatan → cek H-1thn, H-6bln, H-3bln.
   - **Kontrak PPPK**: Tanggal berakhir kontrak → cek H-6bln, H-3bln, H-1bln.
+  - **Satyalancana**: TMT pengangkatan pertama + 10/20/30 tahun → cek H-180, H-90, H-30.
 - [ ] AC-3: Eligibility kenaikan pangkat: (1) 4 tahun terpenuhi, (2) `is_active` hukuman disiplin = false, (3) `is_kinerja_baik` = true.
 - [ ] AC-4: Notifikasi **tidak duplikat**: jika notifikasi H-90 sudah dikirim hari ini, tidak kirim H-90 lagi besok. Gunakan tabel `ews_alerts` untuk tracking.
 - [ ] AC-5: Log eksekusi scheduler dicatat: waktu mulai, selesai, jumlah alert baru.
 - [ ] AC-6: Jika scheduler gagal (error), catat error di log dan kirim notifikasi ke Super Admin.
+- [ ] AC-7: Alert menyimpan status tindak lanjut (`aktif`, `ditangani`, `tidak_perlu`, `kedaluwarsa`).
 
 ---
 
@@ -943,14 +940,15 @@ Setiap story mengikuti format:
 **Acceptance Criteria:**
 
 - [ ] AC-1: Tabel daftar EWS aktif, urut dari sisa hari terkecil (paling mendesak di atas).
-- [ ] AC-2: Kolom: Nama Pegawai, NIP, Jenis Event, Tanggal Target, Sisa Hari, Status Eligibility.
+- [ ] AC-2: Kolom: Nama Pegawai, NIP, Jenis Event, Tanggal Target, Sisa Hari, Status Eligibility, Status Tindak Lanjut.
 - [ ] AC-3: Indikator warna baris:
   - 🔴 Merah: sisa < 30 hari.
   - 🟡 Kuning: sisa 30–90 hari.
   - 🟢 Hijau: sisa > 90 hari.
-- [ ] AC-4: Filter berdasarkan jenis event (Kenaikan Pangkat / KGB / Pensiun / Kontrak PPPK).
+- [ ] AC-4: Filter berdasarkan jenis event (Kenaikan Pangkat / KGB / Pensiun / Kontrak PPPK / Satyalancana) dan status tindak lanjut.
 - [ ] AC-5: Klik nama pegawai membuka halaman detail pegawai.
 - [ ] AC-6: Akses: Admin Kepegawaian, Super Admin, Pimpinan.
+- [ ] AC-7: Admin dapat menandai alert sebagai ditangani/tidak perlu dengan catatan.
 
 ---
 
@@ -966,7 +964,7 @@ Setiap story mengikuti format:
 
 > **Sebagai** pegawai,
 > **Saya ingin** melihat peringatan EWS yang relevan untuk diri saya,
-> **Sehingga** saya tahu kapan kenaikan pangkat, KGB, atau pensiun saya tiba.
+> **Sehingga** saya tahu kapan kenaikan pangkat, KGB, pensiun, atau Satyalancana saya tiba.
 
 **Acceptance Criteria:**
 
@@ -996,6 +994,7 @@ Setiap story mengikuti format:
 - [ ] AC-2: Jika diubah ke "Tidak" → pegawai **tidak eligible** kenaikan pangkat → EWS tidak mengirim notifikasi kenaikan pangkat untuk pegawai ini.
 - [ ] AC-3: Perubahan flag dicatat di audit log.
 - [ ] AC-4: Tooltip penjelasan: *"Flag ini menggantikan penilaian SKP yang belum tersedia di Fase 1. Akan digantikan oleh modul Penilaian Kinerja di fase selanjutnya."*
+- [ ] AC-5: Untuk Satyalancana, Admin dapat mengisi flag/catatan kelayakan manual sampai data SKP terintegrasi.
 
 ---
 
@@ -1018,8 +1017,9 @@ Setiap story mengikuti format:
 - [ ] AC-1: Saat riwayat kepangkatan baru ditambahkan → hitung `tanggal_kenaikan_pangkat_berikutnya = tmt_pangkat + 4 tahun`.
 - [ ] AC-2: Saat riwayat KGB baru ditambahkan → hitung `tanggal_kgb_berikutnya = tmt_kgb + 2 tahun`.
 - [ ] AC-3: Saat jabatan baru ditambahkan → hitung ulang `tanggal_pensiun = tanggal_lahir + BUP_sesuai_jenis_jabatan_baru`.
-- [ ] AC-4: Hasil kalkulasi disimpan di tabel `employees` (kolom computed atau tabel terpisah) agar scheduler EWS tidak perlu hitung ulang setiap hari.
-- [ ] AC-5: Kalkulasi juga dijalankan saat import CSV selesai (batch calculation).
+- [ ] AC-4: Saat data pengangkatan pertama tersedia → hitung milestone Satyalancana 10/20/30 tahun.
+- [ ] AC-5: Hasil kalkulasi disimpan di tabel `employees` (kolom computed atau tabel terpisah) agar scheduler EWS tidak perlu hitung ulang setiap hari.
+- [ ] AC-6: Kalkulasi juga dijalankan saat import CSV selesai (batch calculation).
 
 ---
 
@@ -1093,9 +1093,10 @@ Setiap story mengikuti format:
 - [ ] AC-1: Email dikirim via Laravel Mail + Queue (non-blocking).
 - [ ] AC-2: Template email Bahasa Indonesia, HTML formatted, responsive.
 - [ ] AC-3: Isi email: judul event, detail singkat, tombol/link "Lihat di SIMPEG" mengarah ke halaman terkait.
-- [ ] AC-4: Pengirim configurable via `.env`; nilai production memakai email operasional LLDIKTI.
+- [ ] AC-4: Pengirim configurable via `.env`; nilai production memakai email operasional LLDIKTI atau Gmail resmi yang disediakan.
 - [ ] AC-5: Jika pengiriman gagal, catat di log dan retry otomatis (maks 3x).
 - [ ] AC-6: Email terkirim untuk semua jenis notifikasi yang berlabel ✅ Email di tabel notifikasi PRD.
+- [ ] AC-7: Pengiriman email dipanggil melalui notification dispatcher/channel config, bukan hardcoded langsung di domain cuti/EWS.
 
 ---
 
@@ -1135,7 +1136,7 @@ Setiap story mengikuti format:
 | **Dependensi** | — |
 
 > **Sebagai** sistem,
-> **Saya ingin** secara otomatis mencatat setiap operasi create, update, delete, approval, dan login/logout,
+> **Saya ingin** secara otomatis mencatat setiap operasi create, update, delete, verifikasi/keputusan cuti, dan login/logout,
 > **Sehingga** tersedia audit trail lengkap yang tidak bisa dimanipulasi.
 
 **Acceptance Criteria:**
@@ -1145,8 +1146,8 @@ Setiap story mengikuti format:
   - UPDATE (edit data pegawai, koreksi saldo cuti, dll)
   - SOFT_DELETE (nonaktifkan pegawai)
   - RESTORE (aktifkan kembali)
-  - APPROVE (setujui cuti)
-  - POSTPONE (tunda cuti)
+  - VERIFY / DECIDE (verifikasi dan keputusan cuti)
+  - CHANGE_REQUESTED / DEFER / NOT_APPROVED (Perubahan, Ditangguhkan, Tidak Disetujui)
   - LOGIN (login berhasil)
   - LOGOUT (logout manual atau session timeout)
   - IMPORT (import CSV)
@@ -1262,7 +1263,7 @@ Setiap story mengikuti format:
 
 ---
 
-### US-8.3 · Dashboard Atasan Langsung
+### US-8.3 · Dashboard Kepala Bagian
 
 | Field | Detail |
 |-------|--------|
@@ -1272,14 +1273,14 @@ Setiap story mengikuti format:
 | **Modul** | Dashboard |
 | **Dependensi** | US-4.4, US-4.11 |
 
-> **Sebagai** Atasan Langsung,
+> **Sebagai** Kepala Bagian,
 > **Saya ingin** melihat ringkasan data bawahan langsung saya,
 > **Sehingga** saya bisa memantau pengajuan cuti dan informasi penting bawahan.
 
 **Acceptance Criteria:**
 
 - [ ] AC-1: **Daftar Bawahan**: Nama, jabatan, status (aktif/cuti/dinas luar).
-- [ ] AC-2: **Pengajuan Cuti Pending**: Daftar pengajuan cuti bawahan yang menunggu tindakan saya (quick action: Setujui/Tunda).
+- [ ] AC-2: **Pengajuan Cuti Pending**: Daftar pengajuan cuti bawahan yang menunggu tindakan saya (quick action sesuai label resmi keputusan cuti).
 - [ ] AC-3: **EWS Bawahan**: Peringatan EWS yang relevan untuk bawahan langsung.
 - [ ] AC-4: Klik nama bawahan membuka detail ringkas (read-only).
 
@@ -1325,7 +1326,7 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Halaman admin untuk mengelola setiap reference table: ref_golongan, ref_jenis_jabatan, ref_eselon, ref_unit_kerja, ref_jenjang_pendidikan, ref_bup.
+- [ ] AC-1: Halaman admin untuk mengelola setiap reference table: ref_golongan, ref_jenis_jabatan, ref_jabatan, ref_status_pegawai, ref_eselon, ref_unit_kerja hierarkis, ref_jenjang_pendidikan, ref_bup, dan ref_notification_channels.
 - [ ] AC-2: CRUD per table: lihat daftar, tambah, edit, hapus (soft delete jika sudah dipakai oleh data pegawai).
 - [ ] AC-3: Validasi: tidak bisa menghapus item reference table yang sedang dipakai oleh data pegawai.
 - [ ] AC-4: Perubahan tercatat di audit log.
@@ -1356,6 +1357,30 @@ Setiap story mengikuti format:
 - [ ] AC-3: File Excel (.xlsx) berisi kolom: No, NIP, Nama, Golongan, Jabatan, Unit Kerja, Jenis Pegawai, Status.
 - [ ] AC-4: File otomatis ter-download di browser.
 - [ ] AC-5: Nama file: `Daftar_Pegawai_LLDIKTI_XVI_{tanggal}.xlsx`.
+
+---
+
+### US-9.1B · Export Daftar Pegawai Custom ke Excel
+
+| Field | Detail |
+|-------|--------|
+| **ID** | US-9.1B |
+| **Prioritas** | 🔴 P0 |
+| **Story Points** | 3 |
+| **Modul** | Laporan |
+| **Dependensi** | US-2.3 |
+
+> **Sebagai** Admin Kepegawaian atau Pimpinan,
+> **Saya ingin** memilih kolom dan filter sebelum export nominatif Excel,
+> **Sehingga** saya bisa membuat laporan sesuai kebutuhan tanpa perubahan kode.
+
+**Acceptance Criteria:**
+
+- [ ] AC-1: Halaman export custom menyediakan daftar kolom yang boleh dipilih.
+- [ ] AC-2: Filter baris mendukung status pegawai, unit/tim kerja, jenis pegawai, golongan, jabatan, dan periode pensiun.
+- [ ] AC-3: Output hanya Excel `.xlsx`.
+- [ ] AC-4: Urutan kolom di file mengikuti pilihan pengguna.
+- [ ] AC-5: Kolom sensitif yang tidak diizinkan tidak muncul di daftar pilihan.
 
 ---
 
@@ -1460,15 +1485,15 @@ E3 (Import Excel/CSV) ←── E2
   └── US-3.4 Eksekusi ←── US-3.3
 
 E4 (Cuti) ←── E2
-  ├── US-4.11 Assign Atasan ←── US-2.1
-  ├── US-4.10 Assign Approver ←── US-1.4
+  ├── US-4.11 Assign Kepala Bagian ←── US-2.1
+  ├── US-4.10 Konfigurasi Approval Chain ←── US-1.4
   ├── US-4.12 Kalkulasi Hari Kerja ←── US-8.4
   ├── US-4.1 Ajukan Cuti ←── US-4.11, US-4.12
   ├── US-4.2 Daftar Cuti Pegawai ←── US-4.1
   ├── US-4.3 Saldo Cuti ←── US-4.1
-  ├── US-4.4 Approval Stage 1 ←── US-4.1
-  ├── US-4.5 Approval Stage 2 ←── US-4.4
-  ├── US-4.6 Approval Stage 3 ←── US-4.5
+  ├── US-4.4 Approval/Verifikasi Step 1 ←── US-4.1
+  ├── US-4.5 Verifikasi Kepegawaian ←── US-4.4
+  ├── US-4.6 Keputusan Final PYBMC ←── US-4.5
   ├── US-4.7 Timeline Approval ←── US-4.4
   ├── US-4.8 Daftar Cuti Admin ←── US-4.1
   └── US-4.9 Kelola Saldo ←── US-4.1
@@ -1494,12 +1519,13 @@ E7 (Audit Log) — Independen
 E8 (Dashboard) ←── E2, E4, E5
   ├── US-8.1 Dashboard Admin ←── US-2.3, US-4.8, US-5.2
   ├── US-8.2 Dashboard Pegawai ←── US-2.5, US-4.3, US-5.3
-  ├── US-8.3 Dashboard Atasan ←── US-4.4, US-4.11
+  ├── US-8.3 Dashboard Kepala Bagian ←── US-4.4, US-4.11
   ├── US-8.4 Kelola Hari Libur
   └── US-8.5 Kelola Reference Tables
 
 E9 (Laporan) ←── E2, E4
   ├── US-9.1 Export Pegawai Excel ←── US-2.3
+  ├── US-9.1B Export Pegawai Custom Excel ←── US-2.3
   ├── US-9.2 Export Pegawai PDF ←── US-2.3
   ├── US-9.3 Export Cuti Excel ←── US-4.8
   └── US-9.4 Export Cuti PDF ←── US-4.8
@@ -1553,15 +1579,15 @@ Sprint 1 tetap menjadi fondasi teknis sebelum vertical slice dimulai.
 
 | Vertical Slice | Story | SP |
 |----------------|-------|:--:|
-| Setup aturan cuti | US-4.10 Assign approver | 3 |
-| Setup aturan cuti | US-4.11 Assign atasan | 3 |
+| Setup aturan cuti | US-4.10 Konfigurasi approval chain | 3 |
+| Setup aturan cuti | US-4.11 Assign kepala bagian | 3 |
 | Setup aturan cuti | US-4.12 Kalkulasi hari kerja | 5 |
 | Setup aturan cuti | US-4.3 Saldo cuti | 3 |
 | Pengajuan cuti | US-4.1 Ajukan cuti | 5 |
 | Pengajuan cuti | US-4.2 Daftar cuti pegawai | 3 |
-| Approval & timeline | US-4.4 Approval stage 1 | 5 |
-| Approval & timeline | US-4.5 Approval stage 2 | 3 |
-| Approval & timeline | US-4.6 Approval stage 3 | 5 |
+| Approval & timeline | US-4.4 Approval/verifikasi step 1 | 5 |
+| Approval & timeline | US-4.5 Verifikasi Kepegawaian | 3 |
+| Approval & timeline | US-4.6 Keputusan final PYBMC | 5 |
 | Approval & timeline | US-4.7 Timeline approval | 3 |
 | **Total** | | **38** |
 
@@ -1584,13 +1610,14 @@ Sprint 1 tetap menjadi fondasi teknis sebelum vertical slice dimulai.
 |----------------|-------|:--:|
 | Dashboard admin/pegawai | US-8.1 Dashboard admin | 8 |
 | Dashboard admin/pegawai | US-8.2 Dashboard pegawai | 5 |
-| Dashboard atasan/reference | US-8.3 Dashboard atasan | 5 |
-| Dashboard atasan/reference | US-8.5 Kelola reference tables | 5 |
+| Dashboard Kepala Bagian/reference | US-8.3 Dashboard Kepala Bagian | 5 |
+| Dashboard Kepala Bagian/reference | US-8.5 Kelola reference tables | 5 |
 | Laporan & export | US-9.1 Export pegawai Excel | 3 |
+| Laporan & export | US-9.1B Export pegawai custom Excel | 3 |
 | Laporan & export | US-9.2 Export pegawai PDF | 3 |
 | Laporan & export | US-9.3 Export cuti Excel | 3 |
 | Laporan & export | US-9.4 Export cuti PDF | 3 |
-| **Total** | | **35** |
+| **Total** | | **38** |
 
 ### Sprint 7 — Stabilization, Regression, UAT, Go-Live Prep (Minggu 14–16)
 

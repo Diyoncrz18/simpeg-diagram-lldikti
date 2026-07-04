@@ -389,7 +389,7 @@ flowchart LR
     Role -->|Admin Kepegawaian| DashAdmin[Dashboard Admin]
     Role -->|Pimpinan| DashPimpinan[Dashboard Pimpinan]
     Role -->|Kabag / Verifikator| DashKabag[Dashboard Verifikator]
-    Role -->|Atasan Langsung| DashAtasan[Dashboard Atasan]
+    Role -->|Kepala Bagian| DashKepalaBagian[Dashboard Kepala Bagian]
     Role -->|Pegawai| DashPegawai[Dashboard Pegawai]
 
     DashSA --> Config[Konfigurasi sistem, RBAC, reference table]
@@ -400,7 +400,7 @@ flowchart LR
     DashPimpinan --> ApprovalFinal[Approval final cuti]
     DashPimpinan --> Reports[Laporan dan export]
     DashKabag --> Verify[Verifikasi cuti]
-    DashAtasan --> ApprovalDynamic[Approval dinamis bawahan]
+    DashKepalaBagian --> ApprovalDynamic[Approval dinamis bawahan]
     DashPegawai --> CutiPegawai[Ajukan cuti dan lihat status]
     DashPegawai --> Profile[Lihat profil sendiri]
     DashPegawai --> EWSPersonal[Lihat EWS pribadi]
@@ -451,7 +451,7 @@ flowchart TD
     O -->|Super Admin| P[Dashboard Super Admin]
     O -->|Admin| Q[Dashboard Admin Kepegawaian]
     O -->|Pimpinan| R[Dashboard Pimpinan]
-    O -->|Kabag / Atasan| S[Dashboard Approval]
+    O -->|Kabag / Kepala Bagian| S[Dashboard Approval]
     O -->|Pegawai| T[Dashboard Pegawai]
         </pre>
       </div>
@@ -495,7 +495,7 @@ flowchart TD
     E --> Q{Role yang melihat}
     Q -->|Admin / Super Admin| R[Lihat seluruh data pegawai]
     Q -->|Pimpinan| S[Lihat data read-only semua pegawai]
-    Q -->|Atasan| T[Lihat data bawahan]
+    Q -->|Kepala Bagian| T[Lihat data bawahan]
     Q -->|Pegawai| U[Lihat profil sendiri]
 
     R --> V[Kelola keluarga, disiplin, dokumen, supervisor]
@@ -583,9 +583,9 @@ flowchart LR
 
     L --> M{Approver sama dengan pejabat final?}
     M -->|Ya| N[Skip approval duplikat]
-    M -->|Tidak| O[Atasan langsung review]
-    O --> P{Keputusan atasan}
-    P -->|Tunda| Q[Status ditunda oleh atasan]
+    M -->|Tidak| O[Kepala bagian review]
+    O --> P{Keputusan kepala bagian}
+    P -->|Tunda| Q[Status ditunda oleh kepala bagian]
     P -->|Setuju / Mengetahui| K
     N --> R[Pimpinan / pejabat pemberi cuti review]
 

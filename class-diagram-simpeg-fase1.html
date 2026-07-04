@@ -55,7 +55,7 @@ classDiagram
       +date tanggal_pensiun
       +string profil_status
       +string keycloak_id
-      +uuid atasan_langsung_id
+      +uuid kepala_bagian_id
       +bool is_kinerja_baik
     }
 
@@ -210,7 +210,7 @@ classDiagram
     Employee "1" --> "0..*" EwsAlert
     Employee "1" --> "0..*" Notification
     Employee "1" --> "0..*" AuditLog
-    Employee "0..1" --> "0..*" Employee : atasan langsung
+    Employee "0..1" --> "0..*" Employee : kepala bagian
     Employee "0..*" --> "1..*" Role
     Role "0..*" --> "0..*" Permission
     LeaveRequest "1" --> "1..*" LeaveApproval

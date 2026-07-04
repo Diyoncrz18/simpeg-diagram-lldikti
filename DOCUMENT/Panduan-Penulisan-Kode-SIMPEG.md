@@ -626,7 +626,7 @@ Setiap mutation penting harus audit-aware:
 - soft delete;
 - restore;
 - import;
-- approval/rejection;
+- verifikasi/keputusan cuti;
 - config changes.
 
 Gunakan event yang eksplisit:
@@ -637,9 +637,27 @@ UPDATE
 SOFT_DELETE
 RESTORE
 IMPORT
-APPROVE
-REJECT
+VERIFY
+DECIDE
+CHANGE_REQUESTED
+DEFER
+NOT_APPROVED
+CONFIG_UPDATE
 ```
+
+Untuk domain cuti, jangan memakai event `REJECT` atau label `Ditolak`. Keputusan negatif resmi adalah `NOT_APPROVED` / `Tidak Disetujui`. Aksi `Perubahan` dan `Ditangguhkan` wajib membawa keterangan.
+
+## Notification Channel Pattern
+
+Domain service tidak boleh memanggil SMTP, Gmail, atau WhatsApp Business langsung. Gunakan notification dispatcher yang membaca konfigurasi channel.
+
+Aturan:
+
+- event domain cukup menerbitkan payload notifikasi;
+- dispatcher menentukan channel aktif: in-app, email, dan channel future seperti WhatsApp Business;
+- email dikirim via queue;
+- kegagalan delivery dicatat per channel;
+- credential tetap di `.env` atau secret manager, bukan di database reference table.
 
 Audit log harus menyimpan old/new values jika relevan, tetapi jangan simpan data sensitif yang tidak perlu.
 

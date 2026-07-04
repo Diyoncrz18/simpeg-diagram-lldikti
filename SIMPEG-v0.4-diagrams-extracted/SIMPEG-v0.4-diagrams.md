@@ -42,7 +42,7 @@ flowchart TD
     B -->|"PNS: Semua Jenis"| C
     B -->|"PPPK: Cuti Besar\ndan CLTN Disembunyikan"| C
     C{Cek Saldo\nCuti} -->|"Tidak Cukup"| D(["Ditolak\nOtomatis"])
-    C -->|"Cukup"| E["Stage 1: Atasan Langsung\nMengetahui"]
+    C -->|"Cukup"| E["Stage 1: Kepala Bagian\nMengetahui"]
     E --> F["Stage 2: Kabag/Verifikator\nMenyetujui"]
     F --> G["Stage 3: Pimpinan/PYBMC\nFinal"]
     G -->|"Disetujui"| H["Saldo Dikurangi Otomatis\nCarry-over Dihitung"]
@@ -94,7 +94,7 @@ flowchart LR
     CK3 -->|"Lupa Absen Gabungan\nsudah 2x bulan ini"| BLOK
     CK3 -->|"Izin Terlambat atau Cepat\nsudah 2x bulan ini"| BLOK
     CK3 -->|"Masih ada kuota"| FORM["Isi Form Klaim\nJenis, Tanggal, Alasan"]
-    FORM --> APV{Atasan\nLangsung}
+    FORM --> APV{Kepala Bagian}
     APV -->|"Approve"| OK(["Kehadiran\nTercatat"])
     APV -->|"Tolak"| NOK(["Notifikasi\nPenolakan"])
 ```
@@ -133,14 +133,14 @@ PermenPANRB 6/2022 · PP 30/2019 — berbasis hasil kerja (RHK), bukan daftar ak
 ```mermaid
 %%{init:{"flowchart":{"nodeSpacing":52,"rankSpacing":60,"padding":18},"theme":"dark"}}%%
 flowchart TD
-    A(["Admin / Atasan"]) --> B["Buat SKP Periode Baru\nper Pegawai"]
+    A(["Admin / Kepala Bagian"]) --> B["Buat SKP Periode Baru\nper Pegawai"]
     B --> C["Input RHK\n(Rencana Hasil Kerja)"]
     C --> D["Set Target, Indikator\ndan Satuan per RHK"]
     D --> E[Sepanjang Periode]
     E --> F["Pegawai Isi Log Harian"]
     F --> G["Kaitkan Log ke RHK\n(Many-to-Many, opsional)"]
     G --> H[Akhir Periode]
-    H --> I["Atasan Buka Form Evaluasi"]
+    H --> I["Kepala Bagian Buka Form Evaluasi"]
     I --> J["Nilai Hasil Kerja\nSangat Baik / Baik / Butuh Perbaikan / Kurang"]
     I --> K["Nilai Perilaku BerAKHLAK\n(Kriteria sama)"]
     J --> L[Nilai SKP Final]
@@ -187,7 +187,7 @@ flowchart LR
         J2["Diklat Fungsional\nDiklat JF Arsiparis\nPranata Komputer, dll"]:::j2
         J3["Pelatihan Teknis\nBimtek, Workshop\nSeminar, Kursus"]:::j3
         J4["Pelatihan SIASN\nModul SIASN BKN"]:::j4
-        J5["Coaching dan Mentoring\noleh Atasan Langsung"]:::j5
+        J5["Coaching dan Mentoring\noleh Kepala Bagian"]:::j5
         J6["Belajar Mandiri\nE-learning, Buku"]:::j6
     end
     J1 --> T(["Total JP\nTahun Berjalan\nper Pegawai"])
@@ -219,7 +219,7 @@ flowchart TD
     SA["Super Admin\n(Semua fitur + konfigurasi sistem)"] --> AK
     AK["Admin Kepegawaian\n(Kelola semua data pegawai\nProses pengajuan dan verifikasi)"] --> PM
     PM["Pimpinan\n(Approve cuti dan klaim\nDashboard semua pegawai)"] --> AL
-    AL["Atasan Langsung\n(Approve cuti dan klaim\nbawahan langsung)"] --> PG
+    AL["Kepala Bagian\n(Approve cuti dan klaim\nbawahan langsung)"] --> PG
     PG["Pegawai\n(Lihat data sendiri\nAjukan cuti dan self-service)"]
 ```
 

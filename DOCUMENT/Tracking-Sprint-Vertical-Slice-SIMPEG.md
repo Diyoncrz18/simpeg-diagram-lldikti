@@ -238,12 +238,12 @@ DoD Sprint 1:
 |-------|--------|
 | User stories | US-4.10, US-4.11, US-4.12, US-4.3 |
 | Durasi target | Hari 1-5 |
-| Goal | Atasan, approver, hari kerja, jenis cuti, dan saldo siap dipakai pengajuan |
+| Goal | Kepala Bagian, approver, hari kerja, jenis cuti, dan saldo siap dipakai pengajuan |
 
 | Stage | Owner | Yang Dihandle | Output | Status |
 |-------|-------|---------------|--------|--------|
 | Kickoff | Dion | Validasi aturan LLDIKTI, approval chain, carry-over | Kontrak aturan cuti | Not Started |
-| Frontend dummy | Adithian | UI assign atasan/approver dan saldo dummy | UI setup cuti siap | Not Started |
+| Frontend dummy | Adithian | UI assign kepala bagian/approver dan saldo dummy | UI setup cuti siap | Not Started |
 | Frontend support | Adriel | Komponen dropdown, card saldo, history saldo | UI support siap | Not Started |
 | Backend | Jordan | Tabel cuti, saldo, approver, supervisor, service saldo | Backend aturan siap | Not Started |
 | Backend support | Grantly | Kalkulasi hari kerja dan seed hari libur | Kalkulasi siap | Not Started |
@@ -370,24 +370,24 @@ DoD Sprint 1:
 | Review | Adriel | Review UI/chart/evidence | Merge atau return bug | Not Started |
 | QA | Grantly | Cek akurasi angka, role access, empty state | QA pass/retest note | Not Started |
 
-### Slice 6.2 - Dashboard Atasan + Reference Tables
+### Slice 6.2 - Dashboard Kepala Bagian + Reference Tables
 
 | Field | Detail |
 |-------|--------|
 | User stories | US-8.3, US-8.5 |
 | Durasi target | Hari 5-7 |
-| Goal | Atasan melihat bawahan dan admin bisa kelola reference tables |
+| Goal | Kepala Bagian melihat bawahan dan admin bisa kelola reference tables |
 
 | Stage | Owner | Yang Dihandle | Output | Status |
 |-------|-------|---------------|--------|--------|
-| Kickoff | Dion | Kunci role atasan dan daftar reference table | Kontrak dashboard atasan | Not Started |
-| Frontend dummy | Adithian | Dashboard atasan dan CRUD reference dummy | UI siap | Not Started |
+| Kickoff | Dion | Kunci role kepala bagian dan daftar reference table | Kontrak dashboard kepala bagian | Not Started |
+| Frontend dummy | Adithian | Dashboard Kepala Bagian dan CRUD reference dummy | UI siap | Not Started |
 | Frontend support | Adriel | Komponen filter/table jika dibutuhkan | UI support siap | Not Started |
 | Backend | Jordan | Policy/query bawahan dan CRUD reference table | Backend siap | Not Started |
 | Backend support | Grantly | Test data bawahan dan reference table edge case | QA data siap | Not Started |
 | Integrasi | Adithian + Jordan | UI memakai real data | Flow real data | Not Started |
 | Review | Adriel | Review PR dashboard/reference | Merge atau return bug | Not Started |
-| QA | Grantly | Test role atasan, CRUD reference, delete protection | QA pass/retest note | Not Started |
+| QA | Grantly | Test role kepala bagian, CRUD reference, delete protection | QA pass/retest note | Not Started |
 
 ### Slice 6.3 - Laporan & Export
 

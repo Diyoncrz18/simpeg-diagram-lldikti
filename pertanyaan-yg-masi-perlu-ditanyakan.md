@@ -47,7 +47,7 @@ Role dan permission dikelola di database SIMPEG, bukan di Keycloak. Keycloak han
 Berdasarkan penelusuran website LLDIKTI XVI, kami menemukan struktur organisasi berupa Kepala Lembaga (Bapak Munawir Sadzali Razak), Kabag Umum (Bapak Irwan Halid), 4 Tim Kerja, dan 7 Urusan.
 - Apakah 11 unit kerja ini (4 Tim Kerja + 7 Urusan) adalah daftar unit kerja resmi yang akan dimasukkan ke SIMPEG?
 - Siapa saja pejabat Ketua Tim Kerja dan Kepala Urusan saat ini?
-- Siapa saja yang berperan sebagai **Atasan Langsung**? Apakah Ketua Tim Kerja dan Kepala Urusan tersebut, atau Kabag Umum untuk semua pegawai?
+- Siapa saja yang berperan sebagai **Kepala Bagian**? Apakah Ketua Tim Kerja dan Kepala Urusan tersebut, atau Kabag Umum untuk semua pegawai?
 
 ### B2. 🔴 Data Pegawai Existing
 **Status PRD 1.1 + file `daftar_pegawai.xlsx`:** Format Excel awal sudah tersedia dan digunakan sebagai acuan import awal. Header yang tersedia: `No`, `Nama Pegawai`, `Email Pegawai`, `Golongan`, `Jabatan`, `Kelas Jabatan`, `NIP`, `Nomor Telepon`, `Pangkat`, `Pendidikan Terakhir`, `Pensiun`, `Person`, `Person Formula`, `Prodi Pendidikan Terakhir`, `Status Kepegawaian`, `Tanggal Lahir`.
@@ -55,7 +55,7 @@ Berdasarkan penelusuran website LLDIKTI XVI, kami menemukan struktur organisasi 
 Yang masih perlu diminta:
 - Konfirmasi apakah `daftar_pegawai.xlsx` ini adalah format final untuk production atau baru contoh format.
 - Konfirmasi apakah jumlah baris sudah mencakup seluruh pegawai yang akan diimpor saat go-live.
-- Data yang belum ada di Excel: NIK, No. KK, tempat lahir, jenis kelamin, agama, status kawin, alamat, unit kerja, atasan langsung, TMT/SK kepangkatan, TMT/SK jabatan, TMT KGB, dan data keluarga.
+- Data yang belum ada di Excel: NIK, No. KK, tempat lahir, jenis kelamin, agama, status kawin, alamat, unit kerja, kepala bagian, TMT/SK kepangkatan, TMT/SK jabatan, TMT KGB, dan data keluarga.
 - Apakah data yang belum ada tersebut akan diinput manual setelah import awal, atau akan diberikan dalam file tambahan?
 - Apakah kolom `Person` dan `Person Formula` perlu disimpan di SIMPEG, atau hanya metadata dari file sumber?
 
@@ -87,10 +87,10 @@ Rekap (Bagian 6.4) menyebutkan data keluarga sebagai salah satu jenis data yang 
 ### C1. 🔴 Alur Approval — Peran Spesifik & Jumlah Tahap
 **Status PRD 1.1: Terjawab untuk desain Fase 1.**
 
-Alur awal dibuat seragam: Atasan Langsung → Kabag/verifikator → Pimpinan/PYBMC. Sistem tetap didesain agar approval bisa dikonfigurasi dinamis per pegawai/unit dan melakukan skip jika approver sama.
+Alur awal dibuat seragam: Kepala Bagian → Kabag/verifikator → Pimpinan/PYBMC. Sistem tetap didesain agar approval bisa dikonfigurasi dinamis per pegawai/unit dan melakukan skip jika approver sama.
 
 Yang masih perlu diminta sebagai data final:
-- Daftar atasan langsung per pegawai/unit.
+- Daftar kepala bagian per pegawai/unit.
 - Nama pejabat Kabag/verifikator dan Pimpinan/PYBMC yang aktif saat go-live.
 - Bagaimana jika **approver sedang cuti/dinas luar**? Apakah ada mekanisme **delegasi approval**?
 
@@ -170,7 +170,7 @@ Rekap (Bagian 6.3) menyebutkan "audit log tidak dapat dihapus oleh siapa pun".
 Rekap (Bagian 11) menyebutkan dashboard untuk admin dan pimpinan, tapi tidak detail per role.
 - Apakah **semua role** bisa mengakses dashboard, atau hanya role tertentu?
 - Apakah **data yang ditampilkan** di dashboard berbeda per role?
-  - Contoh: Pimpinan melihat semua pegawai, Atasan Langsung hanya melihat bawahannya?
+  - Contoh: Pimpinan melihat semua pegawai, Kepala Bagian hanya melihat bawahannya?
 - Apakah Pegawai juga punya **dashboard pribadi**? (misal: saldo cuti, status pengajuan, EWS pribadi)
 
 ### F2. 🟡 Laporan yang Diekspor
@@ -308,8 +308,8 @@ Yang masih perlu diminta:
 
 | Prioritas | Jumlah | Kategori |
 |-----------|--------|----------|
-| 🔴 Blocker | 4 | Credential/akses Keycloak final, struktur atasan langsung, konfirmasi kelengkapan file data import final, keputusan kinerja/EWS yang belum eksplisit |
+| 🔴 Blocker | 4 | Credential/akses Keycloak final, struktur kepala bagian, konfirmasi kelengkapan file data import final, keputusan kinerja/EWS yang belum eksplisit |
 | 🟡 Penting | 14 | NIP, Data Keluarga, Golongan/Jabatan, PPPK, Aturan Cuti, Carry-over, daftar BUP final, Kontrak PPPK, Audit Log, Dashboard, Laporan, Backup, Timeline/UAT, Go-Live |
 | 🟢 Nice-to-know | 8 | Pembatalan Cuti, Eskalasi EWS, Akses Audit Log, Kalender Tim, Environment Dev, Akses Koordinasi, Data Pribadi/PDP, Cuti Darurat |
 
-> **Rekomendasi setelah PRD 1.1**: Development dapat berjalan memakai format `daftar_pegawai.xlsx` sebagai acuan import awal. Yang paling perlu dikejar segera adalah credential Keycloak, daftar atasan langsung, konfirmasi kelengkapan file data final, dan referensi jabatan/BUP final.
+> **Rekomendasi setelah PRD 1.1**: Development dapat berjalan memakai format `daftar_pegawai.xlsx` sebagai acuan import awal. Yang paling perlu dikejar segera adalah credential Keycloak, daftar kepala bagian, konfirmasi kelengkapan file data final, dan referensi jabatan/BUP final.
