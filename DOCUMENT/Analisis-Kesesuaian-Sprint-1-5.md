@@ -6,10 +6,31 @@
 | Ruang lingkup | Sprint 1 — Fondasi; Sprint 2 — Data Pegawai Core; Sprint 3 — Import & Pelengkap; Sprint 4 — Cuti Core; Sprint 5 — EWS & Notifikasi; Sprint 6 — Dashboard & Laporan |
 | Kondisi repository | Baseline `development` commit `32ada6b` (20 Juli 2026), ditambah implementasi pada branch `fix/reference-tables-and-testing` melalui PR [#118](https://github.com/LLDIKTI-XVI-TEAM/SIMPEG/pull/118), commit `1ae6106` dan `7612c8e`; status PR `OPEN`, merge state `CLEAN`, dan CI `Pint + PHPStan + Test` lulus. |
 | Metode | Inspeksi source, migration, seeder, route, FormRequest, Action/Service, view Blade, konfigurasi scheduler, dan source test |
-| Sumber acuan | `AGENTS.md`, PRD v1.2, panduan kode, user stories, issues, tracker vertical slice, dan pembagian tugas |
-| Perubahan dalam analisis | Laporan diperbarui untuk mencatat hasil implementasi dan verifikasi PR #118. Tidak ada perubahan keputusan produk pada PRD. |
+| Sumber acuan | `AGENTS.md`, PRD v1.3, panduan kode, user stories, issues, tracker vertical slice, dan pembagian tugas |
+| Perubahan dalam analisis | Laporan awal diperbarui untuk mencatat hasil implementasi dan verifikasi PR #118. Addendum 22 Juli 2026 kemudian menyelaraskan keputusan produk import Data Utama-only pada PRD v1.3 tanpa mengubah tanggal dan baseline audit historis. |
 | Analisis sebelumnya | Commit `32ada6b` — 20 Juli 2026 |
 | Commit baru sejak analisis sebelumnya | PR #118 menambahkan dua commit source (`1ae6106` dan `7612c8e`): reference table Fase 1 dilengkapi, pemilihan kanal notifikasi memakai konfigurasi, fondasi Dusk/test ditambahkan, dan fixture export diselaraskan dengan hierarchy unit kanonis. CI PR lulus setelah perbaikan format. |
+
+## Addendum Keputusan Import — 22 Juli 2026
+
+> **Catatan pembacaan:** Tanggal analisis asli (21 Juli 2026) dan baseline commit di atas dipertahankan sebagai bukti historis dan tidak diubah. Addendum ini hanya menambahkan keputusan kanonis pengguna 22 Juli 2026 dan mereklasifikasi sebagian temuan lama.
+
+Keputusan sesi langsung pengguna 22 Juli 2026 (kanonis, disetujui pengguna) menetapkan ruang lingkup import Fase 1 secara final:
+
+1. Hanya template Data Utama yang aktif. Import membuat record pegawai beserta field snapshot awal (golongan, pangkat, jabatan, kelas jabatan, pendidikan, prodi, dan tanggal pensiun bila tersedia).
+2. Import tidak membuat riwayat kepangkatan, riwayat jabatan, maupun riwayat KGB. Riwayat resmi diinput per pegawai melalui CRUD riwayat append-only.
+3. Kalkulasi TMT dipicu saat riwayat/sumber resmi disimpan per pegawai, bukan saat import massal selesai. PR #120 telah menggabungkan integrasi kalkulator pada commit `7b5ebeae`.
+4. Tanggal pensiun hasil import dipertahankan apa adanya dan tidak dihitung ulang atau ditimpa oleh import.
+5. Template lanjutan multi-jenis tidak dipulihkan tanpa keputusan eksplisit baru.
+
+**Reklasifikasi temuan lama menjadi sesuai/sengaja tidak ada di bawah PRD v1.3:**
+
+- Ketiadaan template lanjutan multi-jenis (Data Pelengkap, Riwayat Kepangkatan, Riwayat Jabatan, Riwayat KGB) kini **sengaja tidak ada** dan bukan lagi kekurangan. Dikeluarkan dari daftar remediasi aktif.
+- Ketiadaan pembuatan snapshot riwayat pangkat/jabatan/KGB saat import kini **sesuai keputusan**. Import memang hanya menyimpan field snapshot pada record pegawai, bukan membuat riwayat.
+- Ketiadaan kalkulasi TMT pasca-import kini **sesuai keputusan**. Kalkulasi dipicu saat riwayat/sumber resmi disimpan, bukan saat import selesai.
+- Ketiadaan perhitungan/fallback tanggal pensiun saat kolom `Pensiun` kosong pada saat import kini **sesuai keputusan**. Import mempertahankan tanggal pensiun apa adanya; perhitungan BUP dilakukan melalui kalkulasi TMT saat riwayat/sumber resmi disimpan.
+
+**Gap yang tetap berlaku (tidak terkait keputusan ini):** manual column mapping dropdown dan peringatan kolom tidak cocok, laporan hasil import yang persisten/downloadable, template PDF daftar pegawai (Satyalancana dan durable report Sprint 6), serta rekalkulasi saat referensi BUP berubah tetap merupakan gap terbuka bila fitur tersebut masih didukung.
 
 ## Legend Status
 
@@ -53,7 +74,7 @@ Untuk Sprint 6 terdapat **6 issue (#39–#43 dan #46)**. Pada level issue, **5 i
 
 **Masalah lama yang BELUM diperbaiki:**
 
-1. Import belum memiliki template lanjutan, manual column mapping, snapshot riwayat, dan kalkulasi TMT pasca-import.
+1. Import belum memiliki manual column mapping. **Reklasifikasi 22 Juli 2026:** template lanjutan multi-jenis, snapshot riwayat, dan kalkulasi TMT pasca-import kini sengaja tidak ada sesuai keputusan pengguna (lihat Addendum Keputusan Import) dan bukan lagi kekurangan.
 2. Skema cuti berbeda dengan PRD canonical (`leave_request_steps` vs `leave_approval_steps`, dll). Keputusan belum didokumentasikan.
 3. `RejectLeaveAction`, `LeaveApprovalService::reject()`, internal status `'rejected'`/`'request_rejected'`, label `'Ditolak'` di `LeaveProofService`, dan route `cuti.reject` masih aktif. Melanggar nomenklatur resmi Fase 1.
 4. `app:run-ews` terdaftar ganda di `bootstrap/app.php` (baris 22–24) DAN `routes/console.php` (baris 27–29).
@@ -115,9 +136,9 @@ Verifikasi Laravel kini dapat dijalankan pada host ini. Podman dan PostgreSQL 17
 
 | Issue | Deliverable | Status | Bukti dan catatan |
 |---:|---|:---:|---|
-| #20 | Download template import | ⚠️ | Tombol dan download CSV UTF-8/XLSX tersedia melalui `GenerateImportTemplateAction` dan `ImportTemplateWriter`. Hanya template `utama` tersedia, hanya satu baris contoh, dan template Data Pelengkap/Riwayat Kepangkatan/Riwayat Jabatan/Riwayat KGB belum ada. |
+| #20 | Download template import | ⚠️ | Tombol dan download CSV UTF-8/XLSX tersedia melalui `GenerateImportTemplateAction` dan `ImportTemplateWriter`. **Reklasifikasi 22 Juli 2026:** hanya template Data Utama yang aktif sesuai keputusan pengguna, sehingga ketiadaan template Data Pelengkap/Riwayat Kepangkatan/Riwayat Jabatan/Riwayat KGB kini sengaja tidak ada dan bukan kekurangan. Gap yang tersisa: hanya satu baris contoh (idealnya dua). |
 | #21 | Upload, preview, validasi Excel/CSV | ⚠️ | Upload maksimal 10 MB, parser XLS/XLSX/CSV, preview, validasi per baris, duplicate NIP skip, error detail, wizard, dan test tersedia. Auto-match hanya menerima header canonical; dropdown/manual column mapping dan peringatan mapping kolom tak cocok belum ditemukan. |
-| #22 | Eksekusi import queue dan laporan | ⚠️ | `ImportEmployeeBatchJob` memproses batch valid, progress polling, hasil inserted/skipped/failed, audit, notifikasi, dan unduh CSV error dari UI tersedia. Belum ada snapshot riwayat pangkat/jabatan/KGB, kalkulasi TMT setelah import, atau perhitungan pensiun ketika kolom kosong. |
+| #22 | Eksekusi import queue dan laporan | ⚠️ | `ImportEmployeeBatchJob` memproses batch valid, progress polling, hasil inserted/skipped/failed, audit, notifikasi, dan unduh CSV error dari UI tersedia. **Reklasifikasi 22 Juli 2026:** ketiadaan pembuatan riwayat pangkat/jabatan/KGB, kalkulasi TMT pasca-import, dan perhitungan pensiun ketika kolom kosong kini sesuai keputusan pengguna — import hanya menyimpan record pegawai beserta field snapshot dan mempertahankan tanggal pensiun apa adanya. Gap yang tersisa: laporan hasil import yang persisten/downloadable (bukan hanya CSV dari state browser). |
 | #23 | Profil sendiri read-only | ✅ | **[DIPERBAIKI `32ada6b`]** Profil memakai data pegawai login, saldo, tanggal pangkat/KGB, serta endpoint profile sendiri. Keluarga dan pendidikan mandiri kini hanya dapat dibaca melalui route GET dengan `employee_id` dari sesi; endpoint mutasi, FormRequest, dan tombol/modal tambah dihapus. Test mengunci data scope, route mutasi tidak tersedia, dan UI read-only, sementara CRUD pendidikan Admin Kepegawaian tetap diuji terpisah. |
 | #24 | CRUD data keluarga | ✅ | CRUD keluarga admin memakai FormRequest, Action, soft delete, audit masking NIK, data scope, API v1, dan test create/update/delete/role tersedia. |
 | #25 | Soft delete dan restore pegawai | ✅ | Soft delete, restore, audit, daftar nonaktif, serta EWS exclusion tersedia. Seluruh mekanisme *hard delete* (force delete, action, command, scheduler harian) telah dihapus dari backend. Halaman Data Backup dikembalikan sebagai filter terpisah untuk restorasi data nonaktif secara aman tanpa batas waktu penyimpanan. |
@@ -138,7 +159,7 @@ Verifikasi Laravel kini dapat dijalankan pada host ini. Podman dan PostgreSQL 17
 
 | Issue | Deliverable | Status | Bukti dan catatan |
 |---:|---|:---:|---|
-| #33 | Kalkulasi TMT otomatis | ⚠️ | EmployeeHistoryService menghitung kenaikan pangkat dari TMT pangkat +4 tahun, KGB +2 tahun, serta pensiun dari tanggal lahir dengan prioritas `default_bup` jabatan lalu BUP jenis jabatan ketika riwayat terbaru dibuat. Namun tidak ada TmtCalculatorService/observer/listener, milestone Satyalancana tidak disimpan, tidak ada rekalkulasi saat import, dan perubahan referensi BUP tidak memicu hitung ulang. |
+| #33 | Kalkulasi TMT otomatis | ⚠️ | EmployeeHistoryService menghitung kenaikan pangkat dari TMT pangkat +4 tahun, KGB +2 tahun, serta pensiun dari tanggal lahir dengan prioritas `default_bup` jabatan lalu BUP jenis jabatan ketika riwayat terbaru dibuat. **Reklasifikasi 22 Juli 2026:** ketiadaan rekalkulasi saat import kini sesuai keputusan pengguna — kalkulasi TMT hanya dipicu saat riwayat/sumber resmi disimpan per pegawai, bukan saat import selesai (integrasi kalkulator merged pada PR #120 commit `7b5ebeae`). Gap yang tersisa: milestone Satyalancana belum disimpan konsisten dan perubahan referensi BUP belum memicu hitung ulang. |
 | #34 | EWS scheduler harian | ⚠️ | `EwsEngineService` memeriksa pegawai aktif untuk lima trigger, threshold configurable, unique alert, log run, error notification, command, dan test tersedia. **Double registrasi masih ada**: `app:run-ews` terdaftar di `bootstrap/app.php` baris 22–24 DAN `routes/console.php` baris 27–29, berisiko dieksekusi dua kali per hari. Alert tidak menyimpan `is_eligible`/`trigger_days`/`tahun` seperti task issue; in-app notification hanya dibuat untuk pegawai, bukan Admin Kepegawaian. |
 | #35 | Halaman daftar EWS aktif | ✅ | Controller/action/view menampilkan nama, NIP, event, target, sisa hari, eligibility, dan follow-up; urutan sisa hari, warna urgensi, filter event/status, detail pegawai, akses Admin/Super Admin/Pimpinan, aksi ditangani/tidak perlu ber-catatan, audit, dan test role tersedia. |
 | #36 | Flag kinerja baik dan kelayakan Satyalancana | ⚠️ | Toggle AJAX, endpoint JSON, FormRequest, Action, RBAC route, audit, flag/catatan Satyalancana, dan test tersedia. Deskripsi UI bukan tooltip dengan teks yang diminta. Saat flag kinerja false, source tetap membuat dan menampilkan alert pangkat sebagai Tidak Eligible, bertentangan dengan PRD yang menyatakan pegawai tidak muncul pada EWS kenaikan pangkat. |
@@ -350,17 +371,17 @@ Status berikut tetap memerlukan QA/retest pada PHP kompatibel dan PostgreSQL seb
 ### Prioritas P0 — tutup acceptance criteria Sprint 5
 
 - ❌ Hapus salah satu registrasi jadwal `app:run-ews`. Saat ini terdaftar ganda: `bootstrap/app.php` (baris 22–24) DAN `routes/console.php` (baris 27–29), berisiko dieksekusi dua kali per hari. Pertahankan satu saja di `routes/console.php` yang configurable via `EwsConfig`, dan hapus dari `bootstrap/app.php`.
-- ❌ Buat satu mekanisme kalkulasi TMT yang dipanggil saat riwayat dibuat/diubah, import selesai, dan referensi BUP berubah. Simpan atau modelkan milestone Satyalancana secara konsisten tanpa menduplikasi aturan di engine.
+- ❌ Buat satu mekanisme kalkulasi TMT yang dipanggil saat riwayat/sumber resmi dibuat/diubah dan saat referensi BUP berubah. **Reklasifikasi 22 Juli 2026:** pemicu "import selesai" dikeluarkan sesuai keputusan pengguna — kalkulasi tidak dijalankan saat import massal selesai. Simpan atau modelkan milestone Satyalancana secara konsisten tanpa menduplikasi aturan di engine.
 - ❌ Lengkapi data alert EWS yang diperlukan requirement (`is_eligible`, `trigger_days`, `tahun`), lalu pastikan semua penerima yang diwajibkan mendapat notifikasi in-app dan email untuk kelima event EWS termasuk Admin Kepegawaian.
 - ❌ Terapkan source of truth PRD untuk flag kinerja false atau dokumentasikan keputusan: PRD menyebut alert pangkat tidak tampil, sedangkan source saat ini menampilkan sebagai Tidak Eligible.
 - ❌ Buat notification dispatcher yang membaca konfigurasi `ref_notification_channels`. `NotificationRecipientResolver::emailEnabled()` saat ini hardcoded. Daftarkan `ews.satyalancana` yang masih absen, dan daftarkan seluruh keputusan cuti dan kelima event EWS.
 
 ### Prioritas P1 — tutup acceptance criteria Sprint 3
 
-- ❌ Tambahkan template Data Pelengkap, Riwayat Kepangkatan, Riwayat Jabatan, dan Riwayat KGB.
-- ❌ Tambahkan dua contoh data dummy pada setiap template yang relevan.
+- ✅ **[SENGAJA TIDAK ADA — reklasifikasi 22 Juli 2026]** Template Data Pelengkap, Riwayat Kepangkatan, Riwayat Jabatan, dan Riwayat KGB tidak termasuk ruang lingkup Fase 1 sesuai keputusan pengguna. Dikeluarkan dari remediasi aktif; tidak dipulihkan tanpa keputusan eksplisit baru.
+- ✅ **[SENGAJA TIDAK ADA — reklasifikasi 22 Juli 2026]** Snapshot riwayat, kalkulasi TMT, dan perhitungan/fallback pensiun saat import sukses tidak dilakukan sesuai keputusan pengguna. Import hanya menyimpan record pegawai beserta field snapshot dan mempertahankan tanggal pensiun apa adanya. Kalkulasi TMT dipicu saat riwayat/sumber resmi disimpan per pegawai.
+- ❌ Tambahkan dua contoh data dummy pada template Data Utama (idealnya dua baris).
 - ❌ Tambahkan manual column mapping dropdown, warning kolom tidak cocok, kontrak API, dan test-nya.
-- ❌ Saat import sukses, buat snapshot riwayat yang tersedia, hitung TMT pangkat/KGB, dan hitung pensiun jika kolom kosong serta reference BUP tersedia.
 - ❌ Sediakan laporan hasil import yang persisten/downloadable untuk error eksekusi, bukan hanya CSV yang dibangun dari state browser.
 
 ### Prioritas P1 — tutup acceptance criteria Sprint 4

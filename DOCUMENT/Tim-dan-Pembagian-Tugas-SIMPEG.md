@@ -1,7 +1,7 @@
 # Komposisi Tim & Pembagian Tugas
 ## SIMPEG Fase 1 — LLDIKTI Wilayah XVI
 
-> Sinkron dengan PRD-SIMPEG-Fase1-Core.md v1.2. Acuan utama teknis: Laravel 12, Blade, PostgreSQL 17, Keycloak SSO untuk autentikasi, RBAC internal SIMPEG, development DB via container, production diarahkan ke Podman, approval cuti berbasis chain dinamis per pegawai/unit, notifikasi channel-configurable, dan export nominatif Excel custom.
+> Sinkron dengan PRD-SIMPEG-Fase1-Core.md v1.3. Acuan utama teknis: Laravel 12, Blade, PostgreSQL 17, Keycloak SSO untuk autentikasi, RBAC internal SIMPEG, development DB via container, production diarahkan ke Podman, approval cuti berbasis chain dinamis per pegawai/unit, notifikasi channel-configurable, dan export nominatif Excel custom.
 
 ---
 
@@ -201,6 +201,8 @@ Sprint 1 tetap fokus pada fondasi karena vertical slice baru efektif jika layout
 | Urutan | Durasi | Vertical Slice | Fokus Bersama | Pembagian Kerja | Output Selesai |
 |--------|--------|----------------|---------------|-----------------|----------------|
 | 3.1 | Hari 1-5 | Import Excel/CSV (US-3.1, US-3.2, US-3.3, US-3.4) | Template, upload, preview, validasi, dan eksekusi import | Dion kunci format kolom; Adithian buat UI upload/preview dummy; Jordan buat template dan kontrak import; Grantly bangun parser/queue/validasi dan QA file sample; Adriel review PR import | Admin bisa import data pegawai dari file sample dan melihat hasil validasi |
+
+> **Batasan ruang lingkup import Slice 3.1 (keputusan pengguna 22 Juli 2026):** hanya template Data Utama yang aktif. Import membuat record pegawai beserta field snapshot awal, tidak membuat riwayat kepangkatan/jabatan/KGB, dan tidak memanggil kalkulasi TMT. Tanggal pensiun hasil import dipertahankan apa adanya. Riwayat resmi diinput per pegawai melalui CRUD append-only. Template lanjutan multi-jenis tidak dipulihkan tanpa keputusan eksplisit baru. Kepemilikan task tidak berubah.
 | 3.2 | Hari 6-8 | Profil sendiri + data keluarga (US-2.5, US-2.8) | Pegawai bisa melihat data sendiri dan admin bisa kelola keluarga | Adithian buat profil read-only dan tab keluarga; Jordan buat policy/query data sendiri; Grantly bantu CRUD keluarga dan QA role access; Adriel review UI dan conflict | Profil sendiri dan data keluarga berjalan dengan real data |
 | 3.3 | Hari 9-10 | Soft delete dan restore pegawai (US-2.9, US-2.10) | Penghapusan aman tanpa hapus permanen | Adithian buat dialog konfirmasi soft delete/restore; Jordan buat soft delete/restore policy dan filter data non-aktif; Grantly QA negative case; Adriel review flow sebelum merge | Data pegawai bisa dinonaktifkan dan dipulihkan tanpa penghapusan permanen |
 
@@ -219,6 +221,8 @@ Sprint 4 dibuat 3 minggu karena cuti punya dependensi business rule, role approv
 | Urutan | Durasi | Vertical Slice | Fokus Bersama | Pembagian Kerja | Output Selesai |
 |--------|--------|----------------|---------------|-----------------|----------------|
 | 5.1 | Hari 1-4 | Kalkulasi TMT & scheduler EWS (US-5.1, US-5.5) | Alert kepegawaian bisa dihitung otomatis | Dion validasi rule; Jordan buat command/scheduler; Grantly bantu query dan dry-run QA; Adithian siapkan placeholder hasil dummy; Adriel review PR backend kritis | Scheduler EWS menghasilkan data alert yang bisa diuji |
+
+> **Batasan kalkulasi TMT Slice 5.1 (keputusan pengguna 22 Juli 2026):** kalkulasi TMT hanya dipicu saat riwayat/sumber resmi disimpan per pegawai, bukan saat import massal selesai. Import Data Utama tidak memanggil kalkulasi ini dan tanggal pensiun hasil import dipertahankan apa adanya. Kepemilikan task tidak berubah.
 | 5.2 | Hari 5-7 | Daftar EWS + flag kinerja + EWS pribadi (US-5.2, US-5.3, US-5.4) | Alert bisa dilihat admin/pegawai sesuai role | Adithian buat tabel/warna/status dummy; Jordan buat filter dan update flag; Grantly QA role access dan edge case; Adriel review UI/merge | EWS tampil dengan real data dan flag bisa diperbarui |
 | 5.3 | Hari 8-10 | Notifikasi & session timeout (US-6.2, US-6.3, US-6.4, US-1.3) | Notifikasi email/in-app dan keamanan session siap | Adithian buat halaman notifikasi; Jordan buat mail/queue/session timeout; Grantly QA email via Mailpit dan tandai dibaca; Adriel review template/merge | Notifikasi dan session timeout siap diuji regression |
 

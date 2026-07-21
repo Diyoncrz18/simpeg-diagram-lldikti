@@ -3,11 +3,11 @@
 
 | Field | Detail |
 |-------|--------|
-| **Versi Dokumen** | 1.2 |
-| **Tanggal** | 4 Juli 2026 |
+| **Versi Dokumen** | 1.3 |
+| **Tanggal** | 22 Juli 2026 |
 | **Domain** | Disiapkan LLDIKTI saat tahap deployment |
 | **Fase** | 1 — Core / Fondasi |
-| **Target Go-Live** | Sebelum 1 September 2026 |
+| **Target Go-Live** | 20 Agustus 2026 |
 | **Tim Pengembang** | Tim Magang (Mahasiswa) dengan Supervisi |
 | **Tech Stack** | Laravel 12 · Blade · PostgreSQL 17 · Keycloak SSO |
 
@@ -31,6 +31,7 @@ PRD ini menjadi **sumber kebenaran utama** untuk Fase 1. Keputusan meeting tekni
 14. Laporan menambahkan export nominatif Excel yang customizable: pengguna memilih kolom dan filter baris; PDF custom tidak masuk Fase 1.
 15. BUP tidak di-hardcode; usia pensiun dihitung dari referensi jabatan / jenis jabatan.
 16. Sample data pegawai, referensi jabatan, pangkat, golongan, struktur unit, saldo cuti awal, dan data mentah lainnya disediakan oleh bagian kepegawaian LLDIKTI.
+17. Keputusan sesi langsung pengguna 22 Juli 2026 (kanonis, disetujui pengguna): import massal Fase 1 hanya mengaktifkan template Data Utama. Import membuat record pegawai beserta field snapshot awal (golongan, pangkat, jabatan, kelas jabatan, pendidikan, prodi, dan tanggal pensiun bila tersedia di kolom Excel), tetapi tidak membuat riwayat kepangkatan, riwayat jabatan, maupun riwayat KGB. Riwayat resmi diinput per pegawai melalui CRUD riwayat append-only. Kalkulasi TMT dijalankan saat riwayat/sumber resmi disimpan, bukan saat import selesai. Tanggal pensiun hasil import dipertahankan apa adanya dan tidak dihitung ulang atau ditimpa oleh proses import. Template lanjutan multi-jenis (Data Pelengkap, Riwayat Kepangkatan, Riwayat Jabatan, Riwayat KGB) tidak termasuk ruang lingkup saat ini dan tidak dipulihkan tanpa keputusan eksplisit baru. Keputusan ini menggantikan rincian import versi sebelumnya jika bertentangan.
 
 ---
 
@@ -521,13 +522,13 @@ Modul ini menyimpan dan mengelola seluruh data kepegawaian secara terpusat. Di F
 | `jenis_pegawai` | enum/ref | Ya | PNS / PPPK / CPNS; dapat dibuat reference bila LLDIKTI ingin menambah kategori |
 | `status_pegawai_id` | ref_status_pegawai_id | Ya | FK ke `ref_status_pegawai`; default `Aktif` |
 | `status_keterangan` | text | Tidak | Keterangan/alasan saat status pegawai berubah, misalnya CLTN, tugas belajar, atau pemberhentian sementara |
-| `golongan_terakhir` | derived/snapshot | Ya untuk import Excel | Diturunkan dari riwayat kepangkatan terbaru berdasarkan TMT; snapshot import awal boleh disimpan sementara |
-| `pangkat_terakhir` | derived/snapshot | Tidak | Diturunkan dari riwayat kepangkatan terbaru; boleh kosong untuk PPPK/CPNS |
-| `jabatan_terakhir` | derived/snapshot | Ya untuk import Excel | Diturunkan dari riwayat jabatan terbaru berdasarkan TMT dan `ref_jabatan` |
-| `kelas_jabatan_terakhir` | derived/snapshot | Ya untuk import Excel | Diturunkan dari riwayat jabatan terbaru; nilai kelas disimpan pada riwayat jabatan, bukan pada master jabatan |
-| `pendidikan_terakhir` | string(20) | Ya untuk import Excel | Contoh: D3, S1, S2 |
-| `prodi_pendidikan_terakhir` | string(255) | Ya untuk import Excel | Dari kolom `Prodi Pendidikan Terakhir` |
-| `tanggal_pensiun` | date | Tidak | Dari kolom `Pensiun`; jika kosong dihitung dari BUP setelah referensi final tersedia |
+| `golongan_terakhir` | snapshot | Ya untuk import Excel | Snapshot langsung dari kolom Excel saat import Data Utama. Setelah ada riwayat kepangkatan resmi, nilai terkini diturunkan dari riwayat terbaru berdasarkan TMT; import tidak membuat riwayat |
+| `pangkat_terakhir` | snapshot | Tidak | Snapshot dari kolom Excel; boleh kosong untuk PPPK/CPNS. Setelah ada riwayat kepangkatan resmi, nilai terkini diturunkan dari riwayat terbaru; import tidak membuat riwayat |
+| `jabatan_terakhir` | snapshot | Ya untuk import Excel | Snapshot dari kolom Excel saat import Data Utama. Setelah ada riwayat jabatan resmi, nilai terkini diturunkan dari riwayat terbaru berdasarkan TMT dan `ref_jabatan`; import tidak membuat riwayat |
+| `kelas_jabatan_terakhir` | snapshot | Ya untuk import Excel | Snapshot dari kolom Excel; nilai kelas resmi disimpan pada riwayat jabatan, bukan pada master jabatan. Import tidak membuat riwayat jabatan |
+| `pendidikan_terakhir` | string(20) | Ya untuk import Excel | Contoh: D3, S1, S2; snapshot dari kolom Excel |
+| `prodi_pendidikan_terakhir` | string(255) | Ya untuk import Excel | Dari kolom `Prodi Pendidikan Terakhir`; snapshot dari kolom Excel |
+| `tanggal_pensiun` | date | Tidak | Dari kolom `Pensiun`. Nilai hasil import dipertahankan apa adanya dan tidak dihitung ulang atau ditimpa oleh import. Bila kolom kosong, tanggal pensiun dihitung dari BUP hanya melalui kalkulasi TMT saat riwayat/sumber resmi disimpan, bukan saat import |
 | `profil_status` | enum | Ya | `belum_lengkap` / `lengkap` untuk membedakan hasil import awal dan profil yang sudah dilengkapi |
 
 #### Data Kontak
@@ -668,6 +669,8 @@ Fitur import Excel/CSV memungkinkan Admin Kepegawaian melakukan migrasi data awa
 
 Format import awal mengikuti file `daftar_pegawai.xlsx` sheet `Pegawai`. Sistem tetap menyediakan mapping kolom agar format ini bisa disesuaikan jika LLDIKTI mengirim file versi berikutnya.
 
+> **Ruang lingkup import Fase 1 (keputusan pengguna 22 Juli 2026):** Hanya template Data Utama yang aktif. Import membuat record pegawai beserta field snapshot awal, tetapi tidak membuat riwayat kepangkatan, riwayat jabatan, maupun riwayat KGB, dan tidak memanggil kalkulasi TMT. Riwayat resmi diinput per pegawai melalui CRUD riwayat append-only. Tanggal pensiun hasil import dipertahankan apa adanya. Template lanjutan multi-jenis tidak termasuk ruang lingkup saat ini dan tidak dipulihkan tanpa keputusan eksplisit baru.
+
 ### 8.2 User Stories
 
 #### US-CSV-01: Import Data Pegawai dari Excel/CSV
@@ -683,8 +686,10 @@ Format import awal mengikuti file `daftar_pegawai.xlsx` sheet `Pegawai`. Sistem 
 4. Validasi sebelum import: NIP unik, email pegawai terisi, format tanggal benar, field wajib dari Excel terisi.
 5. Tampilkan **ringkasan validasi**: berapa baris valid, berapa baris error, detail error per baris.
 6. Admin bisa memilih: import hanya yang valid, atau batalkan semua.
-7. Setelah import, tampilkan **laporan hasil**: berapa berhasil, berapa gagal.
-8. Audit log mencatat import (siapa, kapan, berapa record).
+7. Import hanya memproses template Data Utama: membuat record pegawai beserta field snapshot awal. Import tidak membuat riwayat kepangkatan, riwayat jabatan, maupun riwayat KGB, dan tidak memanggil kalkulasi TMT.
+8. Tanggal pensiun hasil import dipertahankan apa adanya; import tidak menghitung ulang atau menimpa tanggal pensiun.
+9. Setelah import, tampilkan **laporan hasil**: berapa berhasil, berapa gagal.
+10. Audit log mencatat import (siapa, kapan, berapa record).
 
 #### US-CSV-02: Download Template Import
 
@@ -700,12 +705,13 @@ Format import awal mengikuti file `daftar_pegawai.xlsx` sheet `Pegawai`. Sistem 
 
 ### 8.3 Jenis Import yang Didukung (Fase 1)
 
-| Jenis Import | Keterangan |
-|-------------|------------|
-| Data Pegawai (Utama) | Mengikuti `daftar_pegawai.xlsx`: nama, email, NIP, telepon, status kepegawaian, tanggal lahir, golongan, pangkat, jabatan, kelas jabatan, pendidikan, prodi, dan tanggal pensiun jika tersedia |
-| Riwayat Kepangkatan | Import lanjutan jika LLDIKTI menyediakan TMT dan data SK |
-| Riwayat Jabatan | Import lanjutan jika LLDIKTI menyediakan unit kerja, TMT, dan data SK |
-| Riwayat KGB | Import lanjutan jika LLDIKTI menyediakan TMT KGB, gaji pokok, dan data SK |
+Sesuai keputusan pengguna 22 Juli 2026, hanya satu jenis import yang aktif di Fase 1.
+
+| Jenis Import | Status | Keterangan |
+|-------------|--------|------------|
+| Data Pegawai (Utama) | Aktif | Mengikuti `daftar_pegawai.xlsx`: nama, email, NIP, telepon, status kepegawaian, tanggal lahir, golongan, pangkat, jabatan, kelas jabatan, pendidikan, prodi, dan tanggal pensiun jika tersedia. Membuat record pegawai beserta snapshot awal; tidak membuat riwayat apa pun dan tidak memanggil kalkulasi TMT |
+
+**Yang tidak termasuk ruang lingkup saat ini:** template import lanjutan Riwayat Kepangkatan, Riwayat Jabatan, dan Riwayat KGB tidak diaktifkan di Fase 1. Riwayat resmi diinput per pegawai melalui CRUD riwayat append-only, bukan melalui import massal. Template multi-jenis ini tidak dipulihkan tanpa keputusan eksplisit baru.
 
 ---
 
@@ -993,9 +999,11 @@ tanggal_kontrak_berakhir = tanggal_berakhir_kontrak (langsung dari data)
 tanggal_satyalancana = tmt_pengangkatan_pertama + 10/20/30 tahun
 ```
 
-Kalkulasi ini dijalankan ulang setiap kali:
+Kalkulasi ini dijalankan ulang setiap kali riwayat/sumber resmi disimpan:
 - Data riwayat kepangkatan/KGB ditambahkan atau diperbarui.
 - Data jabatan atau referensi BUP diperbarui (karena usia pensiun bisa berubah).
+
+Kalkulasi TMT tidak dipicu oleh selesainya import massal. Import Data Utama hanya menyimpan field snapshot dan mempertahankan tanggal pensiun dari kolom Excel apa adanya. Tanggal pensiun hasil import tidak dihitung ulang atau ditimpa oleh import.
 
 ---
 

@@ -3,7 +3,9 @@
 
 > Dokumen ini berisi daftar issues yang siap dipindahkan ke GitHub Issues / Notion Board.
 > Setiap issue diturunkan dari User Stories dan dipecah menjadi task teknis yang actionable.
-> Sinkron dengan PRD-SIMPEG-Fase1-Core.md v1.2: Keycloak hanya untuk SSO, RBAC internal aplikasi, approval cuti memakai chain dinamis per pegawai/unit, status cuti memakai label resmi, PostgreSQL development via container, production diarahkan ke Podman, notifikasi channel-configurable, dan laporan mendukung export nominatif Excel custom.
+> Sinkron dengan PRD-SIMPEG-Fase1-Core.md v1.3: Keycloak hanya untuk SSO, RBAC internal aplikasi, approval cuti memakai chain dinamis per pegawai/unit, status cuti memakai label resmi, PostgreSQL development via container, production diarahkan ke Podman, notifikasi channel-configurable, dan laporan mendukung export nominatif Excel custom.
+>
+> **Keputusan import Fase 1 (kanonis, disetujui pengguna 22 Juli 2026):** import massal hanya mengaktifkan template Data Utama. Import membuat record pegawai beserta field snapshot awal, tidak membuat riwayat kepangkatan/jabatan/KGB, dan tidak memanggil kalkulasi TMT. Riwayat resmi diinput per pegawai melalui CRUD append-only. Tanggal pensiun hasil import dipertahankan apa adanya. Kalkulasi TMT dipicu saat riwayat/sumber resmi disimpan, bukan saat import selesai. Template lanjutan multi-jenis tidak termasuk ruang lingkup saat ini dan tidak dipulihkan tanpa keputusan eksplisit baru.
 
 ---
 
@@ -682,8 +684,8 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 **Tasks:**
 - [ ] Buat `ImportTemplateController@download` — generate template CSV dan/atau Excel
-- [ ] Template utama Data Pegawai mengikuti header `daftar_pegawai.xlsx`: `No`, `Nama Pegawai`, `Email Pegawai`, `Golongan`, `Jabatan`, `Kelas Jabatan`, `NIP`, `Nomor Telepon`, `Pangkat`, `Pendidikan Terakhir`, `Pensiun`, `Person`, `Person Formula`, `Prodi Pendidikan Terakhir`, `Status Kepegawaian`, `Tanggal Lahir`
-- [ ] Template lanjutan: Data Pelengkap, Riwayat Kepangkatan, Riwayat Jabatan, Riwayat KGB
+- [ ] Hanya template Data Utama yang aktif (keputusan pengguna 22 Juli 2026). Template utama Data Pegawai mengikuti header `daftar_pegawai.xlsx`: `No`, `Nama Pegawai`, `Email Pegawai`, `Golongan`, `Jabatan`, `Kelas Jabatan`, `NIP`, `Nomor Telepon`, `Pangkat`, `Pendidikan Terakhir`, `Pensiun`, `Person`, `Person Formula`, `Prodi Pendidikan Terakhir`, `Status Kepegawaian`, `Tanggal Lahir`
+- [ ] JANGAN memulihkan template lanjutan/sekunder (Data Pelengkap, Riwayat Kepangkatan, Riwayat Jabatan, Riwayat KGB). Template multi-jenis tidak termasuk ruang lingkup saat ini dan hanya boleh dibuat setelah ada keputusan eksplisit baru. Riwayat resmi diinput per pegawai melalui CRUD append-only, bukan template import
 - [ ] Header kolom mengikuti `Mapping-Data-Pegawai-Excel-SIMPEG.md`
 - [ ] Sertakan 2 baris contoh data dummy
 - [ ] Format minimal CSV UTF-8 delimiter koma; opsi Excel memakai `.xlsx`
@@ -743,7 +745,9 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
   - Skip baris NIP duplikat
   - Simpan snapshot awal dari Excel: golongan, pangkat, jabatan, kelas jabatan, pendidikan, prodi, tanggal pensiun jika tersedia
   - Set `profil_status = belum_lengkap` untuk pegawai hasil import yang belum punya data pelengkap PRD
-  - Hitung tanggal pensiun hanya untuk baris yang kolom `Pensiun` kosong dan referensi BUP sudah tersedia
+  - JANGAN membuat riwayat kepangkatan, riwayat jabatan, maupun riwayat KGB. Import hanya mempersistensikan record pegawai beserta field snapshot; riwayat resmi diinput per pegawai melalui CRUD append-only (keputusan pengguna 22 Juli 2026)
+  - Pertahankan tanggal pensiun hasil import apa adanya. Import TIDAK menghitung ulang atau menimpa tanggal pensiun, termasuk saat kolom `Pensiun` kosong
+  - JANGAN memanggil kalkulasi TMT dari import. Kalkulasi TMT hanya dipicu saat riwayat/sumber resmi disimpan per pegawai (lihat Issue #33)
   - Track progress (jumlah berhasil/gagal)
 - [ ] Dispatch job dari controller setelah user klik "Import"
 - [ ] Tampilkan progress bar atau loading indicator
@@ -1013,7 +1017,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
   - Saat data pengangkatan pertama tersedia → milestone Satyalancana 10/20/30 tahun
 - [ ] Register sebagai Model Observer atau Event Listener
 - [ ] Simpan hasil ke kolom di tabel `employees`
-- [ ] Juga jalankan saat import CSV selesai (batch)
+- [ ] Kalkulasi hanya dipicu saat riwayat/sumber resmi disimpan per pegawai. JANGAN menjalankan kalkulasi saat import massal selesai (keputusan pengguna 22 Juli 2026). Import Data Utama mempertahankan tanggal pensiun apa adanya dan tidak membuat riwayat
 - [ ] Unit test
 
 ---

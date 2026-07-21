@@ -3,12 +3,14 @@
 
 | Field | Detail |
 |-------|--------|
-| **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.2 |
-| **Tanggal** | 4 Juli 2026 |
+| **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.3 |
+| **Tanggal** | 22 Juli 2026 |
 | **Total User Stories** | 53 |
 | **Total Epics** | 9 |
 
-> **Catatan sinkronisasi PRD 1.2:** Keycloak digunakan hanya untuk SSO/login. Role dan permission dikelola di database SIMPEG. Approval cuti memakai chain dinamis per pegawai/unit, status keputusan resmi (`Disetujui`, `Perubahan`, `Ditangguhkan`, `Tidak Disetujui`), cuti tahunan tidak boleh lintas tahun, EWS menambahkan Satyalancana, notifikasi harus channel-configurable, dan laporan mendukung export nominatif Excel custom.
+> **Catatan sinkronisasi PRD 1.3:** Keycloak digunakan hanya untuk SSO/login. Role dan permission dikelola di database SIMPEG. Approval cuti memakai chain dinamis per pegawai/unit, status keputusan resmi (`Disetujui`, `Perubahan`, `Ditangguhkan`, `Tidak Disetujui`), cuti tahunan tidak boleh lintas tahun, EWS menambahkan Satyalancana, notifikasi harus channel-configurable, dan laporan mendukung export nominatif Excel custom.
+>
+> **Keputusan import Fase 1 (kanonis, disetujui pengguna 22 Juli 2026):** import massal hanya mengaktifkan template Data Utama. Import membuat record pegawai beserta field snapshot awal, tidak membuat riwayat kepangkatan/jabatan/KGB, dan tidak memanggil kalkulasi TMT. Riwayat resmi diinput per pegawai melalui CRUD append-only. Tanggal pensiun hasil import dipertahankan apa adanya. Kalkulasi TMT dipicu saat riwayat/sumber resmi disimpan, bukan saat import selesai. Template lanjutan multi-jenis tidak termasuk ruang lingkup saat ini.
 
 ---
 
@@ -481,7 +483,7 @@ Setiap story mengikuti format:
 - [ ] AC-2: Minimal tersedia template CSV berformat UTF-8; jika disediakan Excel, gunakan `.xlsx` dengan header yang sama.
 - [ ] AC-3: Header template utama mengikuti file `daftar_pegawai.xlsx`: `No`, `Nama Pegawai`, `Email Pegawai`, `Golongan`, `Jabatan`, `Kelas Jabatan`, `NIP`, `Nomor Telepon`, `Pangkat`, `Pendidikan Terakhir`, `Pensiun`, `Person`, `Person Formula`, `Prodi Pendidikan Terakhir`, `Status Kepegawaian`, `Tanggal Lahir`.
 - [ ] AC-4: Sertakan 2 baris contoh data (dummy) sebagai panduan pengisian.
-- [ ] AC-5: Tersedia template lanjutan untuk data yang tidak ada di Excel awal: Data Pelengkap, Riwayat Kepangkatan, Riwayat Jabatan, Riwayat KGB.
+- [ ] AC-5: Hanya template Data Utama yang aktif di Fase 1 (keputusan pengguna 22 Juli 2026). Template lanjutan multi-jenis (Data Pelengkap, Riwayat Kepangkatan, Riwayat Jabatan, Riwayat KGB) tidak termasuk ruang lingkup saat ini dan tidak dipulihkan tanpa keputusan eksplisit baru.
 
 ---
 
@@ -556,7 +558,9 @@ Setiap story mengikuti format:
 - [ ] AC-4: Laporan bisa di-download sebagai laporan CSV/Excel (berisi baris yang gagal + alasan gagal).
 - [ ] AC-5: Semua record yang berhasil diimpor langsung berstatus aktif dan muncul di daftar pegawai.
 - [ ] AC-6: Audit log mencatat: user, timestamp, nama file, jumlah record berhasil/gagal.
-- [ ] AC-7: Kalkulasi TMT (kenaikan pangkat & KGB berikutnya) otomatis dihitung untuk semua pegawai yang baru diimpor.
+- [ ] AC-7: Import hanya mempersistensikan record pegawai beserta field snapshot awal (golongan, pangkat, jabatan, kelas jabatan, pendidikan, prodi, dan tanggal pensiun bila tersedia). Import tidak membuat riwayat kepangkatan, riwayat jabatan, maupun riwayat KGB.
+- [ ] AC-8: Tanggal pensiun hasil import dipertahankan apa adanya; import tidak menghitung ulang atau menimpa tanggal pensiun.
+- [ ] AC-9: Import tidak memanggil kalkulasi TMT. Kalkulasi TMT hanya dipicu saat riwayat/sumber resmi disimpan per pegawai (lihat US-5.5).
 
 ---
 
@@ -1009,7 +1013,7 @@ Setiap story mengikuti format:
 | **Dependensi** | US-2.6 |
 
 > **Sebagai** sistem,
-> **Saya ingin** otomatis menghitung tanggal kenaikan pangkat, KGB, dan pensiun berikutnya setiap kali data riwayat diperbarui,
+> **Saya ingin** otomatis menghitung tanggal kenaikan pangkat, KGB, dan pensiun berikutnya setiap kali data riwayat/sumber resmi disimpan,
 > **Sehingga** EWS selalu menggunakan data terbaru untuk trigger notifikasi.
 
 **Acceptance Criteria:**
@@ -1019,7 +1023,7 @@ Setiap story mengikuti format:
 - [ ] AC-3: Saat jabatan baru ditambahkan → hitung ulang `tanggal_pensiun = tanggal_lahir + BUP_sesuai_jenis_jabatan_baru`.
 - [ ] AC-4: Saat data pengangkatan pertama tersedia → hitung milestone Satyalancana 10/20/30 tahun.
 - [ ] AC-5: Hasil kalkulasi disimpan di tabel `employees` (kolom computed atau tabel terpisah) agar scheduler EWS tidak perlu hitung ulang setiap hari.
-- [ ] AC-6: Kalkulasi juga dijalankan saat import CSV selesai (batch calculation).
+- [ ] AC-6: Kalkulasi TMT dipicu saat riwayat/sumber resmi disimpan per pegawai, bukan saat import massal selesai (keputusan pengguna 22 Juli 2026). Import Data Utama tidak memanggil kalkulasi ini dan tanggal pensiun hasil import dipertahankan apa adanya.
 
 ---
 

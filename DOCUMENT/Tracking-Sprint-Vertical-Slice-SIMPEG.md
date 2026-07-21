@@ -180,6 +180,8 @@ DoD Sprint 1:
 | Durasi target | Hari 1-5 |
 | Goal | Admin bisa download template, upload file, preview, validasi, dan eksekusi import |
 
+> **Batasan ruang lingkup import (keputusan pengguna 22 Juli 2026):** hanya template Data Utama yang aktif. Import membuat record pegawai beserta field snapshot awal, tidak membuat riwayat kepangkatan/jabatan/KGB, dan tidak memanggil kalkulasi TMT. Tanggal pensiun hasil import dipertahankan apa adanya. Riwayat resmi diinput per pegawai melalui CRUD append-only. Template lanjutan multi-jenis tidak dipulihkan tanpa keputusan eksplisit baru. Slice ini tidak bergantung pada Slice hari libur (Issue #10).
+
 | Stage | Owner | Yang Dihandle | Output | Status |
 |-------|-------|---------------|--------|--------|
 | Kickoff | Dion | Kunci format kolom, sample file, rules validasi | Kontrak import | Not Started |
@@ -299,6 +301,8 @@ DoD Sprint 1:
 | User stories | US-5.1, US-5.5 |
 | Durasi target | Hari 1-4 |
 | Goal | Alert kepegawaian bisa dihitung otomatis dan diuji dry-run |
+
+> **Batasan kalkulasi TMT (keputusan pengguna 22 Juli 2026):** kalkulasi TMT hanya dipicu saat riwayat/sumber resmi disimpan per pegawai, bukan saat import massal selesai. Import Data Utama tidak memanggil kalkulasi ini dan tanggal pensiun hasil import dipertahankan apa adanya.
 
 | Stage | Owner | Yang Dihandle | Output | Status |
 |-------|-------|---------------|--------|--------|

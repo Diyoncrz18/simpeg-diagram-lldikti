@@ -4,7 +4,7 @@
 |---|---|
 | Status | Dokumen turunan kebutuhan produk |
 | Role utama | `pegawai` |
-| Acuan utama | PRD SIMPEG Fase 1 Core v1.2 dan User Stories SIMPEG Fase 1 |
+| Acuan utama | PRD SIMPEG Fase 1 Core v1.3 dan User Stories SIMPEG Fase 1 |
 | Bahasa antarmuka | Bahasa Indonesia |
 | Batasan utama | Pegawai melihat data sendiri secara read-only, dapat mengajukan serta memantau cuti, dan menerima notifikasi. |
 
