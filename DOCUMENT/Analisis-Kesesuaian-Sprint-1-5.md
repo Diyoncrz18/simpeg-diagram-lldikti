@@ -34,17 +34,17 @@ Keputusan sesi langsung pengguna 22 Juli 2026 (kanonis, disetujui pengguna) mene
 
 ## Addendum Sinkronisasi Pekerjaan Jordan — 24 Juli 2026
 
-> **Catatan penomoran:** Nomor task pada `perbaikan-p0-jordan.md` dan `perbaikan-P0.md` adalah nomor tracker lokal Jordan, bukan nomor Issue kanonik. Sinkronisasi berikut memakai kesamaan substansi terhadap user story dan Issue kanonik, bukan kesamaan nomor.
+> **Catatan penomoran:** Nomor task pada `perbaikan-P0.md` adalah nomor tracker lokal Jordan, bukan nomor Issue kanonik. Sinkronisasi berikut memakai kesamaan substansi terhadap user story dan Issue kanonik, bukan kesamaan nomor.
 
-Pekerjaan Jordan yang telah tersedia pada `development` mengubah penilaian source sebagai berikut:
+Seluruh scope tracker lokal Jordan berikut telah selesai dan tersedia pada `development`. Status Issue kanonik tetap dinilai berdasarkan keseluruhan acceptance criteria issue, sehingga selesainya task lokal tidak otomatis menutup gap lain pada Issue #20–#22 atau #33.
 
 1. **Local #1 → Issue #19 / US-2.7:** jalur hapus riwayat disiplin telah dihilangkan dan status Issue #19 tetap ✅.
 2. **Local #2 → Issue #23 / US-2.5:** profil keluarga dan pendidikan mandiri telah read-only dan status Issue #23 tetap ✅.
-3. **Local #3 → Issue #31 / US-4.4–US-4.6:** seluruh write aktif telah memakai `DeclineLeaveAction`, `decline()`, `cuti.decline`, `tidak_disetujui`, dan audit `NOT_APPROVED`. Pembacaan `REJECT`/`rejected` dipertahankan hanya untuk histori legacy pada timeline/proof dan selalu dirender `Tidak Disetujui`. Issue #31 tetap ⚠️ karena pengecualian kompatibilitas read-only tersebut dan gap lain pada issue yang sama.
+3. **Local #3 → Issue #31 / US-4.4–US-4.6:** seluruh write dan read domain telah memakai `DeclineLeaveAction`, `decline()`, `cuti.decline`, `tidak_disetujui`, `NOT_APPROVED`, dan label `Tidak Disetujui`. Compatibility pembacaan token `REJECT`/`rejected` telah dihapus; route/method teknis non-domain seperti `Collection::reject()` tetap valid. Bersama engine approval, snapshot, data scope, notifikasi, audit, QR proof, timeline, dan test yang sudah tersedia, Issue #31 naik menjadi ✅ pada level source.
 4. **Local #6 → Issue #37 / US-6.3:** kebijakan channel per event telah menggunakan `notification_event_channels` dan resolver dua lapis fail-closed untuk `in_app` serta `email`; allowlist event email hardcoded telah dihapus dan Satyalancana tercakup. Issue #37 naik menjadi ✅ pada level source.
-5. **Local #9 → Issue #33 / US-5.5:** `TmtCalculatorService` telah menjadi mekanisme kalkulasi tunggal saat riwayat/sumber resmi disimpan. Issue #33 tetap ⚠️ hanya untuk rekalkulasi setelah referensi BUP berubah dan konsistensi milestone Satyalancana.
-6. **Local #12 → Issue #20–#22 / US-3.1–US-3.4:** batas Data Utama-only telah sesuai addendum 22 Juli dan tidak dipetakan ke Issue #12 kanonik. Gap mapping kolom serta laporan import persisten tetap terbuka.
-7. **Local #14 → Issue #27 / US-4.11:** assignment Kepala Bagian per pegawai kini mendukung Admin Kepegawaian berizin, tanggal efektif current/backdate/future, interval inklusif tanpa overlap, audit atomik, dan snapshot approval lama yang immutable. Issue #27 naik menjadi ✅ pada level source.
+5. **Local #9 → Issue #33 / US-5.5:** scope lokal selesai dan merged; `TmtCalculatorService` telah menjadi mekanisme kalkulasi tunggal saat riwayat/sumber resmi disimpan. Issue #33 tetap ⚠️ hanya untuk rekalkulasi setelah referensi BUP berubah dan konsistensi milestone Satyalancana, yang bukan sisa scope task lokal #9.
+6. **Local #12 → Issue #20–#22 / US-3.1–US-3.4:** scope lokal selesai dan merged; batas Data Utama-only telah sesuai addendum 22 Juli dan tidak dipetakan ke Issue #12 kanonik. Gap mapping kolom serta laporan import persisten tetap terbuka sebagai acceptance criteria Issue #20–#22, bukan sisa task lokal #12.
+7. **Local #14 → Issue #27 / US-4.11:** assignment Kepala Bagian per pegawai kini mendukung Admin Kepegawaian berizin, tanggal efektif current/backdate/future, interval inklusif tanpa overlap, audit atomik, snapshot approval lama yang immutable, serta query detail pegawai dan konfigurasi approval yang hanya memakai assignment efektif. Issue #27 tetap ✅ pada level source.
 8. **Local #19 → delivery lintas-cutting:** `current_step_label` pada daftar cuti Admin Kepegawaian dan Pimpinan berasal dari `role_label` snapshot step aktif dan bernilai `null` untuk request terminal. Ini bukan Issue #19 kanonik; hasilnya dicatat sebagai delivery lintas-cutting tanpa mengubah status Issue #19.
 
 ## Legend Status
@@ -57,7 +57,7 @@ Pekerjaan Jordan yang telah tersedia pada `development` mengubah penilaian sourc
 
 ## Kesimpulan Eksekutif
 
-Dari 38 issue Sprint 1–5, penghitungan ulang tabel status menghasilkan **22 berstatus ✅** pada level source, **16 ⚠️** sebagian, dan **0 ❌**. Selain penutupan sebelumnya, sinkronisasi 24 Juli menaikkan Issue #27 dan #37 menjadi ✅. Issue #31 dan #33 tetap ⚠️ dengan gap yang sudah dipersempit sesuai implementasi aktual. Status source tidak otomatis mengubah tracker delivery menjadi `Done`; tracker formal tetap mengikuti review, QA/retest, dan evidence delivery.
+Dari 38 issue Sprint 1–5, penghitungan ulang tabel status menghasilkan **23 berstatus ✅** pada level source, **15 ⚠️** sebagian, dan **0 ❌**. Selain penutupan sebelumnya, sinkronisasi 24 Juli menaikkan Issue #27, #31, dan #37 menjadi ✅. Issue #33 tetap ⚠️ karena gap kanonik di luar scope task lokal Jordan #9. Status source tidak otomatis mengubah tracker delivery menjadi `Done`; tracker formal tetap mengikuti review, QA/retest, dan evidence delivery.
 
 Untuk Sprint 6 terdapat **6 issue (#39–#43 dan #46)**. Pada level issue, **5 issue berstatus ⚠️ sebagian** dan **1 issue berstatus ❌ belum selesai**; belum ada issue Sprint 6 yang layak dinyatakan ✅ secara utuh. Setelah semua bullet issue dipecah—termasuk sembilan reference table pada Issue #46—terdapat **61 task audit**: **15 selesai pada source, 22 sebagian, dan 24 belum selesai/tidak sesuai**. Foundation hierarchy unit kerja dan notification channel pada Issue #46 tersedia di PR #118, tetapi CRUD Admin tetap belum ada. Tracker delivery masih menandai seluruh stage Sprint 6 sebagai `Not Started`; status source di bagian Sprint 6 tidak boleh dipakai untuk mengubah tracker menjadi `Done` sebelum review, QA/retest, dan evidence terpenuhi.
 
@@ -69,7 +69,7 @@ Untuk Sprint 6 terdapat **6 issue (#39–#43 dan #46)**. Pada level issue, **5 i
 4. **Issue #12 — testing framework:** Dusk dan smoke test browser `/up`, helper TestCase, test autentikasi Keycloak/unregistered identity, konfigurasi `phpunit.dusk.xml`, serta dokumentasi perintah test ditambahkan. Verifikasi mencakup 59 test fokus SQLite, 71 test fokus PostgreSQL 17, Dusk, dan CI PR `Pint + PHPStan + Test` yang lulus. Test constraint ledger yang di-skip pada SQLite sengaja dijalankan penuh pada PostgreSQL 17.
 5. **Issue #27 — assignment Kepala Bagian efektif:** assignment berlaku per pegawai dengan tanggal efektif current/backdate/future, interval inklusif dan penutupan H-1 tanpa overlap, dual gate role/permission, audit atomik, lookup kandidat bounded, dan UI assignment. Pengajuan lama mempertahankan snapshot; pengajuan baru memakai Kepala Bagian efektif milik pemohon dan fail-closed jika tidak tersedia.
 6. **Issue #37 — kebijakan channel notifikasi per event:** delivery `in_app` dan `email` memakai katalog channel global serta pasangan event-channel aktif. Missing/disabled pada salah satu lapis berjalan fail-closed, allowlist hardcoded dihapus, dan event Satyalancana tercakup.
-7. **Issue #31 — nomenklatur keputusan aktif diperbaiki dengan pengecualian legacy read-only:** seluruh write aktif memakai nomenklatur `Tidak Disetujui`/`NOT_APPROVED`; token legacy hanya dibaca untuk mempertahankan histori pada timeline/proof.
+7. **Issue #31 — nomenklatur keputusan cuti diselesaikan:** seluruh write dan read domain memakai `Tidak Disetujui`/`tidak_disetujui`/`NOT_APPROVED`; compatibility token legacy `REJECT`/`rejected` pada timeline/proof telah dihapus dan regression test mengunci kontrak final.
 8. **Issue #33 — kalkulasi TMT disentralisasi:** `TmtCalculatorService` menghitung snapshot pangkat, KGB, dan pensiun dari sumber resmi; import Data Utama tidak menjadi trigger kalkulasi.
 
 **Diperbaiki / ditutup sejak analisis 17 Juli (commit `4ea27e8` sampai `869b842`):**
@@ -117,7 +117,7 @@ Verifikasi Laravel kini dapat dijalankan pada host ini. Podman dan PostgreSQL 17
 | **[BARU] Riwayat disiplin append-only** | Route DELETE/action/permission/tombol hapus dihilangkan; `DeleteDocumentAction` menolak dokumen yang masih dipakai riwayat disiplin; `DisciplineRecordTest`, `EmployeeDocumentTest`, dan `RbacPermissionMiddlewareTest` tersedia. |
 | **[BARU] Profil mandiri read-only** | Route keluarga dan pendidikan hanya GET; controller membaca scope dari sesi; FormRequest serta UI mutasi dihapus. `MyFamilyTest`, `MyEducationHistoryTest`, `ProfileTest`, dan `EducationHistoryTest` tersedia. |
 | **[UPDATE] Assignment Kepala Bagian efektif** | `AssignSupervisorAction`, `AssignSupervisorRequest`, histori `SupervisorAssignment`, lookup bounded, UI detail pegawai, hard audit, serta regression test current/backdate/future/overlap/snapshot tersedia. |
-| **[UPDATE] Nomenklatur keputusan cuti** | Write aktif memakai `DeclineLeaveAction`, `decline()`, `cuti.decline`, `tidak_disetujui`, dan `NOT_APPROVED`; histori legacy hanya dibaca dan dirender `Tidak Disetujui`. |
+| **[UPDATE] Nomenklatur keputusan cuti** | Write dan read domain memakai `DeclineLeaveAction`, `decline()`, `cuti.decline`, `tidak_disetujui`, `NOT_APPROVED`, dan label `Tidak Disetujui`; compatibility token `REJECT`/`rejected` telah dihapus dan dikunci regression test. |
 | **[UPDATE] Kebijakan channel per event** | `notification_event_channels`, `NotificationChannelResolver::isEnabledForEvent()`, gating `in_app`/`email`, Satyalancana, migration backfill, serta test enabled/disabled/missing tersedia. |
 | **[UPDATE] Kalkulator TMT tunggal** | `TmtCalculatorService` dan integrasi sumber resmi tersedia; import Data Utama tidak membuat riwayat atau memicu kalkulasi. |
 | **[UPDATE] Label tahap aktif lintas-cutting** | Daftar cuti Admin Kepegawaian dan Pimpinan mengirim `current_step_label` dari snapshot step aktif; request terminal mengirim `null`. |
@@ -174,7 +174,7 @@ Verifikasi Laravel kini dapat dijalankan pada host ini. Podman dan PostgreSQL 17
 | #28 | Konfigurasi approval chain | ⚠️ | Chain per pegawai, step, PYBMC global, backfill, audit, FormRequest, dan skip duplicate tersedia. Konfigurasi per unit belum ada; form utama masih legacy stage 2/3; UI untuk menyusun chain per pegawai secara penuh tidak terbukti; step type dibatasi `kepala_bagian`/ `verifier`. |
 | #29 | Kalkulasi hari kerja otomatis | ⚠️ | `WorkdayCalculator`, endpoint `/api/v1/cuti/calculate-workdays`, warning weekend/libur, validasi request, dan test unit/feature tersedia. Tetapi Blade menetapkan `workDays = result.data`, padahal kontrak API mengembalikan `data.jumlah_hari_kerja`; nilai/warning real-time tidak dirender sesuai kontrak. |
 | #30 | Form pengajuan cuti | ⚠️ | Form, upload lampiran tervalidasi, hitung server-side, saldo, snapshot chain, status menunggu, audit, in-app/email queue, dan test tersedia. Dropdown tidak terbukti menyaring jenis Cuti Besar/CLTN untuk PPPK; validasi lintas tahun hanya diterapkan pada cuti tahunan, bukan semua pengajuan. |
-| #31 | Approval engine cuti dinamis | ⚠️ | **[SELESAI PADA ALUR AKTIF, PENGECUALIAN LEGACY READ-ONLY]** Snapshot per request, data-scope approver, notifikasi, audit, final deduction, QR proof, timeline, dokumen eksternal Kepala Lembaga, dan test tersedia. Seluruh write aktif memakai `DeclineLeaveAction`, `LeaveApprovalService::decline()`, route `cuti.decline`, status `tidak_disetujui`, dan audit `NOT_APPROVED`. Token `REJECT`/`rejected` hanya dibaca pada timeline/proof untuk menjaga histori lama dan selalu dirender `Tidak Disetujui`; pengecualian kompatibilitas ini membuat issue tetap ⚠️, bukan gap write aktif. |
+| #31 | Approval engine cuti dinamis | ✅ | **[DIPERBAIKI]** Snapshot per request, data-scope approver, notifikasi, audit, final deduction, QR proof, timeline, dokumen eksternal Kepala Lembaga, dan test tersedia. Seluruh write dan read domain memakai `DeclineLeaveAction`, `LeaveApprovalService::decline()`, route `cuti.decline`, status `tidak_disetujui`, audit `NOT_APPROVED`, dan label `Tidak Disetujui`. Compatibility token legacy `REJECT`/`rejected` pada timeline/proof telah dihapus; regression test mencegah vocabulary lama kembali ke kontrak domain. |
 | #32 | Saldo cuti dan daftar cuti pegawai | ✅ | Balance ledger, bucket N-2/N-1/tahun berjalan, seeder 2026, koreksi awal/manual ber-audit, rollover scheduler, halaman/API saldo, riwayat, dan test tersedia. Commit `5442035` mengunci jenis mutasi ledger saldo cuti. |
 
 ## Status Issue Sprint 5
@@ -388,7 +388,7 @@ Status berikut tetap memerlukan QA/retest pada PHP kompatibel dan PostgreSQL seb
 
 - ✅ **[SELESAI]** Hapus endpoint/API force delete, `DeleteEmployeeAction::forceDelete()`, `PurgeDeletedEmployeesAction`, command `employees:purge-deleted`, dan jadwal purge harian pukul 02:00 di `bootstrap/app.php`. Halaman Data Backup dikembalikan sebagai filter nonaktif permanen tanpa purge otomatis.
 - ✅ Perbaiki mapping Keycloak: simpan `users.employee_id`, validasi uniqueness `keycloak_id`, audit persisten di `audit_logs`, dan test tersedia — **SELESAI commit #109**.
-- ✅ **[SELESAI DENGAN PENGECUALIAN LEGACY READ-ONLY]** Seluruh write aktif memakai `DeclineLeaveAction`, `LeaveApprovalService::decline()`, route `cuti.decline`, status `tidak_disetujui`, dan audit `NOT_APPROVED`. Pembacaan token `REJECT`/`rejected` hanya dipertahankan untuk histori legacy pada timeline/proof dan selalu dirender `Tidak Disetujui`.
+- ✅ **[SELESAI]** Seluruh write dan read domain memakai `DeclineLeaveAction`, `LeaveApprovalService::decline()`, route `cuti.decline`, status `tidak_disetujui`, audit `NOT_APPROVED`, dan label `Tidak Disetujui`. Compatibility pembacaan token `REJECT`/`rejected` pada timeline/proof telah dihapus dan dikunci oleh regression test.
 - ❌ Putuskan lalu dokumentasikan schema canonical cuti sebelum membuat migration baru: apakah PRD memakai `leave_approval_steps`, `leave_balance_adjustments`, `leave_documents`, atau proyek mempertahankan nama semantic alternatif saat ini (`leave_request_steps`, `leave_balance_ledger`, `leave_proofs`). Konflik ini tidak boleh diselesaikan dengan asumsi.
 
 ### Prioritas P0 — tutup acceptance criteria Sprint 5
@@ -430,7 +430,6 @@ Status berikut tetap memerlukan QA/retest pada PHP kompatibel dan PostgreSQL seb
 |---|---|---|---|
 | Nama dan bentuk tabel cuti | PRD §15.2 memakai `leave_approval_steps`, `leave_balance_adjustments`, `leave_documents`; source memakai `leave_request_steps`, `leave_balance_ledger`, `leave_proofs`. | Migration, model, API, audit, dan laporan dapat drift. | Tetapkan schema canonical dan strategi migrasi tanpa merusak data/foreign key. |
 | Chain per unit | PRD mengizinkan chain per pegawai atau unit; source hanya per pegawai + global legacy. | Unit kerja tidak dapat menjadi scope konfigurasi. | Tetapkan model/unit hierarchy dan precedence global–unit–pegawai sebelum implementasi. |
-| Status keputusan cuti legacy | Alur aktif telah memakai `Tidak Disetujui`/`NOT_APPROVED`; token `REJECT`/`rejected` hanya dibaca untuk histori lama pada timeline/proof. | Kontrak write baru konsisten, tetapi kompatibilitas histori perlu tetap dibatasi agar token legacy tidak kembali dipakai untuk write. | Pertahankan pengecualian read-only yang sudah diterima dan regression test yang memastikan seluruh write aktif memakai vocabulary resmi. |
 | Flag kinerja EWS | PRD §10.3 menyatakan pegawai dengan flag Tidak tidak muncul pada EWS kenaikan pangkat; Issue #36 menyatakan Tidak Eligible; source membuat alert dan menampilkannya sebagai Tidak Eligible. | Perilaku dashboard, notifikasi, dan pekerjaan admin berbeda menurut dokumen. | Karena PRD adalah sumber utama, selaraskan source agar alert tidak tampil atau rekam keputusan perubahan PRD sebelum mempertahankan perilaku sekarang. |
 
 ## Verifikasi Runtime dan Batasan yang Masih Ada
@@ -448,7 +447,7 @@ Status berikut tetap memerlukan QA/retest pada PHP kompatibel dan PostgreSQL seb
 | Area | Status 14 Juli (`50b1e77`) | Status 17 Juli (`4ea27e8`) | Status 20 Juli (`32ada6b`) | Perubahan terbaru |
 |---|:---:|:---:|:---:|---|
 | Issue #4 Mapping User | ✅ (partial) | ✅ | ✅ | Tidak berubah |
-| Dokumen eksternal Kepala Lembaga | ❌ | ⚠️ (Issue #31 naik) | ⚠️ | Tetap tersedia; nomenklatur write aktif sudah diperbaiki, legacy hanya read-only |
+| Dokumen eksternal Kepala Lembaga | ❌ | ⚠️ (Issue #31 naik) | ✅ | Tetap tersedia; nomenklatur write/read domain sudah final dan compatibility legacy telah dihapus |
 | Force delete pegawai backend | ❌ | ✅ | ✅ | Tidak berubah |
 | Autocomplete pegawai cuti | — | ✅ baru | ✅ | Tidak berubah |
 | Email `cuti.perlu_perubahan`/`cuti.tidak_disetujui` | ❌ absen | ⚠️ ditambahkan | ✅ | Kebijakan event-channel DB-backed menggantikan allowlist hardcoded |
@@ -461,7 +460,7 @@ Status berikut tetap memerlukan QA/retest pada PHP kompatibel dan PostgreSQL seb
 | Dashboard Pimpinan | ⚠️ | ⚠️ | ⚠️ lebih lengkap | +744 baris widget; `PimpinanDashboardDataTest` tersedia, tetapi runtime/QA belum dijalankan ulang |
 | Riwayat disiplin append-only (Issue #19) | ❌ | ❌ | ✅ | Route/action/permission/tombol DELETE dihapus; dokumen SK disiplin diblokir dari penghapusan; test route lama dan preservasi record/file tersedia |
 | Profil self-service read-only (Issue #23) | ❌ | ❌ | ✅ | Route keluarga/pendidikan hanya GET, controller terscope sesi, UI/FormRequest mutasi dihapus; test scope dan ketiadaan route mutasi tersedia |
-| REJECT nomenclature | ❌ | ❌ | ⚠️ | Write aktif selesai; kompatibilitas histori legacy dipertahankan read-only |
+| REJECT nomenclature | ❌ | ❌ | ✅ | Vocabulary domain final memakai `tidak_disetujui`/`NOT_APPROVED`; compatibility `REJECT`/`rejected` telah dihapus |
 | Double EWS scheduler | ❌ | ❌ | ❌ | Belum diperbaiki |
 | SESSION_LIFETIME `.env.example` | ❌ | ❌ | ❌ | Belum diperbaiki |
 | Profil self-service routes | ❌ | ❌ | ✅ | Tidak ada lagi route mutasi keluarga/pendidikan mandiri |
