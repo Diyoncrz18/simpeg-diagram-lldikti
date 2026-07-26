@@ -1318,10 +1318,12 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 | **Story Points** | 5 |
 | **Dependensi** | Issue #11 |
 
+> **Catatan keputusan 26 Juli 2026 (kanonis):** kebijakan penghapusan memakai pola hybrid `is_active` — item yang sudah dipakai data pegawai tidak dapat dihapus dan hanya dinonaktifkan via `is_active`; item yang belum pernah dipakai boleh dihapus permanen dengan audit. Frasa "soft delete jika sudah dipakai" dibaca sebagai nonaktif `is_active`, **bukan** `SoftDeletes`/`deleted_at`. Lihat `Kickoff-Sprint-6-Kontrak-dan-Keputusan.md` (K-1).
+
 **Tasks:**
 - [ ] CRUD untuk: ref_golongan, ref_jenis_jabatan, ref_jabatan, ref_status_pegawai, ref_eselon, ref_unit_kerja hierarkis, ref_jenjang_pendidikan, ref_bup, ref_notification_channels
 - [ ] Validasi: tidak bisa hapus item yang sedang dipakai
-- [ ] Soft delete jika sudah dipakai
+- [ ] Soft delete jika sudah dipakai (per keputusan 26 Juli 2026: nonaktif via `is_active`)
 - [ ] Audit log
 - [ ] Akses: Super Admin
 

@@ -2,18 +2,18 @@
 
 | Field | Nilai |
 |---|---|
-| Tanggal analisis | 21 Juli 2026 |
+| Tanggal analisis | 22 Juli 2026 — pembaruan verifikasi source melalui Graphify |
 | Ruang lingkup | Sprint 1 — Fondasi; Sprint 2 — Data Pegawai Core; Sprint 3 — Import & Pelengkap; Sprint 4 — Cuti Core; Sprint 5 — EWS & Notifikasi; Sprint 6 — Dashboard & Laporan |
-| Kondisi repository | Baseline `development` commit `32ada6b` (20 Juli 2026), ditambah implementasi pada branch `fix/reference-tables-and-testing` melalui PR [#118](https://github.com/LLDIKTI-XVI-TEAM/SIMPEG/pull/118), commit `1ae6106` dan `7612c8e`; status PR `OPEN`, merge state `CLEAN`, dan CI `Pint + PHPStan + Test` lulus. |
-| Metode | Inspeksi source, migration, seeder, route, FormRequest, Action/Service, view Blade, konfigurasi scheduler, dan source test |
+| Kondisi repository | Worktree `SIMPEG` diperiksa pada HEAD `9a27caa` (22 Juli 2026). Perubahan keputusan cuti pada commit `c33bf46` (PR #119) sudah termasuk. Ada perubahan lokal pada `.gitignore` dan `bootstrap/app.php` serta `test_show.php` tak terlacak; diff `bootstrap/app.php` hanya format path dan tidak mengubah perilaku scheduler. |
+| Metode | `SIMPEG/graphify-out/graph.json` dibaca lebih dulu, diikuti query/explain Graphify. Source hanya dibuka pada file yang ditunjuk graph untuk memverifikasi controller, action/service, view, scheduler, dan model. Tidak ada test/runtime QA yang dijalankan dalam pembaruan ini. |
 | Sumber acuan | `AGENTS.md`, PRD v1.3, panduan kode, user stories, issues, tracker vertical slice, dan pembagian tugas |
-| Perubahan dalam analisis | Laporan awal diperbarui untuk mencatat hasil implementasi dan verifikasi PR #118. Addendum 22 Juli 2026 kemudian menyelaraskan keputusan produk import Data Utama-only pada PRD v1.3 tanpa mengubah tanggal dan baseline audit historis. |
-| Analisis sebelumnya | Commit `32ada6b` — 20 Juli 2026 |
-| Commit baru sejak analisis sebelumnya | PR #118 menambahkan dua commit source (`1ae6106` dan `7612c8e`): reference table Fase 1 dilengkapi, pemilihan kanal notifikasi memakai konfigurasi, fondasi Dusk/test ditambahkan, dan fixture export diselaraskan dengan hierarchy unit kanonis. CI PR lulus setelah perbaikan format. |
+| Perubahan dalam analisis | Laporan awal dan addendum import dipertahankan sebagai catatan historis. Pembaruan 22 Juli ini merevisi klaim yang tidak lagi sesuai dengan source aktif untuk audit, Hari Libur, riwayat pegawai, keputusan cuti, dan export pegawai. |
+| Analisis sebelumnya | Baseline historis `32ada6b` — 20 Juli 2026 |
+| Commit baru sejak analisis sebelumnya | Selain PR #118, source aktif kini mencakup `c33bf46` (penyelarasan keputusan `Tidak Disetujui`) dan HEAD `9a27caa`. Semua status dalam pembaruan ini adalah status source, bukan bukti tracker `Done`. |
 
 ## Addendum Keputusan Import — 22 Juli 2026
 
-> **Catatan pembacaan:** Tanggal analisis asli (21 Juli 2026) dan baseline commit di atas dipertahankan sebagai bukti historis dan tidak diubah. Addendum ini hanya menambahkan keputusan kanonis pengguna 22 Juli 2026 dan mereklasifikasi sebagian temuan lama.
+> **Catatan pembacaan:** Baseline 21 Juli 2026 dan commit `32ada6b` tetap dicatat pada bagian historis. Metadata teratas telah diperbarui ke 22 Juli 2026; addendum ini menambahkan keputusan kanonis pengguna serta mereklasifikasi temuan lama yang berubah pada source aktif.
 
 Keputusan sesi langsung pengguna 22 Juli 2026 (kanonis, disetujui pengguna) menetapkan ruang lingkup import Fase 1 secara final:
 
@@ -32,6 +32,21 @@ Keputusan sesi langsung pengguna 22 Juli 2026 (kanonis, disetujui pengguna) mene
 
 **Gap yang tetap berlaku (tidak terkait keputusan ini):** manual column mapping dropdown dan peringatan kolom tidak cocok, laporan hasil import yang persisten/downloadable, template PDF daftar pegawai (Satyalancana dan durable report Sprint 6), serta rekalkulasi saat referensi BUP berubah tetap merupakan gap terbuka bila fitur tersebut masih didukung.
 
+## Addendum Verifikasi Graphify — 22 Juli 2026
+
+Pembaruan ini menggunakan `SIMPEG/graphify-out/graph.json` sebagai pintu masuk. **EXTRACTED** berarti relasi yang diekstrak langsung Graphify dari source; **INFERRED** berarti relasi panggilan yang disimpulkan Graphify dan kemudian diverifikasi kembali pada source. Jika graph tidak menyediakan relasi lintas-file, kesimpulan ditandai sebagai verifikasi source (SV), bukan diperlakukan sebagai relasi EXTRACTED.
+
+| Temuan pembaruan | Node dan relasi graph | Verifikasi source dan status dokumen |
+|---|---|---|
+| Keputusan cuti | `DeclineLeaveAction` mereferensikan `LeaveApprovalService` dan diimpor/direferensikan controller keputusan sebagai relasi **EXTRACTED**. | Workflow aktif memakai `DeclineLeaveAction`, `LeaveApprovalService::decline()`, audit `NOT_APPROVED`, dan label `Tidak Disetujui`. `LeaveProofService` masih mengenali key legacy `rejected` dan memetakannya ke label resmi. Klaim bahwa action/route aktif masih memakai `REJECT` atau label `Ditolak` diperbaiki menjadi status kompatibilitas legacy. |
+| Audit log | `AuditLog` mewarisi model dan memakai UUID sebagai relasi **EXTRACTED**. Panggilan `AuditService::log()` ke `AuditLog` adalah **INFERRED**. | `AuditLog` hanya mematikan `updated_at`; tidak ada guard aplikasi eksplisit terhadap update/delete. `AuditService` menangkap kegagalan write dan hanya mencatat warning. `UpdateEmployeeAction` meneruskan `Employee::toArray()` ke audit; karena NIK/No. KK memakai cast encrypted dan service tidak masking, diperlukan test payload audit untuk menutup risiko data sensitif. Issue #5 tidak lagi boleh mengklaim model immutable secara penuh. |
+| Hari Libur | Node `HariLiburController` memiliki `index`, `store`, `edit`, `update`, dan `destroy` sebagai method **EXTRACTED**. | Route web benar-benar menuju controller ini, tetapi controller memakai data statis dan session `dynamic_audit_logs`; mutasi web tidak persisten ke database. Issue #10 diturunkan ke ⚠️ untuk flow Admin web; API v1 tidak boleh dipakai sebagai bukti bahwa UI web sudah durable. |
+| Riwayat pegawai | `UpdateEmployeeAction` direferensikan controller pegawai secara **EXTRACTED**. Panggilan audit action → service adalah **INFERRED** lalu diverifikasi. | Saat menerima ID riwayat yang ada, action menjalankan `update(...)` pada riwayat pangkat, jabatan, dan KGB. Klaim append-only tanpa pengecualian tidak sesuai dan Issue #18 diturunkan ke ⚠️. |
+| Export Pegawai | `ExportPegawaiPreviewAction` mereferensikan `EmployeeExportDataService` secara **EXTRACTED**; `LaporanController` mereferensikan preview action secara **EXTRACTED**. | Preview menjalankan `rows(..., defaultToActive: false)`, sedangkan Excel memakai default aktif. Maka preview dan file tidak memakai default filter status yang sama. View custom juga mengikat state/method Alpine yang tidak didefinisikan dalam komponen; perlu browser QA sebelum flow custom Admin disebut siap. |
+| Scheduler EWS | Node `RunEws`, `bootstrap/app.php`, dan `routes/console.php` ditemukan. Graph tidak menyediakan relasi lintas-file untuk dua registrasi jadwal. | SV source mengonfirmasi `app:run-ews` tetap terdaftar di kedua lokasi; status Issue #34 tetap ⚠️. |
+| Dashboard Admin | `DashboardController` memiliki `index()` sebagai method **EXTRACTED**; view dashboard ditunjuk sebagai node source. | Controller hanya memasok EWS; angka/list/chart lain di view masih dummy. Status Issue #39 tetap ⚠️. |
+| Reference table CRUD | Graph menemukan node model reference, tetapi tidak menghasilkan bukti negatif yang cukup tentang seluruh route/controller/action CRUD. | Status Issue #46 dipertahankan sementara sebagai ❌ berdasarkan audit sebelumnya, tetapi ketiadaan CRUD belum boleh diklaim sudah terverifikasi ulang hanya dari hasil graph ini. Perlu query Graphify sempit per reference table sebelum re-klasifikasi. |
+
 ## Legend Status
 
 | Icon | Status | Arti |
@@ -42,9 +57,9 @@ Keputusan sesi langsung pengguna 22 Juli 2026 (kanonis, disetujui pengguna) mene
 
 ## Kesimpulan Eksekutif
 
-Dari 38 issue Sprint 1–5, penghitungan ulang tabel status menghasilkan **20 berstatus ✅** pada level source, **18 ⚠️** sebagian, dan **0 ❌**. Dua temuan P0—riwayat disiplin append-only dan profil mandiri read-only—telah ditutup pada commit `32ada6b`; Issue #11 dan #12 ditutup pada source di PR #118 yang telah lulus CI. Status implementasi ini belum mengubah tracker delivery menjadi `Done` sebelum PR digabung, review, dan QA/retest terdokumentasi.
+Dari 38 issue Sprint 1–5, rekap historis 21 Juli mencatat **20 berstatus ✅**, **18 ⚠️**, dan **0 ❌** pada level source. Verifikasi Graphify 22 Juli menurunkan Issue #5 (audit), #10 (flow web Hari Libur), dan #18 (riwayat pegawai) dari klaim ✅ menjadi ⚠️; rekap source minimum yang telah dikoreksi adalah **17 ✅**, **21 ⚠️**, dan **0 ❌**. Issue #31 tetap ⚠️: workflow baru sudah memakai nomenklatur resmi, tetapi kompatibilitas key legacy `rejected` perlu diputuskan/dibuktikan. Dua temuan P0—riwayat disiplin append-only dan profil mandiri read-only—tetap tertutup pada source. Status implementasi ini belum mengubah tracker delivery menjadi `Done` sebelum review, QA/retest, dan evidence terdokumentasi.
 
-Untuk Sprint 6 terdapat **6 issue (#39–#43 dan #46)**. Pada level issue, **5 issue berstatus ⚠️ sebagian** dan **1 issue berstatus ❌ belum selesai**; belum ada issue Sprint 6 yang layak dinyatakan ✅ secara utuh. Setelah semua bullet issue dipecah—termasuk sembilan reference table pada Issue #46—terdapat **61 task audit**: **15 selesai pada source, 22 sebagian, dan 24 belum selesai/tidak sesuai**. Foundation hierarchy unit kerja dan notification channel pada Issue #46 tersedia di PR #118, tetapi CRUD Admin tetap belum ada. Tracker delivery masih menandai seluruh stage Sprint 6 sebagai `Not Started`; status source di bagian Sprint 6 tidak boleh dipakai untuk mengubah tracker menjadi `Done` sebelum review, QA/retest, dan evidence terpenuhi.
+Untuk Sprint 6 terdapat **6 issue (#39–#43 dan #46)**. Pada level issue, **5 issue berstatus ⚠️ sebagian** dan **1 issue berstatus ❌ belum selesai**; belum ada issue Sprint 6 yang layak dinyatakan ✅ secara utuh. Setelah semua bullet issue dipecah—termasuk sembilan reference table pada Issue #46—terdapat **61 task audit**: **15 selesai pada source, 22 sebagian, dan 24 belum selesai/tidak sesuai**. Foundation hierarchy unit kerja dan notification channel pada Issue #46 tersedia di PR #118; audit historis menyatakan CRUD Admin belum ada, sedangkan pembaruan Graphify ini belum cukup untuk membuktikan ulang ketiadaannya secara menyeluruh. Tracker delivery masih menandai seluruh stage Sprint 6 sebagai `Not Started`; status source di bagian Sprint 6 tidak boleh dipakai untuk mengubah tracker menjadi `Done` sebelum review, QA/retest, dan evidence terpenuhi.
 
 **Diperbaiki / ditutup sejak analisis sebelumnya (commit `32ada6b` dan PR #118):**
 
@@ -76,10 +91,12 @@ Untuk Sprint 6 terdapat **6 issue (#39–#43 dan #46)**. Pada level issue, **5 i
 
 1. Import belum memiliki manual column mapping. **Reklasifikasi 22 Juli 2026:** template lanjutan multi-jenis, snapshot riwayat, dan kalkulasi TMT pasca-import kini sengaja tidak ada sesuai keputusan pengguna (lihat Addendum Keputusan Import) dan bukan lagi kekurangan.
 2. Skema cuti berbeda dengan PRD canonical (`leave_request_steps` vs `leave_approval_steps`, dll). Keputusan belum didokumentasikan.
-3. `RejectLeaveAction`, `LeaveApprovalService::reject()`, internal status `'rejected'`/`'request_rejected'`, label `'Ditolak'` di `LeaveProofService`, dan route `cuti.reject` masih aktif. Melanggar nomenklatur resmi Fase 1.
-4. `app:run-ews` terdaftar ganda di `bootstrap/app.php` (baris 22–24) DAN `routes/console.php` (baris 27–29).
+3. Workflow keputusan baru sudah memakai `DeclineLeaveAction`, `LeaveApprovalService::decline()`, `NOT_APPROVED`, serta label `Tidak Disetujui`. Kompatibilitas legacy `rejected` masih dikenali pada `LeaveProofService`; tetapkan strategi retensi/migrasi data lama dan pastikan tidak ada endpoint/action aktif dengan nomenklatur lama.
+4. `app:run-ews` terdaftar ganda di `bootstrap/app.php` (baris 20–22) DAN `routes/console.php` (baris 27–29).
 5. Kelayakan event pada `NotificationRecipientResolver::emailEnabled()` masih hardcoded meskipun enable/disable kanal sudah membaca `ref_notification_channels`; `ews.satyalancana` absen.
 6. `SESSION_LIFETIME=120` di `.env.example` tidak konsisten dengan middleware idle 30 menit.
+7. Audit log belum memiliki guard immutable eksplisit dan masih fail-open bila write audit gagal; payload audit pegawai perlu diuji untuk memastikan NIK/No. KK termasking.
+8. CRUD Hari Libur pada route web masih memakai data statis/session, dan edit riwayat pangkat/jabatan/KGB masih dapat memutasi record yang ada.
 
 Verifikasi Laravel kini dapat dijalankan pada host ini. Podman dan PostgreSQL 17 juga telah dipakai untuk test fokus; versi PHP lokal 8.3 masih berbeda dari PHP 8.4 pada CI.
 
@@ -111,12 +128,12 @@ Verifikasi Laravel kini dapat dijalankan pada host ini. Podman dan PostgreSQL 17
 | #2 | Keycloak SSO dan middleware | ⚠️ | Controller, Action callback/logout/redirect, middleware, config Socialite, dan test tersedia. Login IdP nyata belum diuji; bootstrap first mapped employee masih membutuhkan keputusan terdokumentasi. |
 | #3 | Logout dan session management | ⚠️ | Logout POST, invalidasi session, dan audit tersedia. Route GET `/logout` juga memutasi session tanpa CSRF. |
 | #4 | Mapping user Keycloak dan RBAC | ✅ | **[DIPERBAIKI commit #109]** `UpdateUserMappingRequest` terpisah, `employee_id` disimpan otomatis saat mapping berdasarkan pencocokan email pegawai, validasi uniqueness `keycloak_id`, audit log ditulis ke `audit_logs` via `AuditService`, dan `UserMappingControllerTest` tersedia (guest/role/update/employee_id). |
-| #5 | Audit log | ✅ | Migration `audit_logs`, model immutable, `AuditService`, audit auth dan mutasi tersedia. |
+| #5 | Audit log | ⚠️ | Migration `audit_logs`, model, `AuditService`, audit auth dan mutasi tersedia. Namun model hanya mematikan `updated_at` tanpa guard immutable aplikasi, `AuditService` fail-open bila write gagal, dan payload audit pegawai perlu diuji agar NIK/No. KK tidak tersimpan tanpa masking. |
 | #6 | Notifikasi in-app backend | ✅ | Migration/model, service, action inbox/read/unread, controller API, dan test tersedia. |
 | #7 | Bell icon notifikasi | ✅ | Komponen notification bell, endpoint, dan JavaScript aplikasi tersedia. |
 | #8 | Design system dan layout master | ✅ | Layout, komponen UI/form reusable, Tailwind/Vite, dan UI Bahasa Indonesia tersedia. |
 | #9 | Reusable Blade components | ⚠️ | Komponen utama tersedia, tetapi `resources/views/components/README.md` atau dokumentasi setara belum ada. |
-| #10 | CRUD hari libur dan cuti bersama | ✅ | Model, API v1, FormRequest, Action, controller, view, audit, seeder, dan test tersedia. |
+| #10 | CRUD hari libur dan cuti bersama | ⚠️ | Model/API v1/FormRequest/Action/seeder/test tersedia, tetapi route dan controller Admin web masih menggunakan data statis serta `dynamic_audit_logs` di session. Mutasi dari UI web belum persisten ke database atau `audit_logs`. |
 | #11 | Migration/seeder reference tables | ✅ | PR #118 melengkapi `ref_notification_channels`; hierarchy unit kerja (`parent_id`, `level`, `jenis_unit`, `is_active`); `default_bup` dan `is_active` pada jabatan; serta kode/kelompok dan katalog sepuluh status pegawai. Seeder hierarchy dan idempotensi kanal diuji. |
 | #12 | Setup testing framework | ✅ | PHPUnit tetap tersedia dan kini dilengkapi Laravel Dusk, `DuskTestCase`, smoke test browser, helper test, test auth, `phpunit.dusk.xml`, dan panduan README. Bukti PostgreSQL 17 tersedia dari test fokus serta CI PR yang menjalankan `composer test` dengan driver `pgsql`. |
 
@@ -129,7 +146,7 @@ Verifikasi Laravel kini dapat dijalankan pada host ini. Podman dan PostgreSQL 17
 | #15 | Form edit pegawai | ✅ | FormRequest, Action, view, penggantian berkas/foto, audit, dan test tersedia. |
 | #16 | Halaman daftar pegawai | ✅ | Search, filter, sort, pagination, eager loading, default aktif, RBAC, dan test tersedia. |
 | #17 | Halaman detail pegawai bertab | ✅ | Data relasi, tab, informasi EWS, view, dan test detail tersedia. |
-| #18 | Riwayat pangkat, jabatan, KGB append-only | ✅ | `EmployeeHistoryService`, transaksi, `is_latest`, audit, pembaruan tanggal terhitung, dan test tersedia. |
+| #18 | Riwayat pangkat, jabatan, KGB append-only | ⚠️ | `EmployeeHistoryService`, transaksi, `is_latest`, audit, pembaruan tanggal terhitung, dan test tersedia. Namun `UpdateEmployeeAction` tetap menjalankan `update(...)` ketika menerima ID riwayat yang ada; sifat append-only belum berlaku tanpa pengecualian. |
 | #19 | Riwayat hukuman disiplin | ✅ | **[DIPERBAIKI `32ada6b`]** Pembuatan, status aktif, scheduler, upload SK, audit, dan list tersedia. Jalur DELETE/action/permission/tombol hapus telah dihapus. `DeleteDocumentAction` memblokir penghapusan dokumen yang terhubung ke riwayat disiplin pada server-side transaction sehingga SK/file fisik tidak dapat menjadi bypass append-only. Test mengunci route lama tidak ada/URI lama 404 atau 405 dengan record tetap tersimpan. |
 
 ## Status Issue Sprint 3
@@ -152,7 +169,7 @@ Verifikasi Laravel kini dapat dijalankan pada host ini. Podman dan PostgreSQL 17
 | #28 | Konfigurasi approval chain | ⚠️ | Chain per pegawai, step, PYBMC global, backfill, audit, FormRequest, dan skip duplicate tersedia. Konfigurasi per unit belum ada; form utama masih legacy stage 2/3; UI untuk menyusun chain per pegawai secara penuh tidak terbukti; step type dibatasi `kepala_bagian`/ `verifier`. |
 | #29 | Kalkulasi hari kerja otomatis | ⚠️ | `WorkdayCalculator`, endpoint `/api/v1/cuti/calculate-workdays`, warning weekend/libur, validasi request, dan test unit/feature tersedia. Tetapi Blade menetapkan `workDays = result.data`, padahal kontrak API mengembalikan `data.jumlah_hari_kerja`; nilai/warning real-time tidak dirender sesuai kontrak. |
 | #30 | Form pengajuan cuti | ⚠️ | Form, upload lampiran tervalidasi, hitung server-side, saldo, snapshot chain, status menunggu, audit, in-app/email queue, dan test tersedia. Dropdown tidak terbukti menyaring jenis Cuti Besar/CLTN untuk PPPK; validasi lintas tahun hanya diterapkan pada cuti tahunan, bukan semua pengajuan. |
-| #31 | Approval engine cuti dinamis | ⚠️ | **[SEBAGIAN DIPERBAIKI]** Snapshot per request, data-scope approver, notifikasi, audit, final deduction, QR proof, timeline, dan test E2E tersedia. Dokumen eksternal Kepala Lembaga kini tersedia via `KepalaLembagaSupportingDocument` dengan upload, audit, dan akses `is_kepala_lembaga`. Namun source masih memakai `RejectLeaveAction` (class name), audit payload `'REJECT'`, `LeaveApprovalService::reject()`, internal status `'rejected'`/`'request_rejected'`, label `'Ditolak'` di `LeaveProofService`, dan route/name `cuti.reject`. Ini masih melanggar nomenklatur resmi Fase 1. |
+| #31 | Approval engine cuti dinamis | ⚠️ | Snapshot per request, data-scope approver, notifikasi, audit, final deduction, QR proof, timeline, dokumen eksternal Kepala Lembaga, dan test E2E tersedia. Workflow aktif kini memakai `DeclineLeaveAction`, `LeaveApprovalService::decline()`, audit `NOT_APPROVED`, dan label `Tidak Disetujui`. `LeaveProofService` masih menerima key legacy `rejected` untuk kompatibilitas presentasi; putuskan retensi/migrasi data legacy dan buktikan tidak ada endpoint/action aktif dengan vocabulary lama. |
 | #32 | Saldo cuti dan daftar cuti pegawai | ✅ | Balance ledger, bucket N-2/N-1/tahun berjalan, seeder 2026, koreksi awal/manual ber-audit, rollover scheduler, halaman/API saldo, riwayat, dan test tersedia. Commit `5442035` mengunci jenis mutasi ledger saldo cuti. |
 
 ## Status Issue Sprint 5
@@ -160,7 +177,7 @@ Verifikasi Laravel kini dapat dijalankan pada host ini. Podman dan PostgreSQL 17
 | Issue | Deliverable | Status | Bukti dan catatan |
 |---:|---|:---:|---|
 | #33 | Kalkulasi TMT otomatis | ⚠️ | EmployeeHistoryService menghitung kenaikan pangkat dari TMT pangkat +4 tahun, KGB +2 tahun, serta pensiun dari tanggal lahir dengan prioritas `default_bup` jabatan lalu BUP jenis jabatan ketika riwayat terbaru dibuat. **Reklasifikasi 22 Juli 2026:** ketiadaan rekalkulasi saat import kini sesuai keputusan pengguna — kalkulasi TMT hanya dipicu saat riwayat/sumber resmi disimpan per pegawai, bukan saat import selesai (integrasi kalkulator merged pada PR #120 commit `7b5ebeae`). Gap yang tersisa: milestone Satyalancana belum disimpan konsisten dan perubahan referensi BUP belum memicu hitung ulang. |
-| #34 | EWS scheduler harian | ⚠️ | `EwsEngineService` memeriksa pegawai aktif untuk lima trigger, threshold configurable, unique alert, log run, error notification, command, dan test tersedia. **Double registrasi masih ada**: `app:run-ews` terdaftar di `bootstrap/app.php` baris 22–24 DAN `routes/console.php` baris 27–29, berisiko dieksekusi dua kali per hari. Alert tidak menyimpan `is_eligible`/`trigger_days`/`tahun` seperti task issue; in-app notification hanya dibuat untuk pegawai, bukan Admin Kepegawaian. |
+| #34 | EWS scheduler harian | ⚠️ | `EwsEngineService` memeriksa pegawai aktif untuk lima trigger, threshold configurable, unique alert, log run, error notification, command, dan test tersedia. **Double registrasi masih ada**: `app:run-ews` terdaftar di `bootstrap/app.php` baris 20–22 DAN `routes/console.php` baris 27–29, berisiko dieksekusi dua kali per hari. Alert tidak menyimpan `is_eligible`/`trigger_days`/`tahun` seperti task issue; in-app notification hanya dibuat untuk pegawai, bukan Admin Kepegawaian. |
 | #35 | Halaman daftar EWS aktif | ✅ | Controller/action/view menampilkan nama, NIP, event, target, sisa hari, eligibility, dan follow-up; urutan sisa hari, warna urgensi, filter event/status, detail pegawai, akses Admin/Super Admin/Pimpinan, aksi ditangani/tidak perlu ber-catatan, audit, dan test role tersedia. |
 | #36 | Flag kinerja baik dan kelayakan Satyalancana | ⚠️ | Toggle AJAX, endpoint JSON, FormRequest, Action, RBAC route, audit, flag/catatan Satyalancana, dan test tersedia. Deskripsi UI bukan tooltip dengan teks yang diminta. Saat flag kinerja false, source tetap membuat dan menampilkan alert pangkat sebagai Tidak Eligible, bertentangan dengan PRD yang menyatakan pegawai tidak muncul pada EWS kenaikan pangkat. |
 | #37 | Notifikasi email | ⚠️ | `NotificationService`, job queue, tiga retry, log kegagalan final, template responsive Bahasa Indonesia, CTA aman, Mailpit development, dan test tersedia. Kanal `email` dan `in_app` kini dibaca dari `ref_notification_channels`; test mengunci perilaku saat kanal dinonaktifkan. Namun kelayakan event email masih hardcoded via array di `NotificationRecipientResolver::emailEnabled()`, `ews.satyalancana` masih absen dari daftar email, dan Admin EWS hanya menerima email tambahan, bukan notifikasi in-app. |
@@ -248,12 +265,12 @@ Implementasi Excel menggunakan dependency yang sudah terpasang, `phpoffice/phpsp
 |---:|---|:---:|---|
 | 42.1 | Buat class export pegawai | ✅ | Dipenuhi secara ekuivalen oleh `ExportPegawaiExcelAction` + service PhpSpreadsheet; tidak memakai nama/package opsional persis dari issue. |
 | 42.2 | Kolom tetap: No, NIP, Nama, Golongan, Jabatan, Unit Kerja, Jenis, Status | ✅ | Delapan kolom dan urutannya dikunci oleh `COLUMNS`; test membaca workbook aktual. |
-| 42.3 | Export mengikuti filter aktif | ✅ | Filter status, unit, jenis, golongan, jabatan, pencarian, periode pensiun, dan sort diterapkan oleh `EmployeeExportDataService`; preview dan file memakai filter yang sama. |
+| 42.3 | Export mengikuti filter aktif | ⚠️ | Filter status, unit, jenis, golongan, jabatan, pencarian, periode pensiun, dan sort tersedia di `EmployeeExportDataService`. Namun preview memanggil `rows(..., defaultToActive: false)` sementara file Excel memakai default aktif; saat status kosong, preview dan file tidak memiliki default filter yang sama. |
 | 42.4 | Nama file `Daftar_Pegawai_LLDIKTI_XVI_{tanggal}.xlsx` | ✅ | Nama file memakai format `Daftar_Pegawai_LLDIKTI_XVI_YYYYMMDD.xlsx` dan dikunci test. |
-| 42.5 | Custom — pilihan kolom dari whitelist aman | ✅ | `CustomEmployeeExportRequest::ALLOWED_COLUMNS` menolak field sensitif; test menolak kolom `nik`. |
+| 42.5 | Custom — pilihan kolom dari whitelist aman | ⚠️ | `CustomEmployeeExportRequest::ALLOWED_COLUMNS` menolak field sensitif; test menolak kolom `nik`. Namun view custom Admin mengikat state/method Alpine (`showCustomExportModal`, `customColumns`, `submitCustomExport`, dan lain-lain) yang tidak didefinisikan dalam komponen; backend tersedia, tetapi flow UI perlu browser QA/perbaikan. |
 | 42.6 | Custom — filter status, unit/tim, jenis, golongan, jabatan, periode pensiun | ✅ | Seluruh filter diteruskan ke `EmployeeExportDataService`. |
 | 42.7 | Custom — output Excel saja | ✅ | Endpoint custom menghasilkan streaming XLSX; tidak ada output custom PDF. |
-| 42.8 | Custom — urutan kolom mengikuti pilihan user | ⚠️ | `PimpinanCustomEmployeeExportAction` mempertahankan urutan input, tetapi endpoint custom umum/Admin mengurutkan ulang pilihan memakai `COLUMN_ORDER`; test-nya justru mengunci urutan canonical walaupun input pengguna berbeda. Samakan kontrak semua role dengan urutan input tervalidasi. |
+| 42.8 | Custom — urutan kolom mengikuti pilihan user | ⚠️ | `PimpinanCustomEmployeeExportAction` mempertahankan urutan input, tetapi endpoint custom umum/Admin mengurutkan ulang pilihan memakai `COLUMN_ORDER`; test-nya justru mengunci urutan canonical walaupun input pengguna berbeda. Setelah flow UI Admin berfungsi, samakan kontrak semua role dengan urutan input tervalidasi. |
 | 42.9 | PDF — Blade `exports/employees-pdf.blade.php` | ❌ | File/view PDF daftar pegawai tidak ditemukan. |
 | 42.10 | PDF — header nama instansi, judul, tanggal cetak | ❌ | Belum ada template PDF daftar pegawai. |
 | 42.11 | PDF — tabel data | ❌ | Belum ada query/action/view PDF daftar pegawai. |
@@ -278,7 +295,7 @@ Evidence utama: `CutiReportController`, `CutiRekapQuery`, `ExportCutiExcelAction
 
 ### Issue #46 — Kelola Reference Tables (CRUD Admin)
 
-Migration/model/seeder referensi bukan bukti CRUD. Pencarian route, controller, FormRequest, Action, view, dan feature test tidak menemukan permukaan kelola reference table. `ReferenceSeederTest` memverifikasi seed dan hierarchy; PR #118 menambahkan hierarchy `ref_unit_kerja` serta migration/model `ref_notification_channels`. Model referensi belum memakai `SoftDeletes`, dan belum ada permukaan CRUD, audit, atau proteksi hapus.
+Migration/model/seeder referensi bukan bukti CRUD. Audit historis menemukan belum ada route, controller, FormRequest, Action, view, dan feature test untuk permukaan kelola reference table. `ReferenceSeederTest` memverifikasi seed dan hierarchy; PR #118 menambahkan hierarchy `ref_unit_kerja` serta migration/model `ref_notification_channels`. Verifikasi Graphify 22 Juli tidak menghasilkan bukti cukup untuk menyimpulkan ketiadaan CRUD secara menyeluruh—ketiadaan node bukan bukti negatif—sehingga status ❌ dipertahankan sementara sampai query Graphify sempit per reference table dilakukan. Model referensi yang diperiksa tetap belum memakai `SoftDeletes`.
 
 | No | Task issue | Status | Bukti dan pekerjaan tersisa |
 |---:|---|:---:|---|
@@ -318,10 +335,10 @@ Status berikut tetap memerlukan QA/retest pada PHP kompatibel dan PostgreSQL seb
 
 ### Sprint 1
 
-- ✅ Audit log database, service, immutable model, dan halaman audit tersedia.
+- ⚠️ Audit log database, service, dan halaman audit tersedia, tetapi immutable guard aplikasi, perilaku saat write audit gagal, serta masking payload audit pegawai masih harus ditutup.
 - ✅ Notifikasi in-app, inbox/read/unread, notification bell, serta queue email pendukung tersedia.
 - ✅ Layout master, design system, dan komponen UI/form dasar tersedia.
-- ✅ CRUD hari libur/cuti bersama dengan RBAC, audit, seeder, dan test tersedia.
+- ⚠️ Route Hari Libur memiliki RBAC dan permukaan CRUD, tetapi controller web masih memakai data statis/session; persistence database serta audit `audit_logs` untuk mutasi dari UI belum tersedia.
 - ✅ **[BARU]** Mapping user Keycloak: `UpdateUserMappingRequest`, simpan `employee_id`, validasi uniqueness `keycloak_id`, audit log ke `audit_logs`, dan test lengkap tersedia (Issue #4, commit #109).
 
 ### Sprint 2
@@ -329,7 +346,7 @@ Status berikut tetap memerlukan QA/retest pada PHP kompatibel dan PostgreSQL seb
 - ✅ Migration/model data pegawai dan relasi riwayat tersedia.
 - ✅ Tambah/edit/daftar/detail pegawai memakai data nyata, validasi, upload, audit, dan test tersedia.
 - ✅ **[UPDATE]** Status kelengkapan dokumen pegawai 4-nilai: `ListEmployeesAction` mengembalikan `'kosong'`/`'tersedia'`/`'tidak_lengkap'`/`'lengkap'`. `EmployeeIndexTest` diperluas dengan 8 test komprehensif termasuk verifikasi storage file dan endpoint `/status-dokumen`. `ShowEmployeeDocumentStatusAction` menggabungkan arsip `Document` dan riwayat SK menjadi daftar terpadu.
-- ✅ Riwayat pangkat, jabatan, dan KGB bersifat append-only dengan `is_latest`, transaksi, dan audit.
+- ⚠️ Riwayat pangkat, jabatan, dan KGB memiliki `is_latest`, transaksi, dan audit, tetapi update pegawai masih dapat memutasi riwayat yang sudah ada; append-only belum absolut.
 - ✅ **[BARU] Issue #19 — riwayat hukuman disiplin append-only:** action, route DELETE, permission, dan kontrol hapus dihilangkan. Dokumen SK yang dipakai riwayat disiplin ditolak oleh `DeleteDocumentAction` pada server-side transaction; test menutup bypass route dan penghapusan dokumen/file.
 
 ### Sprint 3
@@ -365,12 +382,12 @@ Status berikut tetap memerlukan QA/retest pada PHP kompatibel dan PostgreSQL seb
 
 - ✅ **[SELESAI]** Hapus endpoint/API force delete, `DeleteEmployeeAction::forceDelete()`, `PurgeDeletedEmployeesAction`, command `employees:purge-deleted`, dan jadwal purge harian pukul 02:00 di `bootstrap/app.php`. Halaman Data Backup dikembalikan sebagai filter nonaktif permanen tanpa purge otomatis.
 - ✅ Perbaiki mapping Keycloak: simpan `users.employee_id`, validasi uniqueness `keycloak_id`, audit persisten di `audit_logs`, dan test tersedia — **SELESAI commit #109**.
-- ❌ Ganti semua istilah/action `REJECT` pada domain cuti: ganti nama class `RejectLeaveAction`, audit payload `'REJECT'`, `LeaveApprovalService::reject()`, internal status `'rejected'`/`'request_rejected'`, label `'Ditolak'` di `LeaveProofService`, dan route/name `cuti.reject` dengan nomenklatur `Tidak Disetujui`/`NOT_APPROVED`; pertahankan keterangan wajib dan audit.
+- ⚠️ Workflow aktif keputusan cuti telah memakai `DeclineLeaveAction`, `LeaveApprovalService::decline()`, audit `NOT_APPROVED`, dan label `Tidak Disetujui`. Sisa pekerjaan adalah menetapkan retensi/migrasi key legacy `rejected` pada `LeaveProofService` dan membuktikan tidak ada endpoint/action aktif dengan vocabulary lama.
 - ❌ Putuskan lalu dokumentasikan schema canonical cuti sebelum membuat migration baru: apakah PRD memakai `leave_approval_steps`, `leave_balance_adjustments`, `leave_documents`, atau proyek mempertahankan nama semantic alternatif saat ini (`leave_request_steps`, `leave_balance_ledger`, `leave_proofs`). Konflik ini tidak boleh diselesaikan dengan asumsi.
 
 ### Prioritas P0 — tutup acceptance criteria Sprint 5
 
-- ❌ Hapus salah satu registrasi jadwal `app:run-ews`. Saat ini terdaftar ganda: `bootstrap/app.php` (baris 22–24) DAN `routes/console.php` (baris 27–29), berisiko dieksekusi dua kali per hari. Pertahankan satu saja di `routes/console.php` yang configurable via `EwsConfig`, dan hapus dari `bootstrap/app.php`.
+- ❌ Hapus salah satu registrasi jadwal `app:run-ews`. Saat ini terdaftar ganda: `bootstrap/app.php` (baris 20–22) DAN `routes/console.php` (baris 27–29), berisiko dieksekusi dua kali per hari. Pertahankan satu saja di `routes/console.php` yang configurable via `EwsConfig`, dan hapus dari `bootstrap/app.php`.
 - ❌ Buat satu mekanisme kalkulasi TMT yang dipanggil saat riwayat/sumber resmi dibuat/diubah dan saat referensi BUP berubah. **Reklasifikasi 22 Juli 2026:** pemicu "import selesai" dikeluarkan sesuai keputusan pengguna — kalkulasi tidak dijalankan saat import massal selesai. Simpan atau modelkan milestone Satyalancana secara konsisten tanpa menduplikasi aturan di engine.
 - ❌ Lengkapi data alert EWS yang diperlukan requirement (`is_eligible`, `trigger_days`, `tahun`), lalu pastikan semua penerima yang diwajibkan mendapat notifikasi in-app dan email untuk kelima event EWS termasuk Admin Kepegawaian.
 - ❌ Terapkan source of truth PRD untuk flag kinerja false atau dokumentasikan keputusan: PRD menyebut alert pangkat tidak tampil, sedangkan source saat ini menampilkan sebagai Tidak Eligible.
@@ -408,7 +425,7 @@ Status berikut tetap memerlukan QA/retest pada PHP kompatibel dan PostgreSQL seb
 | Nama dan bentuk tabel cuti | PRD §15.2 memakai `leave_approval_steps`, `leave_balance_adjustments`, `leave_documents`; source memakai `leave_request_steps`, `leave_balance_ledger`, `leave_proofs`. | Migration, model, API, audit, dan laporan dapat drift. | Tetapkan schema canonical dan strategi migrasi tanpa merusak data/foreign key. |
 | Kepala Bagian | PRD/US-4.11 menugaskan Admin Kepegawaian; source route hanya Super Admin dan start date otomatis hari ini. | Proses operasional tidak sesuai role dan histori tidak lengkap. | Sahkan role yang berwenang serta field effective date. |
 | Chain per unit | PRD mengizinkan chain per pegawai atau unit; source hanya per pegawai + global legacy. | Unit kerja tidak dapat menjadi scope konfigurasi. | Tetapkan model/unit hierarchy dan precedence global–unit–pegawai sebelum implementasi. |
-| Status keputusan cuti | PRD/AGENTS melarang `REJECT`; source memakainya secara internal dan pada route/action. | Kontrak domain dan audit tidak konsisten. | Gunakan satu vocabulary resmi untuk UI, audit, kode, dan test. |
+| Status keputusan cuti | Workflow aktif sudah memakai `DeclineLeaveAction`, `decline()`, `NOT_APPROVED`, dan label `Tidak Disetujui`; `LeaveProofService` masih mengenali key legacy `rejected`. | Data historis/kompatibilitas dapat tetap membawa vocabulary lama walau flow baru sudah resmi. | Putuskan retensi atau migrasi key legacy, lalu buktikan seluruh endpoint/action aktif memakai vocabulary resmi. |
 | Flag kinerja EWS | PRD §10.3 menyatakan pegawai dengan flag Tidak tidak muncul pada EWS kenaikan pangkat; Issue #36 menyatakan Tidak Eligible; source membuat alert dan menampilkannya sebagai Tidak Eligible. | Perilaku dashboard, notifikasi, dan pekerjaan admin berbeda menurut dokumen. | Karena PRD adalah sumber utama, selaraskan source agar alert tidak tampil atau rekam keputusan perubahan PRD sebelum mempertahankan perilaku sekarang. |
 
 ## Verifikasi Runtime dan Batasan yang Masih Ada
@@ -417,16 +434,16 @@ Status berikut tetap memerlukan QA/retest pada PHP kompatibel dan PostgreSQL seb
 |---|---|---|
 | `php artisan route:list --path=api/v1 --json` | Berhasil pada 20 Juli 2026 | Output menegaskan API disiplin hanya GET/POST, serta profil keluarga/pendidikan mandiri hanya GET. |
 | Test fokus perubahan `32ada6b` | Berhasil: 64 test, 211 assertion | Menjalankan `DisciplineRecordTest`, `EmployeeDocumentTest`, `ProfileTest`, `MyEducationHistoryTest`, `MyFamilyTest`, `EducationHistoryTest`, dan `RbacPermissionMiddlewareTest`. |
-| `composer qa` dan test suite PostgreSQL penuh | Belum dijalankan ulang untuk analisis ini | Di luar perubahan dokumentasi ini; focused test SQLite tidak menggantikan evidence PostgreSQL 17. |
-| Podman compose/PostgreSQL integration test | Tidak dapat dijalankan | Binary `podman` tidak ditemukan pada workstation. |
-| PostgreSQL-sensitive test | Tidak dapat diverifikasi | Runtime container tidak tersedia dan `phpunit.xml` memakai SQLite in-memory. |
+| `composer qa` dan test suite PostgreSQL penuh | Tidak dijalankan pada pembaruan Graphify 22 Juli | Pembaruan ini bersifat audit source; tidak menggantikan evidence QA/runtime historis. |
+| Podman compose/PostgreSQL integration test | Tidak dieksekusi ulang pada pembaruan ini | Dokumen historis memiliki evidence yang saling bertentangan tentang ketersediaan Podman/PostgreSQL; rekonsiliasi evidence runtime harus dilakukan terpisah sebelum dipakai sebagai gate. |
+| PostgreSQL-sensitive test | Tidak diverifikasi ulang pada pembaruan ini | Graph/source tidak membuktikan perilaku PostgreSQL runtime. |
 
 ## Perbandingan Status Antar Versi Analisis
 
 | Area | Status 14 Juli (`50b1e77`) | Status 17 Juli (`4ea27e8`) | Status 20 Juli (`32ada6b`) | Perubahan terbaru |
 |---|:---:|:---:|:---:|---|
 | Issue #4 Mapping User | ✅ (partial) | ✅ | ✅ | Tidak berubah |
-| Dokumen eksternal Kepala Lembaga | ❌ | ⚠️ (Issue #31 naik) | ⚠️ | Tidak berubah; REJECT masih ada |
+| Dokumen eksternal Kepala Lembaga | ❌ | ⚠️ (Issue #31 naik) | ⚠️ | Workflow keputusan kini menggunakan `Tidak Disetujui`; key legacy `rejected` masih perlu keputusan retensi/migrasi |
 | Force delete pegawai backend | ❌ | ✅ | ✅ | Tidak berubah |
 | Autocomplete pegawai cuti | — | ✅ baru | ✅ | Tidak berubah |
 | Email `cuti.perlu_perubahan`/`cuti.tidak_disetujui` | ❌ absen | ⚠️ ditambahkan | ⚠️ | Tidak berubah; masih hardcoded |
@@ -439,7 +456,7 @@ Status berikut tetap memerlukan QA/retest pada PHP kompatibel dan PostgreSQL seb
 | Dashboard Pimpinan | ⚠️ | ⚠️ | ⚠️ lebih lengkap | +744 baris widget; `PimpinanDashboardDataTest` tersedia, tetapi runtime/QA belum dijalankan ulang |
 | Riwayat disiplin append-only (Issue #19) | ❌ | ❌ | ✅ | Route/action/permission/tombol DELETE dihapus; dokumen SK disiplin diblokir dari penghapusan; test route lama dan preservasi record/file tersedia |
 | Profil self-service read-only (Issue #23) | ❌ | ❌ | ✅ | Route keluarga/pendidikan hanya GET, controller terscope sesi, UI/FormRequest mutasi dihapus; test scope dan ketiadaan route mutasi tersedia |
-| REJECT nomenclature | ❌ | ❌ | ❌ | Belum diperbaiki |
+| Nomenklatur keputusan cuti | ❌ | ❌ | ⚠️ | Workflow aktif telah memakai `Decline`/`NOT_APPROVED`; kompatibilitas `rejected` masih perlu ditutup atau didokumentasikan |
 | Double EWS scheduler | ❌ | ❌ | ❌ | Belum diperbaiki |
 | SESSION_LIFETIME `.env.example` | ❌ | ❌ | ❌ | Belum diperbaiki |
 | Profil self-service routes | ❌ | ❌ | ✅ | Tidak ada lagi route mutasi keluarga/pendidikan mandiri |
@@ -447,6 +464,6 @@ Status berikut tetap memerlukan QA/retest pada PHP kompatibel dan PostgreSQL seb
 
 ## Batasan Analisis
 
-- Analisis menilai source yang ada pada commit `32ada6b`; tidak menggantikan QA manual, UAT, atau sign-off tim.
+- Analisis historis memakai `32ada6b`; pembaruan ini menilai source aktif pada HEAD `9a27caa`, termasuk perubahan nomenklatur keputusan cuti `c33bf46`. Pembaruan tidak menggantikan QA manual, UAT, atau sign-off tim.
 - Credential Keycloak, SMTP/email operasional, dan deployment Podman produksi tidak diuji.
 - Ikon ✅ hanya menyatakan bukti implementasi source/test tersedia. Tracker tetap tidak dapat menyatakan `Done` tanpa review, QA/retest, dan evidence sesuai dokumen proses.

@@ -1281,9 +1281,11 @@ Setiap story mengikuti format:
 > **Saya ingin** melihat ringkasan data bawahan langsung saya,
 > **Sehingga** saya bisa memantau pengajuan cuti dan informasi penting bawahan.
 
+> **Catatan keputusan 26 Juli 2026 (kanonis):** status `Dinas Luar` ditunda ke Fase 2 dan kelak diturunkan dari modul Surat Tugas/penugasan, bukan input manual. AC-1 Fase 1 direvisi menjadi status `aktif/cuti` saja. Lihat `Kickoff-Sprint-6-Kontrak-dan-Keputusan.md` (K-2).
+
 **Acceptance Criteria:**
 
-- [ ] AC-1: **Daftar Bawahan**: Nama, jabatan, status (aktif/cuti/dinas luar).
+- [ ] AC-1: **Daftar Bawahan**: Nama, jabatan, status (aktif/cuti; *dinas luar ditunda ke Fase 2 — keputusan 26 Juli 2026*).
 - [ ] AC-2: **Pengajuan Cuti Pending**: Daftar pengajuan cuti bawahan yang menunggu tindakan saya (quick action sesuai label resmi keputusan cuti).
 - [ ] AC-3: **EWS Bawahan**: Peringatan EWS yang relevan untuk bawahan langsung.
 - [ ] AC-4: Klik nama bawahan membuka detail ringkas (read-only).
