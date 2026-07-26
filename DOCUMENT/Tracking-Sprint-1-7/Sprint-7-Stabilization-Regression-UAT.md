@@ -54,7 +54,7 @@ Prioritas P1:
 | # | Task | Asal temuan | Owner usulan |
 |---|---|---|---|
 | 7.2-5 | Hubungkan Hari Libur web ke database (controller web masih array statis + audit session; reuse Action/FormRequest API yang sudah benar) | Sprint 1 #10 | Jordan |
-| 7.2-6 | Validasi lintas tahun kalender untuk SEMUA jenis cuti (kini hanya cuti pemotong saldo; angkat keluar dari `validateSaldoTahunan()` di Store & Resubmit request) | Sprint 4 #30 | Jordan |
+| 7.2-6 | Validasi lintas tahun kalender untuk SEMUA jenis cuti (kini hanya cuti pemotong saldo; angkat keluar dari `validateSaldoTahunan()` di Store & Resubmit request) — **sudah dikerjakan lebih awal: PR #136 menunggu review (27 Juli); bila merge sebelum Sprint 7, task ini tinggal verifikasi** | Sprint 4 #30 | Jordan |
 | 7.2-7 | Amankan logout: hapus route GET `/logout` yang memutasi session tanpa CSRF | Sprint 1 #3 | Adriel |
 | 7.2-8 | Import manual column mapping + warning kolom tak dikenal + FormRequest validate/execute (sisa terakhir Sprint 3 #21; rencana rinci sudah ada). Sekalian putuskan nasib jalur "skip NIP duplikat" yang dead code (rule `unique` menangkap lebih dulu) — hidupkan atau revisi AC US-3.3 | Sprint 3 #21 | Grantly (BE) + Adithian (UI) |
 | 7.2-9 | Perluas audit fail-closed (`logOrFail()` baru 3/36 call-site → terapkan pada mutation wajib: keputusan cuti, CRUD pegawai, import) + dokumentasikan kebijakan | Sprint 1 #5 | Jordan |
