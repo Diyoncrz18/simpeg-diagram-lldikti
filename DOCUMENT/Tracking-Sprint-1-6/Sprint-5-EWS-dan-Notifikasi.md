@@ -1,0 +1,43 @@
+# Tracking Sprint 5 — EWS & Notifikasi
+
+| Field | Detail |
+|---|---|
+| Periode | 21 – 30 Juli 2026 |
+| Cakupan issue | #33 – #38, #49 (`Issues-SIMPEG-Fase1.md`) |
+| Pembaruan terakhir | 26 Juli 2026 |
+| Basis verifikasi | Source HEAD `1b2e5b6` + verifikasi kode 26 Juli 2026 |
+| Menggantikan | `Analisis-Kesesuaian-Sprint-1-5.md` (dihapus 26 Juli 2026) |
+
+Legend: ✅ selesai pada source · ⚠️ sebagian · ❌ belum selesai. Status source, bukan status tracker `Done`.
+
+## Ringkasan
+
+**3 ✅ · 4 ⚠️ · 0 ❌.** Kemenangan besar sejak audit: dispatcher notifikasi per event kini berbasis database (PR #122) — gap P0 tertutup. Dua P0 tersisa: **registrasi ganda scheduler `app:run-ews`** (risiko eksekusi 2×/hari) dan **perilaku flag kinerja yang bertentangan dengan PRD**.
+
+## Status per Issue
+
+| Issue | Deliverable | Status | Bukti & catatan |
+|---:|---|:---:|---|
+| #33 | Kalkulasi TMT otomatis | ⚠️ | Sentralisasi tercapai (**PR #120**): `TmtCalculatorService` dipanggil dari 5 titik saat riwayat/sumber resmi disimpan; import tidak memanggilnya (sesuai keputusan 22 Juli, dikunci test PR #121). **Gap tersisa:** (a) milestone Satyalancana masih dihitung ephemeral di loop scheduler, tidak disimpan konsisten; (b) perubahan referensi BUP (`ref_jabatan.default_bup` / `ref_jenis_jabatan.maks_usia_pensiun`) tidak memicu rekalkulasi — tidak ada observer, dan guard `if (tanggal_pensiun === null)` membuat nilai lama tidak pernah dikoreksi. |
+| #34 | EWS scheduler harian | ⚠️ | Engine 5 trigger, threshold configurable, unique alert, log run, error notification, command, test tersedia. **Gap P0 terverifikasi:** `app:run-ews` terdaftar **ganda** — `bootstrap/app.php:20-26` DAN `routes/console.php:27-29` → berisiko jalan 2×/hari; test `EwsCommandScheduleTest` memakai `->first()` sehingga duplikat lolos regresi. Gap lain: kolom `is_eligible` & `tahun` (milestone) tidak ada di `ews_alerts` (eligibility dihitung ulang tiap render; `interval_days` ≈ `trigger_days` sudah oke). Penerima in-app Admin Kepegawaian kini **sudah** menerima (PR #122). |
+| #35 | Halaman daftar EWS aktif | ✅ | Data nyata, sort urgensi, filter event/status, warna, detail pegawai, akses role, follow-up ber-catatan + audit, test role. |
+| #36 | Flag kinerja & kelayakan Satyalancana | ⚠️ | Toggle AJAX, FormRequest, Action, RBAC route, audit, flag/catatan Satyalancana, test tersedia. **Gap P0 (konflik PRD) terverifikasi:** saat `is_kinerja_baik=false`, `EwsEngineService` **tetap membuat** alert pangkat dan menampilkannya "Tidak Eligible" di admin/kabag/pimpinan — PRD §10.3 menyatakan pegawai tidak muncul di EWS pangkat. Guard `isNonEligiblePromotion()` di resolver efektif dead code (engine tidak mengirim `is_eligible` di data). Minor: teks helper belum memakai frasa AC ("Flag ini menggantikan penilaian SKP yang belum tersedia di Fase 1…"). |
+| #37 | Notifikasi email | ✅ | **Ditutup PR #122.** Tabel baru `notification_event_channels` (kebijakan per event × channel, seeded di migrasi) + `NotificationChannelResolver` fail-closed dua lapis (kebijakan event AND channel global); `emailEnabled()` kini murni delegasi DB — array hardcoded dihapus; `ews.satyalancana` terdaftar in-app **dan** email; Admin Kepegawaian menerima in-app EWS; queue 3× retry + template Bahasa Indonesia tetap. Catatan: UI admin untuk mengelola kebijakan ini belum ada — dicakup Issue #46 (Sprint 6). |
+| #38 | Session timeout | ⚠️ | Middleware idle 30 menit, invalidasi sesi, redirect Keycloak, JSON 401, audit `SESSION_TIMEOUT`, test tersedia. **Gap kecil:** `.env.example` masih `SESSION_LIFETIME=120` (cookie hidup 120 menit vs idle 30) — samakan ke 30 atau dokumentasikan alasan dua nilai. |
+| #49 | EWS pribadi (pegawai) | ✅ | Section EWS pribadi di dashboard pegawai memakai data real ber-scope pegawai login + `DashboardEwsTest`; ditata ulang PR #123. |
+
+## Gap Terbuka (urutan prioritas)
+
+1. **P0 — Hapus registrasi ganda `app:run-ews`** (#34): pertahankan satu registrasi (versi configurable `EwsConfig`), perkuat test agar menghitung jumlah event terdaftar.
+2. **P0 — Selaraskan flag kinerja dengan PRD** (#36): skip pembuatan alert pangkat saat flag false (atau ubah PRD secara eksplisit bila tim memilih perilaku sekarang); bereskan dead-code guard resolver.
+3. **P1 — Kolom snapshot `ews_alerts`** (#34): tambah `is_eligible` + `tahun` (milestone), isi saat engine membuat alert.
+4. **P1 — TMT lanjutan** (#33): simpan milestone Satyalancana konsisten; rekalkulasi saat referensi BUP berubah; tinjau guard skip `tanggal_pensiun` (hormati keputusan import 22 Juli: nilai import tidak ditimpa).
+5. **P2 — `.env.example` SESSION_LIFETIME** (#38) dan teks helper flag kinerja (#36).
+
+## Riwayat Perubahan Status
+
+| Tanggal | Perubahan |
+|---|---|
+| 22 Juli 2026 | Baseline audit: #35 ✅; #33/#34/#36/#37/#38 ⚠️. Reklasifikasi: kalkulasi TMT pasca-import sengaja tidak ada (keputusan import). |
+| 23 Juli 2026 | PR #122: kebijakan channel per event berbasis DB → #37 ✅; in-app Admin untuk EWS tertutup (sebagian #34). PR #123: EWS pribadi dashboard pegawai ditata ulang → #49 dikonfirmasi ✅. |
+| 26 Juli 2026 | Verifikasi HEAD `1b2e5b6`: double scheduler (#34) dan perilaku flag kinerja (#36) dikonfirmasi belum berubah — keduanya P0 tersisa sprint ini. |
