@@ -45,7 +45,7 @@ Super Admin membuka daftar pegawai
 1. `PRD-SIMPEG-Fase1-Core.md` §4.1–4.2: Keycloak hanya autentikasi; SIMPEG adalah source of truth role/permission. Super Admin melakukan mapping user dan assignment role internal.
 2. `User-Stories-SIMPEG-Fase1.md` US-1.4 (P0): daftar pegawai beserta status mapping, input Keycloak ID/email, satu role internal, unique Keycloak account, dan audit perubahan.
 3. `Panduan-Penulisan-Kode-SIMPEG.md`: mutation menggunakan FormRequest dan Action; authorization berlapis; audit mutation penting; Alpine tidak menggantikan mutation backend.
-4. `Analisis-Kesesuaian-Administrasi-Sistem-Super-Admin.md`: temuan terkini khusus halaman Administrasi Sistem.
+4. `Tracking-Role/Role-Super-Admin.md`: tracking kesesuaian terkini role Super Admin (mengonsolidasi audit Administrasi Sistem 23 Juli yang menjadi dasar rencana ini).
 
 ### Bukti Graphify dan source saat ini
 
