@@ -919,7 +919,7 @@ EWS adalah scheduler otomatis yang berjalan setiap hari untuk memeriksa momen pe
 |-------|--------|
 | **Dasar hukum** | PP 49/2018 |
 | **Rumus** | Tanggal lahir + usia pensiun pada referensi jabatan = tanggal pensiun |
-| **BUP** | Tidak di-hardcode; diambil dari `ref_jenis_jabatan.maks_usia_pensiun` atau detail `ref_bup` |
+| **BUP** | Tidak di-hardcode; diambil dari `ref_jabatan.default_bup` (prioritas pertama) dengan fallback `ref_jenis_jabatan.maks_usia_pensiun`. Revisi per K-4 (27 Juli 2026): `ref_bup` di-deprecate dan tidak lagi menjadi sumber BUP |
 | **Interval notifikasi** | H-1 tahun, H-6 bulan, H-3 bulan |
 | **Penerima** | Pegawai bersangkutan + Admin Kepegawaian |
 
@@ -1587,7 +1587,7 @@ Master data berikut menjadi seed awal dan harus dapat dikelola oleh Super Admin/
 | 3 | Fungsional Umum / Pelaksana | 58 | Default umum |
 | 4 | Jabatan Akademik / Dosen | 65 / 70 | Disiapkan untuk modul Dosen DPK di fase berikutnya |
 
-> Field `maks_usia_pensiun` wajib tersedia agar EWS pensiun tidak mengunci usia pensiun secara statis di kode. Untuk jabatan yang lebih detail, nilai BUP dapat dioverride oleh `ref_jabatan` atau `ref_bup`.
+> Field `maks_usia_pensiun` wajib tersedia agar EWS pensiun tidak mengunci usia pensiun secara statis di kode. Untuk jabatan yang lebih detail, nilai BUP dioverride oleh `ref_jabatan.default_bup`. **Revisi per K-4 (27 Juli 2026):** `ref_bup` di-deprecate dan bukan lagi jalur override; presedensi resmi Fase 1 adalah `ref_jabatan.default_bup` lalu `ref_jenis_jabatan.maks_usia_pensiun`.
 
 ### 16.3 ref_jabatan
 
@@ -1725,9 +1725,11 @@ Daftar final nama tim kerja, urusan, dan sub-unit mengikuti data bagian kepegawa
 
 > Diinput manual oleh Admin/Super Admin setiap awal tahun berdasarkan SKB Menteri.
 
-### 16.13 ref_bup (Batas Usia Pensiun)
+### 16.13 ref_bup (Batas Usia Pensiun) — DEPRECATED per K-4
 
-Reference ini dipakai bila aturan BUP perlu lebih detail dari `ref_jenis_jabatan.maks_usia_pensiun`.
+> **DEPRECATED per K-4 (27 Juli 2026).** Tabel ini tidak dipakai perhitungan BUP mana pun dan tidak dibuatkan CRUD. Sumber BUP resmi Fase 1 adalah `ref_jabatan.default_bup` (prioritas pertama) dengan fallback `ref_jenis_jabatan.maks_usia_pensiun`. Alasan: PRD memposisikan reference ini sebagai opsi kondisional ("bila", "atau"), bukan kewajiban; kewajiban PRD — BUP tidak di-hardcode dan dapat diubah Admin tanpa ubah kode — sudah dipenuhi jalur yang berjalan. Kolom `jenis_jabatan` di sini berupa teks tanpa foreign key sehingga duplikat semantik dengan `ref_jenis_jabatan.nama`; menyambungkannya akan membuat jalur ketiga yang berebut sumber kebenaran tanpa aturan presedensi. Tabel, model, dan seeder tetap dipertahankan pada Fase 1; penghapusan dijadwalkan ke Fase 2. Daftar BUP di bawah tetap dipertahankan sebagai acuan nilai domain, bukan sebagai spesifikasi tabel yang harus dikelola.
+
+Reference ini semula dirancang untuk dipakai bila aturan BUP perlu lebih detail dari `ref_jenis_jabatan.maks_usia_pensiun`.
 Hasil meeting menyepakati bahwa BUP tidak di-hardcode di aplikasi.
 
 | Jenis Jabatan | BUP (Tahun) |
@@ -1739,7 +1741,7 @@ Hasil meeting menyepakati bahwa BUP tidak di-hardcode di aplikasi.
 | Pimpinan Tinggi | 60 |
 | Struktural (Eselon I-II) | 60 |
 
-> **Catatan:** Data BUP final mengikuti daftar jabatan yang diberikan oleh bagian kepegawaian LLDIKTI. Bila ada jabatan dengan usia pensiun berbeda, Admin harus dapat memperbaruinya melalui reference table.
+> **Catatan:** Data BUP final mengikuti daftar jabatan yang diberikan oleh bagian kepegawaian LLDIKTI. Bila ada jabatan dengan usia pensiun berbeda, Admin harus dapat memperbaruinya melalui reference table. **Per K-4 (27 Juli 2026)** reference table yang dimaksud adalah `ref_jabatan` (kolom `default_bup`, tingkat paling detail) dan `ref_jenis_jabatan` (kolom `maks_usia_pensiun`, fallback per kategori) — bukan `ref_bup`. Kewajiban ini baru sepenuhnya tertepati setelah CRUD `ref_jabatan` tersedia; sampai saat itu Admin hanya dapat mengatur BUP pada tingkat kategori jenis jabatan.
 
 ### 16.14 ref_notification_channels
 

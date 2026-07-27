@@ -7,7 +7,7 @@
 | Disetujui oleh | Dion Kobi — System Analyst & Project Manager |
 | Status | **Kanonis** — jika bertentangan dengan teks PRD/User Stories/Issues sebelumnya, dokumen ini yang berlaku sampai dokumen sumber direvisi |
 | Acuan | PRD-SIMPEG-Fase1-Core.md v1.3 §13–14 & §16, User-Stories US-8.1/8.3/8.5 & US-9.x, Issues #39–#43 & #46, `AGENTS.md`, hasil verifikasi kode HEAD `1b2e5b6` (26 Juli 2026) |
-| Cakupan | Dua keputusan produk (K-1, K-2) dan satu kontrak slice (K-3) yang memblokir pengerjaan Sprint 6 |
+| Cakupan | Tiga keputusan produk (K-1, K-2, K-4) dan satu kontrak slice (K-3) yang memblokir pengerjaan Sprint 6 |
 
 ---
 
@@ -101,11 +101,58 @@ US-8.3 AC-1 meminta daftar bawahan berstatus *aktif/cuti/dinas luar*, tetapi tid
 
 ---
 
+## K-4 — `ref_bup` Di-deprecate, Tidak Masuk Cakupan CRUD Fase 1 (Issue #46 / US-8.5)
+
+### Latar belakang
+
+Dari 9 tabel yang tercantum pada Issue #46, `ref_bup` tidak memiliki foreign key, relasi Eloquent, maupun pemanggilan runtime. Perhitungan batas usia pensiun yang berjalan mengambil nilai dari `ref_jabatan.default_bup` lalu jatuh ke `ref_jenis_jabatan.maks_usia_pensiun`. Kolom `jenis_jabatan` pada `ref_bup` berupa teks tanpa foreign key sehingga duplikat semantik dengan `ref_jenis_jabatan.nama`.
+
+### Keputusan (disetujui 27 Juli 2026)
+
+`ref_bup` tidak disambungkan ke perhitungan BUP dan tidak dibuatkan CRUD. Sumber BUP resmi Fase 1 adalah `ref_jabatan.default_bup` sebagai prioritas pertama dengan fallback `ref_jenis_jabatan.maks_usia_pensiun`. Cakupan CRUD Issue #46 berubah dari 9 tabel menjadi **8 tabel**.
+
+### Aturan penerapan
+
+1. Fase 1: hapus entri dari daftar dokumen, hapus baris `ref_bup` pada halaman Pengaturan Sistem, tandai model `RefBup` sebagai `@deprecated`, dan sesuaikan test yang memakainya.
+2. Fase 1: tabel, migration, dan seeder `ref_bup` **tetap dipertahankan**. Migrasi `is_active` sudah menyentuh tabel ini dan sudah berjalan; migrasi destruktif menjelang go-live menambah risiko tanpa manfaat operasional.
+3. Fase 2: drop tabel, hapus model, hapus seeder.
+4. Dilarang membuat halaman kelola `ref_bup`. Bila halaman dibuat, Admin akan mengisi data dan mengira berpengaruh pada perhitungan pensiun padahal tidak dibaca kode mana pun. Pola "keberhasilan palsu" ini sudah ditandai P1 pada audit Role Super Admin dan tidak boleh ditambah.
+5. Konsekuensi wajib: CRUD `ref_jabatan` tetap berada dalam cakupan Slice Issue #46 karena menjadi satu-satunya jalur Admin mengatur BUP per jabatan detail. Granularitas `ref_bup` (6 baris) lebih halus daripada `ref_jenis_jabatan` (4 kategori), sehingga tanpa CRUD `ref_jabatan` tingkat presedensi paling spesifik tidak dapat diisi Admin dan janji PRD §1742 belum tertepati.
+6. Tab statis "Batas Usia Pensiun" pada halaman Data Master dicabut bersama form modalnya. Tab tersebut menampilkan data hardcoded beserta tombol Tambah, Edit, dan Hapus yang tidak menyimpan apa pun — bentuk keberhasilan palsu yang sama seperti aturan 4.
+
+### Alasan
+
+PRD memposisikan `ref_bup` sebagai opsi kondisional, bukan kewajiban: §16.13 memakai kata "dipakai bila", §16.2 memakai "dapat dioverride oleh `ref_jabatan` atau `ref_bup`", §10 memakai "atau detail `ref_bup`", dan §1 poin 15 tidak menyebutnya sama sekali. Kewajiban substantif PRD hanya dua, yaitu BUP tidak di-hardcode dan Admin dapat memperbaruinya tanpa ubah kode; keduanya sudah dipenuhi jalur yang berjalan. Menyambungkan `ref_bup` justru menciptakan jalur ketiga yang berebut sumber kebenaran dengan dua jalur yang sudah ada, tanpa aturan presedensi.
+
+### Dokumen yang direvisi
+
+| Dokumen | Lokasi | Tindakan |
+|---|---|---|
+| `Issues-SIMPEG-Fase1.md` | Issue #46, task CRUD | `ref_bup` dikeluarkan; cakupan menjadi 8 tabel |
+| `Issues-SIMPEG-Fase1.md` | Issue #11, baris seeder `ref_bup` | **Tidak dicoret**, hanya ditandai deprecated. Baris ini adalah cakupan migration/seeder, dan aturan 2 mempertahankan keduanya di Fase 1 |
+| `User-Stories-SIMPEG-Fase1.md` | US-8.5 AC-1 | `ref_bup` dikeluarkan; cakupan menjadi 8 tabel |
+| `PRD-SIMPEG-Fase1-Core.md` | §10 baris BUP | Sumber BUP diubah menjadi `ref_jabatan.default_bup` dengan fallback `ref_jenis_jabatan.maks_usia_pensiun` |
+| `PRD-SIMPEG-Fase1-Core.md` | §16.2 catatan | `ref_bup` dihapus dari jalur override |
+| `PRD-SIMPEG-Fase1-Core.md` | §16.13 | Ditandai DEPRECATED; daftar nilai dipertahankan sebagai acuan domain |
+| `PRD-SIMPEG-Fase1-Core.md` | §16.13 catatan penutup | Reference table yang dimaksud diperjelas menjadi `ref_jabatan` dan `ref_jenis_jabatan` |
+| `Tracking-Role/Role-Super-Admin.md` | Baris sisa Data Master | Open question `ref_bup` ditutup |
+| `Tracking-Sprint-1-7/Sprint-6-Dashboard-dan-Laporan.md` | Status #46 | Open question `ref_bup` ditutup |
+
+### Catatan koreksi rujukan
+
+Instruksi awal menyebut "coret `ref_bup` dari Issue #46 baris 417 dan 1324" serta "CRUD `ref_jabatan` di Issue #46 baris 407". Setelah diverifikasi, baris 407 dan 417 berada di **Issue #11** (cakupan migration/seeder), bukan Issue #46. Task CRUD Issue #46 berada pada satu baris yang memuat `ref_bup` sekaligus `ref_jabatan`. Karena aturan 2 mempertahankan seeder di Fase 1, baris Issue #11 tidak dicoret melainkan ditandai deprecated agar tidak bertentangan dengan keputusan ini.
+
+---
+
 ## Konsekuensi ke Backlog & Dokumen
 
 | Item | Dampak |
 |---|---|
 | Task #16 (Dashboard Admin) | **Unblocked** — kontrak K-3 menjadi acuan FE (dummy fixture) & BE |
+| Issue #46 cakupan CRUD | **Berubah** — 9 tabel menjadi 8 tabel per K-4; `ref_bup` keluar, CRUD `ref_jabatan` tetap wajib |
+| CRUD `ref_jabatan` | **Prioritas dinaikkan** — syarat sah K-4; tanpa ini Admin tidak dapat mengatur BUP per jabatan detail dan PRD §1742 belum tertepati |
+| Backlog Sprint 7 | Tambah P1: presedensi BUP global versus per jabatan. `EwsEngineService` memperlakukan `pensiun_required_age_years` sebagai override penuh, sehingga bila diisi 58 maka pejabat tinggi ikut dihitung 58 dan bertentangan dengan keputusan meeting PRD §926. Urutan yang benar: `ref_jabatan.default_bup`, lalu `ref_jenis_jabatan.maks_usia_pensiun`, lalu global sebagai fallback paling kalah. Catatan teknis: `EwsSchedulerTest` saat ini mengunci perilaku override tersebut sehingga test itu harus diubah lebih dulu |
+| Backlog Fase 2 | Tambah: drop tabel `ref_bup`, hapus model, hapus seeder (K-4 aturan 3) |
 | Task #22 (Reference Tables) | **Unblocked** — implementasi mengikuti K-1; tidak ada migrasi `SoftDeletes` |
 | Task #23 (Kabag) | **Scope berubah** — sub-item "Dinas Luar" menjadi: bersihkan kode setengah jadi PR #125 + revisi dokumen (K-2); sisa pekerjaan koding: pagination EWS bawahan |
 | US-8.3 AC-1 | Direvisi per K-2 (catatan ditambahkan di User-Stories-SIMPEG-Fase1.md) |

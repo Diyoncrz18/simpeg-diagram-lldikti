@@ -1332,7 +1332,7 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Halaman admin untuk mengelola setiap reference table: ref_golongan, ref_jenis_jabatan, ref_jabatan, ref_status_pegawai, ref_eselon, ref_unit_kerja hierarkis, ref_jenjang_pendidikan, ref_bup, dan ref_notification_channels.
+- [ ] AC-1: Halaman admin untuk mengelola setiap reference table: ref_golongan, ref_jenis_jabatan, ref_jabatan, ref_status_pegawai, ref_eselon, ref_unit_kerja hierarkis, ref_jenjang_pendidikan, dan ref_notification_channels — **8 tabel**. `ref_bup` dikeluarkan dari cakupan per K-4 (27 Juli 2026) karena tidak dibaca perhitungan BUP mana pun; sumber BUP resmi adalah `ref_jabatan.default_bup` dengan fallback `ref_jenis_jabatan.maks_usia_pensiun`.
 - [ ] AC-2: CRUD per table: lihat daftar, tambah, edit, hapus (soft delete jika sudah dipakai oleh data pegawai).
 - [ ] AC-3: Validasi: tidak bisa menghapus item reference table yang sedang dipakai oleh data pegawai.
 - [ ] AC-4: Perubahan tercatat di audit log.

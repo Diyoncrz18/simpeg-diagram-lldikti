@@ -414,7 +414,7 @@ Buat semua migration dan seeder untuk reference tables Fase 1.
 - [ ] `ref_agama` — Islam, Kristen, Katolik, Hindu, Buddha, Konghucu
 - [ ] `ref_status_kawin` — Belum Kawin, Kawin, Cerai Hidup, Cerai Mati
 - [ ] `ref_hubungan_keluarga` — Suami, Istri, Anak
-- [ ] `ref_bup` — Batas Usia Pensiun per jenis jabatan (sesuai PP 49/2018)
+- [ ] `ref_bup` — Batas Usia Pensiun per jenis jabatan (sesuai PP 49/2018). **DEPRECATED per K-4 (27 Juli 2026):** migration dan seeder tetap dipertahankan pada Fase 1 sehingga baris ini tidak dicoret, tetapi tabel ini tidak dibaca perhitungan BUP mana pun dan tidak dibuatkan CRUD. Sumber BUP resmi: `ref_jabatan.default_bup` dengan fallback `ref_jenis_jabatan.maks_usia_pensiun`. Penghapusan tabel dijadwalkan ke Fase 2.
 - [ ] `ref_notification_channels` — in_app, email, whatsapp_business (future/configurable)
 - [ ] Buat seeder: `php artisan db:seed --class=ReferenceTableSeeder`
 - [ ] Test: seeder bisa dijalankan ulang tanpa error (idempotent)
@@ -1320,8 +1320,10 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 > **Catatan keputusan 26 Juli 2026 (kanonis):** kebijakan penghapusan memakai pola hybrid `is_active` — item yang sudah dipakai data pegawai tidak dapat dihapus dan hanya dinonaktifkan via `is_active`; item yang belum pernah dipakai boleh dihapus permanen dengan audit. Frasa "soft delete jika sudah dipakai" dibaca sebagai nonaktif `is_active`, **bukan** `SoftDeletes`/`deleted_at`. Lihat `Kickoff-Sprint-6-Kontrak-dan-Keputusan.md` (K-1).
 
+> **Catatan keputusan 27 Juli 2026 (kanonis, K-4):** cakupan CRUD issue ini berubah dari 9 tabel menjadi **8 tabel**. `ref_bup` di-deprecate dan tidak dibuatkan CRUD karena tidak dibaca kode mana pun; sumber BUP resmi Fase 1 adalah `ref_jabatan.default_bup` (prioritas pertama) dengan fallback `ref_jenis_jabatan.maks_usia_pensiun`. Tabel, model, dan seeder `ref_bup` tetap dipertahankan pada Fase 1; penghapusannya dijadwalkan ke Fase 2. **Konsekuensi wajib:** CRUD `ref_jabatan` tetap berada dalam cakupan issue ini karena menjadi satu-satunya jalur Admin mengatur BUP per jabatan detail. Lihat `Kickoff-Sprint-6-Kontrak-dan-Keputusan.md` (K-4).
+
 **Tasks:**
-- [ ] CRUD untuk: ref_golongan, ref_jenis_jabatan, ref_jabatan, ref_status_pegawai, ref_eselon, ref_unit_kerja hierarkis, ref_jenjang_pendidikan, ref_bup, ref_notification_channels
+- [ ] CRUD untuk: ref_golongan, ref_jenis_jabatan, ref_jabatan, ref_status_pegawai, ref_eselon, ref_unit_kerja hierarkis, ref_jenjang_pendidikan, ref_notification_channels — **8 tabel** (`ref_bup` dikeluarkan per K-4)
 - [ ] Validasi: tidak bisa hapus item yang sedang dipakai
 - [ ] Soft delete jika sudah dipakai (per keputusan 26 Juli 2026: nonaktif via `is_active`)
 - [ ] Audit log
