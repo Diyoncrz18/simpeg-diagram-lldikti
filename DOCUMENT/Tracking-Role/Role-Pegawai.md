@@ -21,7 +21,7 @@ lainnya.
 
 | # | Halaman target (dok. 22 Juli) | Status | Bukti |
 |---|---|:---:|---|
-| 1 | Dashboard Pribadi | ⚠️ | `DashboardController.php:49-77` → `pegawai/dashboard.blade.php`. Widget nyata: profil ringkas, 3 kartu saldo, cuti aktif (5), EWS pribadi, notifikasi (5). **Bug: widget notifikasi selalu kosong** (lihat Belum Sesuai #1) |
+| 1 | Dashboard Pribadi | ✅ | `BuildPegawaiDashboardAction` (PR #132, merged 27 Juli) → `pegawai/dashboard.blade.php`. Widget nyata: profil ringkas, 3 kartu saldo, cuti aktif (5), EWS pribadi, notifikasi (5). Bug FK widget notifikasi + ekstraksi Action ditutup PR #132 dengan 6 feature test |
 | 2 | Profil Saya | ✅ | `/dashboard/profil` → `ShowProfilePageAction`; 10 tab (Profil, Cuti, Keluarga, Kepangkatan, Jabatan, KGB, Disiplin, Pendidikan, Pengangkatan, Dokumen SK) — read-only, tanpa kebocoran kontrol edit; pintasan admin dipagari role |
 | 3 | Ajukan Cuti | ✅ | `cuti.create/store` + `StoreLeaveRequestRequest`; validasi saldo real-time (submit di-disable), hitung hari kerja server-side (`WorkdayCalculator`), tolak lintas tahun, jenis cuti disaring PNS/PPPK, chain approval wajib resolve |
 | 4 | Daftar Cuti Saya | ✅ | `CutiController::index` self-scoped (kecuali ber-permission `cuti.read_all`); label resmi tanpa `Ditolak` (grep = 0) |
@@ -46,19 +46,19 @@ lainnya.
 
 | # | Prioritas | Temuan (terverifikasi 27 Juli) | Tindak lanjut |
 |---|:---:|---|---|
-| 1 | P0 (bug) | **Widget "Notifikasi Terbaru" dashboard selalu kosong** — `DashboardController.php:64` memfilter `SimpegNotification::where('user_id', $user->id)` padahal `notifications.user_id` ber-FK ke `employees.id` dan penulis notifikasi mengisi `employee->id`; seharusnya `$user->employee_id` (pembanding benar: `NotificationController.php:12`) | Task tracker #17 (Issue #40) |
-| 2 | P1 | **Halaman Saldo Cuti tak terjangkau dari UI** — grep `route('cuti.saldo')` di seluruh views = 0; hanya bisa diakses ketik URL. Dokumen target menempatkannya sebagai halaman inti pegawai | Gabungkan dengan task #17 (finalisasi dashboard/navigasi pegawai) |
-| 3 | P1 | **Antrean verifikator tak terjangkau dari UI** — grep `route('cuti.approval')` di seluruh views = 0; pegawai yang ditunjuk di approval chain hanya bisa menindaklanjuti lewat link notifikasi per-pengajuan. AC "Pengajuan Menunggu Tindakan" belum selesai dari sisi navigasi | Perlu diangkat ke backlog (kandidat gabung Issue #40/#44) |
-| 4 | P1 | **Validasi lintas tahun baru untuk Cuti Tahunan** — pesan `StoreLeaveRequestRequest` eksplisit "Cuti tahunan…"; PRD meminta larangan lintas tahun untuk semua jenis cuti | Task tracker #7 |
-| 5 | P2 | Label `Perlu Perubahan` masih tampil di daftar/detail cuti yang dipakai pegawai (`admin/cuti/index.blade.php:17`, `show.blade.php:305`) — istilah resmi `Perubahan` | Task tracker #25 |
-| 6 | P2 | **Dashboard pegawai satu-satunya tanpa Action** — logika inline di `DashboardController` (pimpinan/kabag punya `Build*DashboardAction`); layak diseragamkan saat mengerjakan task #17 | Task tracker #17 |
-| 7 | P2 | Route `cuti.saldo` tanpa middleware `permission:` (hanya allowlist role grup) — aman karena controller resolve employee dari sesi, tetapi berbeda pola dari route lain yang bergerbang ganda | Catatan konsistensi — rapikan saat menyentuh route cuti |
+| 1 | P1 | **Halaman Saldo Cuti tak terjangkau dari UI** — grep `route('cuti.saldo')` di seluruh views = 0; hanya bisa diakses ketik URL. Dokumen target menempatkannya sebagai halaman inti pegawai | Gabungkan dengan task #17 (finalisasi dashboard/navigasi pegawai) |
+| 2 | P1 | **Antrean verifikator tak terjangkau dari UI** — grep `route('cuti.approval')` di seluruh views = 0; pegawai yang ditunjuk di approval chain hanya bisa menindaklanjuti lewat link notifikasi per-pengajuan. AC "Pengajuan Menunggu Tindakan" belum selesai dari sisi navigasi | Perlu diangkat ke backlog (kandidat gabung Issue #40/#44) |
+| 3 | P1 | **Validasi lintas tahun baru untuk Cuti Tahunan** — PRD meminta larangan untuk semua jenis cuti. **→ Dikerjakan: PR #136 menunggu review (27 Juli)** | Task tracker #7 |
+| 4 | P2 | Label `Perlu Perubahan` masih tampil di daftar/detail cuti yang dipakai pegawai (`admin/cuti/index.blade.php:17`, `show.blade.php:305`) — istilah resmi `Perubahan` | Task tracker #25 |
+| 5 | P2 | Route `cuti.saldo` tanpa middleware `permission:` (hanya allowlist role grup) — aman karena controller resolve employee dari sesi, tetapi berbeda pola dari route lain yang bergerbang ganda | Catatan konsistensi — rapikan saat menyentuh route cuti |
+
+> **Ditutup 27 Juli 2026 (PR #132, merged):** bug FK widget notifikasi (`$user->id` → `$user->employee_id`) dan ekstraksi `BuildPegawaiDashboardAction` — dua temuan sebelumnya di tabel ini (P0 bug + P2 arsitektur), dikunci 6 feature test.
 
 ## Kesimpulan
 
 Fondasi role pegawai lebih sehat daripada yang terlihat: semua alur inti (profil, cuti end-to-end,
-EWS pribadi, notifikasi, QR) ada dan pembatasan datanya ditegakkan server-side. Tiga hal yang
-membuatnya belum bisa dinyatakan selesai US-8.2/4.7: bug kolom `user_id` di widget notifikasi,
-dua halaman fungsional yang tidak tersambung navigasi (saldo & antrean verifikator), dan validasi
-lintas tahun yang belum menyeluruh. Semuanya kecil secara teknis dan sudah terpetakan ke task
-tracker — kandidat kuat untuk slice dashboard pegawai (Issue #40) di Sprint 6.
+EWS pribadi, notifikasi, QR) ada dan pembatasan datanya ditegakkan server-side. Bug widget
+notifikasi dan ekstraksi `BuildPegawaiDashboardAction` sudah ditutup PR #132 (merged 27 Juli);
+validasi lintas tahun semua jenis dikerjakan di PR #136 (menunggu review). Sisa yang membuat
+US-8.2/4.7 belum selesai penuh: dua halaman fungsional tanpa tautan navigasi (saldo & antrean
+verifikator) — kandidat slice dashboard pegawai (Issue #40) di Sprint 6.

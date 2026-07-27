@@ -14,7 +14,7 @@ Legend: ✅ selesai pada source · ⚠️ sebagian · ❌ belum selesai. Status 
 
 ## Ringkasan
 
-**0 ✅ · 5 ⚠️ · 1 ❌.** Banyak fondasi sudah terbangun lebih awal (dashboard Pimpinan + Kabag + Pegawai, Excel export) berkat PR #123/#125, tetapi belum ada issue yang layak ✅ utuh. Fokus sprint: dashboard **Admin** real-data, PDF pegawai, penyelarasan export cuti, dan CRUD reference tables (#46 satu-satunya ❌ total).
+**0 ✅ · 6 ⚠️ · 0 ❌.** Banyak fondasi sudah terbangun lebih awal (dashboard Pimpinan + Kabag + Pegawai, Excel export) berkat PR #123/#125, dan #46 naik dari ❌ setelah PR #134 merge. Fokus sprint: dashboard **Admin** real-data, PDF pegawai, penyelarasan export cuti, dan sisa reference tables (tab lanjutan + channel notifikasi).
 
 ## Status per Issue
 
