@@ -834,17 +834,19 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 **Tasks:**
 - [ ] Migration `leave_requests`:
-  - employee_id, jenis_cuti_id (FK), tanggal_mulai, tanggal_selesai, jumlah_hari_kerja, alasan, file_lampiran, workflow_status, final_decision_status, qr_token, generated_document_path, external_approval, timestamps
+  - employee_id, jenis_cuti_id (FK), leave_request_case_id nullable, tanggal_mulai, tanggal_selesai, jumlah_hari_kerja, alasan, alamat_selama_cuti, nomor_telepon, lampiran_path, status, timestamps
 - [ ] Migration `leave_approval_chains`:
   - scope_type (global/unit/employee), scope_id nullable, step_order, step_type, approver_employee_id, is_active, timestamps
-- [ ] Migration `leave_approval_steps`:
-  - leave_request_id, step_order, step_type, approver_id, decision_status (`Disetujui`/`Perubahan`/`Ditangguhkan`/`Tidak Disetujui`), keterangan, acted_at, timestamps
+- [ ] Migration `leave_request_steps`:
+  - leave_request_id, step_order, step_type, approver_employee_id, status, is_final, skipped_reason, decision_note, acted_at, timestamps
 - [ ] Migration `leave_balances`:
-  - employee_id, tahun (int), jatah_dasar, carry_over_n1, hak_tambahan_n2_n1, terpakai, sisa, timestamps
-- [ ] Migration `leave_balance_adjustments`:
-  - employee_id, tahun, adjustment_days, reason, created_by, timestamps
-- [ ] Migration `leave_documents`:
-  - leave_request_id, document_path, qr_token, verification_payload, external_document_path, timestamps
+  - employee_id, tahun (int), jatah_awal, carry_over, sisa_n2, sisa_n1, sisa_tahun_berjalan, terpakai_tahun_berjalan, hangus, timestamps
+- [ ] Migration `leave_balance_ledger`:
+  - employee_id, leave_request_id nullable, leave_balance_id nullable, tahun, event_type, amount, reason, metadata, created_by, occurred_at, timestamps
+- [ ] Migration `leave_proofs`:
+  - leave_request_id, token QR, document_path, document_mime, generated_by, generated_at, metadata, timestamps
+- [ ] Dokumen persetujuan eksternal:
+  - kebutuhan bisnis tetap di PRD; desain storage, migration, otorisasi, audit, dan retensi diputuskan terpisah sebelum diaktifkan
 - [ ] Buat semua model dengan relationships
 
 ---
@@ -930,7 +932,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
   - Tanggal valid
   - Tanggal mulai/selesai tidak boleh lintas tahun kalender
 - [ ] Setelah submit: status = "Menunggu [step pertama approval chain]"
-- [ ] Snapshot approval chain ke `leave_approval_steps`
+- [ ] Snapshot approval chain ke `leave_request_steps`
 - [ ] Kirim notifikasi ke pihak pertama pada chain (channel mengikuti konfigurasi)
 
 **Tasks Frontend (Adithian):**
