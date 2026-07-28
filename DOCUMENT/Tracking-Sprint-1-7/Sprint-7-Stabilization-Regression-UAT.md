@@ -65,7 +65,7 @@ Prioritas P2 & dokumen:
 | # | Task | Owner usulan |
 |---|---|---|
 | 7.2-11 | Item kecil: `SESSION_LIFETIME` .env.example → 30 (atau dokumentasikan), `resources/views/components/README.md`, teks helper flag kinerja sesuai AC | Adriel |
-| 7.2-12 | ADR skema cuti canonical (`leave_request_steps`/`leave_balance_ledger`/`leave_proofs`) + selaraskan PRD §15.2 | Dion |
+| 7.2-12 | ✅ Selesai 28 Juli — [Keputusan Skema Cuti Canonical](../Keputusan-Skema-Cuti-Canonical.md) menetapkan `leave_request_steps`/`leave_balance_ledger`/`leave_proofs`; PRD §15.2 dan issue breakdown telah diselaraskan | Dion |
 | 7.2-13 | Eskalasi keputusan produk: approval chain per unit (precedence pegawai > unit > global) — keputusan saja, implementasi di luar Fase 1 bila waktu tidak cukup | Dion |
 | 7.2-14 | Bereskan hygiene lokal yang mengganjal `composer qa`: perubahan menggantung `bootstrap/app.php` (formatting) & `test_show.php` — commit/buang agar gate QA lokal hijau | Dion |
 

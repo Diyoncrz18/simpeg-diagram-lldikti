@@ -3,8 +3,8 @@
 
 | Field | Detail |
 |-------|--------|
-| **Versi Dokumen** | 1.3 |
-| **Tanggal** | 22 Juli 2026 |
+| **Versi Dokumen** | 1.4 |
+| **Tanggal** | 28 Juli 2026 |
 | **Domain** | Disiapkan LLDIKTI saat tahap deployment |
 | **Fase** | 1 — Core / Fondasi |
 | **Target Go-Live** | 20 Agustus 2026 |
@@ -32,6 +32,7 @@ PRD ini menjadi **sumber kebenaran utama** untuk Fase 1. Keputusan meeting tekni
 15. BUP tidak di-hardcode; usia pensiun dihitung dari referensi jabatan / jenis jabatan.
 16. Sample data pegawai, referensi jabatan, pangkat, golongan, struktur unit, saldo cuti awal, dan data mentah lainnya disediakan oleh bagian kepegawaian LLDIKTI.
 17. Keputusan sesi langsung pengguna 22 Juli 2026 (kanonis, disetujui pengguna): import massal Fase 1 hanya mengaktifkan template Data Utama. Import membuat record pegawai beserta field snapshot awal (golongan, pangkat, jabatan, kelas jabatan, pendidikan, prodi, dan tanggal pensiun bila tersedia di kolom Excel), tetapi tidak membuat riwayat kepangkatan, riwayat jabatan, maupun riwayat KGB. Riwayat resmi diinput per pegawai melalui CRUD riwayat append-only. Kalkulasi TMT dijalankan saat riwayat/sumber resmi disimpan, bukan saat import selesai. Tanggal pensiun hasil import dipertahankan apa adanya dan tidak dihitung ulang atau ditimpa oleh proses import. Template lanjutan multi-jenis (Data Pelengkap, Riwayat Kepangkatan, Riwayat Jabatan, Riwayat KGB) tidak termasuk ruang lingkup saat ini dan tidak dipulihkan tanpa keputusan eksplisit baru. Keputusan ini menggantikan rincian import versi sebelumnya jika bertentangan.
+18. Keputusan pengguna 28 Juli 2026: nama tabel fisik canonical cuti adalah `leave_request_steps`, `leave_balance_ledger`, dan `leave_proofs`. Keputusan, alasan, serta batasnya dicatat pada [Keputusan Skema Cuti Canonical](Keputusan-Skema-Cuti-Canonical.md).
 
 ---
 
@@ -1448,38 +1449,43 @@ Fase 1 menyediakan export laporan dasar ke format PDF dan Excel. Selain export f
 
 ```
 ┌────────────────────────┐     ┌──────────────────────────┐
-│    leave_requests      │     │  leave_approval_steps    │
+│    leave_requests      │     │  leave_request_steps     │
 │────────────────────────│     │──────────────────────────│
 │ id (PK, UUID)          │     │ id (PK, UUID)            │
 │ employee_id (FK)       │──┐  │ leave_request_id (FK)    │
-│ jenis_cuti_id (FK)     │  │  │ step_order               │
-│ tanggal_mulai          │  │  │ step_type                │
-│ tanggal_selesai        │  ├──│ approver_id (FK)         │
-│ jumlah_hari_kerja      │  │  │ decision_status          │
-│ alasan                 │  │  │ keterangan              │
-│ lampiran_path          │  │  │ acted_at                 │
-│ workflow_status        │  │  └──────────────────────────┘
-│ final_decision_status  │  │
-│ qr_token               │  │  ┌──────────────────────────┐
-│ generated_document_path│  │  │  leave_balances          │
-└────────────────────────┘  │  │──────────────────────────│
-                            └──│ id (PK, UUID)            │
-                               │ employee_id (FK)         │
-                               │ tahun                    │
-                               │ jatah_dasar              │
-                               │ carry_over_n1            │
-                               │ hak_tambahan_n2_n1       │
-                               │ terpakai                 │
-                               │ sisa                     │
-                               └──────────────────────────┘
+│ jenis_cuti_id (FK)     │  └──│ step_order               │
+│ leave_request_case_id  │     │ step_type                │
+│ tanggal_mulai          │     │ role_label               │
+│ tanggal_selesai        │     │ approver_employee_id(FK)│
+│ jumlah_hari_kerja      │     │ status                   │
+│ alasan                 │     │ is_final                 │
+│ lampiran_path          │     │ decision_note            │
+│ status                 │     │ acted_at                 │
+└────────────────────────┘     └──────────────────────────┘
+
+┌────────────────────────┐     ┌──────────────────────────┐
+│     leave_balances     │     │       leave_proofs       │
+│────────────────────────│     │──────────────────────────│
+│ id (PK, UUID)          │     │ id (PK, UUID)            │
+│ employee_id (FK)       │     │ leave_request_id (FK)    │
+│ tahun                  │     │ token (unik, QR)         │
+│ sisa_n2 / sisa_n1      │     │ document_path            │
+│ sisa_tahun_berjalan    │     │ document_mime            │
+│ terpakai_tahun_berjalan│     │ metadata                 │
+└────────────────────────┘     └──────────────────────────┘
+
 ```
+
+`leave_balance_ledger` menyimpan event append-only yang terkait dengan pegawai, bucket saldo, dan bila relevan pengajuan cuti; contoh event termasuk hak tahunan, carry-over, pemotongan final, serta koreksi manual.
 
 | Tabel | Catatan |
 |-------|---------|
 | `leave_approval_chains` | Template/konfigurasi chain per pegawai/unit; memuat urutan step, tipe step, dan pegawai approver/verifikator |
-| `leave_approval_steps` | Snapshot chain per pengajuan agar perubahan konfigurasi tidak mengubah riwayat pengajuan lama |
-| `leave_documents` | Menyimpan metadata formulir cuti, QR token, path PDF, dan dokumen eksternal bila `external_approval = true` |
-| `leave_balance_adjustments` | Menyimpan koreksi saldo manual beserta alasan dan audit trail |
+| `leave_request_steps` | Snapshot chain per pengajuan: urutan, tipe langkah, approver, status, keputusan/keterangan, dan waktu tindakan; perubahan konfigurasi tidak mengubah riwayat pengajuan lama |
+| `leave_proofs` | Bukti formulir cuti resmi final: token QR, path/mime PDF, penerbit, waktu terbit, dan metadata snapshot |
+| `leave_balance_ledger` | Ledger append-only mutasi saldo tahunan, termasuk hak, carry-over, pemotongan final, dan koreksi manual beserta alasan serta audit trail |
+
+Nama tabel fisik canonical di bagian ini mengikuti [Keputusan Skema Cuti Canonical](Keputusan-Skema-Cuti-Canonical.md). `external_approval` dan `external_document_path` bukan kolom runtime pada `leave_proofs`; kebutuhan dokumen eksternal tetap merupakan kebutuhan bisnis yang memerlukan desain storage dan migration tersendiri sebelum diaktifkan.
 
 `decision_status` dan `final_decision_status` hanya memakai label resmi: `Disetujui`, `Perubahan`, `Ditangguhkan`, `Tidak Disetujui`. Keterangan wajib untuk semua selain `Disetujui`.
 
