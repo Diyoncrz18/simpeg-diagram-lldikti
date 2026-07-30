@@ -4,7 +4,7 @@
 |---|---|
 | Role internal | `super_admin` |
 | Tanggal analisis ulang | 27 Juli 2026 |
-| Basis verifikasi | Branch `development` @ `e82b527` (sesudah PR #121–#131) |
+| Basis verifikasi | Source `development` @ `0b94960` (PR #147) + working tree Slice 4 terverifikasi lokal pada PostgreSQL dan browser, 29 Juli 2026 |
 | Dokumen asal (dikonsolidasi ke file ini) | `Analisis-Frontend-Backend-Role-Super-Admin.md` (audit 21 Juli) dan `Analisis-Kesesuaian-Administrasi-Sistem-Super-Admin.md` (audit 23 Juli) |
 | Acuan produk | PRD v1.3 §4.2 (konfigurasi sistem, user management, seluruh kemampuan Admin), §12 (audit immutable), §15–16 (RBAC & master dari database), US-1.4 |
 | Status keseluruhan | ⚠️ **Belum sepenuhnya sesuai** — operasional harian kuat; halaman konfigurasi sistem masih titik terlemah |
@@ -45,7 +45,7 @@ dan pengerasan audit log.
 | 2 | P0 | **Immutability audit belum ditegakkan** — `AuditLog` (41 baris) tanpa guard `updating`/`deleting`, tanpa observer; murni konvensi | Task tracker #3, Sprint 7 (7.2-2) |
 | 3 | P0/P2 | **Halaman Audit Log memuat semua record ke browser** — `AuditController.php:13-18` `->get()` tanpa paginate, filter/paginasi di Alpine, payload tanpa masking | Sprint 7 slice 7.1 (7.1-1) |
 | 4 | P1 | **Audit fail-closed baru parsial** — `AuditService` kini punya `logOrFail()`, tapi baru dipakai 2 tempat (user mapping, assign supervisor); 39 pemakaian lain masih `log()` yang menelan kegagalan | Task tracker #12 |
-| 5 | P1 | **Data Master — sebagian besar ditutup PR #134 (merged 27 Juli)**: CRUD lima tabel referensi (golongan, jenis jabatan, eselon, status pegawai, jenjang pendidikan) + halaman Data Master berbasis database + guard baris sistem, sesuai keputusan K-1. **Tab unit kerja hierarkis MERGED ke `development` via PR #147 pada 29 Juli (squash `0b94960`)**: membaca database dengan tampilan berjenjang, nama unik se-sistem, penonaktifan induk ditolak selama masih ada sub-unit aktif, jenis unit terkunci empat nilai resmi, kedalaman dihitung otomatis dan seluruh sub-unit ikut disesuaikan saat induk dipindahkan. Sisa: tab referensi lain (jenis cuti, agama, status perkawinan, hari libur), CRUD `ref_jabatan` (naik prioritas per K-4, satu-satunya jalur Admin mengatur BUP per jabatan detail), UI channel & event notifikasi. **Keputusan `ref_bup` SUDAH DITUTUP per K-4 (27 Juli 2026):** di-deprecate, tidak dibuatkan CRUD, tab statis BUP pada halaman Data Master dicabut bersama form modalnya karena menampilkan data hardcoded beserta tombol aksi yang tidak menyimpan apa pun | Task tracker #22 (Issue #46) — lanjutan slice |
+| 5 | P1 | **Data Master — sebagian besar ditutup PR #134 (merged 27 Juli)**: CRUD lima tabel referensi (golongan, jenis jabatan, eselon, status pegawai, jenjang pendidikan) + halaman Data Master berbasis database + guard baris sistem, sesuai keputusan K-1. **Tab unit kerja hierarkis MERGED ke `development` via PR #147 pada 29 Juli (squash `0b94960`)**: membaca database dengan tampilan berjenjang, nama unik se-sistem, penonaktifan induk ditolak selama masih ada sub-unit aktif, jenis unit terkunci empat nilai resmi, kedalaman dihitung otomatis dan seluruh sub-unit ikut disesuaikan saat induk dipindahkan. **Channel & event notifikasi selesai implementasi lokal 29 Juli dan menunggu commit/PR.** Sisa: tab referensi lain (jenis cuti, agama, status perkawinan, hari libur) dan CRUD `ref_jabatan` (naik prioritas per K-4, satu-satunya jalur Admin mengatur BUP per jabatan detail). **Keputusan `ref_bup` SUDAH DITUTUP per K-4 (27 Juli 2026):** di-deprecate, tidak dibuatkan CRUD, tab statis BUP pada halaman Data Master dicabut bersama form modalnya karena menampilkan data hardcoded beserta tombol aksi yang tidak menyimpan apa pun | Task tracker #22 (Issue #46) — lanjutan slice |
 | 6 | P1 | **Hari Libur web masih statis + audit session** — `Admin/HariLiburController` masih `static $hariLiburData`, store/update/destroy hanya menulis `dynamic_audit_logs`; API/model nyata sudah ada tapi tidak dipakai halaman | Task tracker #5 |
 | 7 | P1 | **Pengaturan Sistem = keberhasilan palsu** — `SettingsController::update()` tidak membaca input; input `x-model` tanpa `name=`; profil instansi/SMTP hardcode; panel mapping SSO di halaman ini masih memakai `<option value="Super Admin">` (bug lama yang di Kelola Akses User sudah diperbaiki) dan hanya memutasi array JS lokal | Belum ada task khusus — kandidat: sembunyikan/disable form sampai kontrak storage diputuskan (usulan audit 23 Juli tetap berlaku) |
 | 8 | P1 | **RBAC** — `RbacController::update()` masih `Request` mentah, `sync()` dalam loop tanpa transaction, audit hanya session, tanpa invariant anti-lockout server-side | Belum ada task khusus — perlu diangkat ke backlog (P1) |
@@ -58,6 +58,10 @@ dan pengerasan audit log.
 | 15 | P2 | **Import: tahap validate masih `$request->validate()` inline; tahap execute tanpa validasi input sama sekali** (hanya baca batch dari cache) | Backlog P2 (lanjutan Issue #22) |
 | 16 | P2 | **Form ubah password lokal** — kini via `UpdatePasswordRequest`/`UpdatePasswordAction` (struktur membaik), tetapi tetap hanya memutasi password lokal tanpa Keycloak dan tanpa audit; berpotensi menyesatkan pengguna SSO | Keputusan produk: hapus/sembunyikan atau dokumentasikan |
 
+### Update 29 Juli 2026 — Channel Notifikasi
+
+UI channel dan kebijakan event notifikasi **selesai implementasi lokal dan menunggu commit/PR**. Super Admin memperoleh halaman database-backed untuk master kill-switch dan matriks 13 event, dengan desired state, status efektif fail-closed, audit atomik, pagination, queued email recheck, serta perlindungan config/credential. WhatsApp Business tetap disabled karena adapter belum tersedia. Dengan ini, item channel notifikasi tidak lagi menjadi sisa implementasi #46; sisa #46 adalah CRUD `ref_jabatan` dan tab referensi lain. Verifikasi final lokal dan reviewer telah lulus.
+
 ## Riwayat Temuan Audit 21–23 Juli → Kondisi Sekarang
 
 | Temuan lama | Kondisi 27 Juli |
@@ -66,6 +70,6 @@ dan pengerasan audit log.
 | ❌ Email EWS Satyalancana tidak terkirim | ✅ Diperbaiki — resolusi channel dari DB, event ter-seed in-app+email |
 | ⚠️ EwsConfigController gemuk | ✅ Controller dirapikan; ⚠️ transaction + paginasi audit tersisa |
 | ❌ Audit create pegawai berisiko plaintext | ✅ `getRawOriginal()`; ❌ jalur **update** masih bocor |
-| ❌ Data Master statis | ⚠️ Sebagian besar ditutup PR #134 (merged 27 Juli) — sisa tab lanjutan, CRUD `ref_jabatan`, dan channel notifikasi. Keputusan `ref_bup` sudah ditutup per K-4 |
+| ❌ Data Master statis | ⚠️ Sebagian besar ditutup PR #134 dan PR #147; channel notifikasi selesai implementasi lokal 29 Juli dan menunggu commit/PR. Sisa tab lanjutan dan CRUD `ref_jabatan`. Keputusan `ref_bup` sudah ditutup per K-4 |
 | ❌ Hari Libur web, Pengaturan Sistem, Dashboard, RBAC, preview laporan, modal custom, PDF L1/L3 | ❌ Semua masih berlaku (lihat tabel di atas) |
 | ⚠️ AuditService menelan kegagalan | ⚠️ Parsial — `logOrFail()` lahir tapi belum menyebar |
