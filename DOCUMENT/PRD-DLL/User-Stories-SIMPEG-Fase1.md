@@ -3,14 +3,82 @@
 
 | Field | Detail |
 |-------|--------|
-| **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.3 |
+| **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.4 |
 | **Tanggal** | 22 Juli 2026 |
+| **Pembaruan status terakhir** | 5 Agustus 2026 |
+| **Basis verifikasi status** | Branch `development` @ `4839ab6` (setelah PR #123–#162) |
 | **Total User Stories** | 53 |
 | **Total Epics** | 9 |
 
 > **Catatan sinkronisasi PRD 1.3:** Keycloak digunakan hanya untuk SSO/login. Role dan permission dikelola di database SIMPEG. Approval cuti memakai chain dinamis per pegawai/unit, status keputusan resmi (`Disetujui`, `Perubahan`, `Ditangguhkan`, `Tidak Disetujui`), cuti tahunan tidak boleh lintas tahun, EWS menambahkan Satyalancana, notifikasi harus channel-configurable, dan laporan mendukung export nominatif Excel custom.
 >
 > **Keputusan import Fase 1 (kanonis, disetujui pengguna 22 Juli 2026):** import massal hanya mengaktifkan template Data Utama. Import membuat record pegawai beserta field snapshot awal, tidak membuat riwayat kepangkatan/jabatan/KGB, dan tidak memanggil kalkulasi TMT. Riwayat resmi diinput per pegawai melalui CRUD append-only. Tanggal pensiun hasil import dipertahankan apa adanya. Kalkulasi TMT dipicu saat riwayat/sumber resmi disimpan, bukan saat import selesai. Template lanjutan multi-jenis tidak termasuk ruang lingkup saat ini.
+
+---
+
+## Pembaruan Status Acceptance Criteria — 5 Agustus 2026
+
+Penyelarasan status dilakukan terhadap kode aktual branch `development` @ `4839ab6`, mencakup hasil PR #123–#162. Centang hanya diberikan pada kriteria yang terbukti pada source dan/atau test, bukan berdasarkan status tracker.
+
+### Kriteria yang dinaikkan menjadi selesai
+
+| User Story | Kriteria | Bukti implementasi |
+|---|---|---|
+| US-1.2 | AC-2 | Logout memanggil `Auth::logout()`, invalidasi session, dan regenerasi token sebelum memutus sesi Keycloak |
+| US-1.3 | AC-2, AC-4 | Batas idle dibaca dari `SIMPEG_SESSION_IDLE_TIMEOUT` melalui `config/session.php` dan ditegakkan middleware; pesan *"Sesi Anda telah berakhir. Silakan login kembali."* tersimpan saat sesi berakhir. AC-2 selesai setelah revisi kriteria oleh keputusan K-US-03 |
+| US-4.1 | AC-3, AC-7 | Form membaca hasil kalkulasi hari kerja dari endpoint; `StoreLeaveRequestRequest` menolak pengajuan saat rantai approval tidak dapat diresolusi |
+| US-4.2 | AC-5 | Daftar cuti memakai paginator server-side dengan pilihan jumlah baris dan mempertahankan query string |
+| US-4.4 | AC-2 | Detail pengajuan bawahan menampilkan identitas pemohon, jenis, rentang tanggal, jumlah hari, alasan, dan lampiran |
+| US-4.7 | AC-1, AC-3 | Detail pengajuan memuat informasi lengkap beserta lampiran; akses baca dibatasi pemohon, approver snapshot, dan pemantau ber-izin baca menyeluruh |
+| US-4.10 | AC-1, AC-4, AC-5 | Halaman konfigurasi approval chain tersedia; rantai diresolusi lalu di-snapshot pada pengajuan baru; verifikator dapat menunjuk pegawai tertentu tanpa role baru |
+| US-4.11 | AC-1, AC-5 | Detail pegawai menampilkan kepala bagian aktif; audit penetapan bersifat fail-closed di dalam transaksi |
+| US-4.12 | AC-1, AC-2 | Kalkulator hari kerja mengecualikan akhir pekan dan membaca tanggal libur dari `ref_hari_libur` sesuai rentang tahun |
+| US-5.1 | AC-1, AC-3 | Jadwal EWS membaca jam dari konfigurasi dengan proteksi overlap; kelayakan kenaikan pangkat dihitung dari masa kerja, hukuman disiplin aktif, dan flag kinerja |
+| US-6.2 | AC-5 | Klik notifikasi menandai dibaca lalu mengarahkan ke halaman terkait |
+| US-7.2 | AC-5, AC-6 | Urutan default terbaru di atas; akses digerbang role Super Admin/Admin Kepegawaian beserta izin baca audit |
+| US-7.3 | AC-2, AC-4 | Halaman detail menampilkan operator, waktu, IP, user agent, event, modul, dan ID record, serta tombol menuju record terkait |
+| US-8.1 | AC-1, AC-2, AC-3, AC-5, AC-6, AC-7, AC-8, AC-9 | Dashboard Admin memakai payload nyata kontrak K-3 dengan tata letak responsif |
+| US-8.3 | AC-3 | EWS bawahan dibatasi pada bawahan langsung dan disajikan berpaginasi |
+| US-9.1B | AC-4 | Export kustom mempertahankan urutan kolom sesuai pilihan pengguna |
+| US-9.2 | AC-2, AC-3, AC-4, AC-5 | PDF daftar pegawai memuat identitas instansi, judul, tanggal cetak, tabel sesuai filter, penomoran halaman, dan orientasi lanskap |
+| US-9.4 | AC-3, AC-4, AC-5 | Template PDF rekap cuti memuat tabel rekap per pegawai, area tanda tangan, dan footer bernomor halaman |
+
+### Kriteria yang sengaja tetap terbuka
+
+| User Story | Kriteria | Alasan |
+|---|---|---|
+| US-3.2, US-3.3 | AC-4, AC-5 (US-3.2); AC-5 (US-3.3) | Pemetaan kolom manual dan peringatan kolom tidak dikenal belum tersedia. Untuk US-3.3 AC-5, arah kerja sudah ditetapkan keputusan K-US-02 dan menunggu implementasi |
+| US-4.2 | AC-4 | Filter status tersedia, namun filter periode masih berbasis bulan sehingga filter tahun belum terpenuhi |
+| US-4.5 | AC-2 | Verifikator belum melihat rincian saldo tahun berjalan beserta riwayat dua tahun sebelumnya pada layar keputusan |
+| US-4.10 | AC-2 | Kriteria sudah direvisi oleh keputusan K-US-01 sehingga precedence tidak lagi menjadi pertanyaan terbuka; sisa pekerjaan adalah aksi penerapan template rantai ke seluruh anggota unit |
+| US-5.4 | AC-2, AC-4 | Alert dan notifikasi kenaikan pangkat masih terbit meskipun flag kinerja bernilai negatif; teks bantuan belum memakai kalimat kriteria |
+| US-5.5 | AC-4, AC-5 | Milestone Satyalancana belum disimpan sebagai hasil kalkulasi sehingga masih dihitung ulang saat penjadwalan |
+| US-6.2 | AC-2 | Daftar notifikasi membedakan warna menurut jenis, belum menurut status sudah atau belum dibaca |
+| US-7.1 | AC-1, AC-3 | Cakupan kejadian belum diverifikasi menyeluruh dan model audit belum menolak perubahan maupun penghapusan |
+| US-7.2 | AC-3, AC-4 | Halaman masih memuat seluruh catatan sekaligus tanpa paginasi maupun pencarian sisi server |
+| US-8.4 | AC-1 sampai AC-5 | Pengelolaan hari libur pada antarmuka web masih memakai data statis dan pencatatan sementara, belum menyentuh tabel referensi |
+| US-8.5 | AC-1, AC-2, AC-3 | Tujuh dari delapan tabel referensi sudah dapat dikelola; pengelolaan `ref_jabatan` belum tersedia |
+| US-9.2 | AC-1 | Kriteria dipertahankan oleh keputusan K-US-04; sisa pekerjaan adalah menambahkan tombol Export PDF di halaman daftar pegawai |
+
+### Keputusan produk 5 Agustus 2026
+
+Empat kriteria yang sebelumnya ambigu telah diputuskan dan disetujui pengguna pada 5 Agustus 2026. Keputusan ini menjadi acuan sampai ada keputusan yang lebih baru.
+
+| Kode | Kriteria | Keputusan | Alasan utama |
+|---|---|---|---|
+| K-US-01 | US-4.10 AC-2 | Rantai approval aktif pada runtime tetap tepat satu per pegawai. Konfigurasi dapat disalin ke seluruh anggota satu unit kerja sebagai template. Cakupan unit sebagai lapisan resolusi runtime ditunda ke Fase 2 | Kebutuhan sebenarnya adalah efisiensi konfigurasi, bukan resolusi berlapis. Menjaga satu rantai aktif per pegawai menghapus pertanyaan precedence secara permanen dan mempertahankan keutuhan snapshot per pengajuan |
+| K-US-02 | US-3.3 AC-5 | Kriteria dipertahankan dan jalur baris terlewat dihidupkan. NIP yang sudah ada di database menjadi terlewat; NIP ganda dalam satu berkas tetap error; email pegawai yang sudah terdaftar tetap error | Import awal wajar dijalankan berulang atas berkas yang saling menimpa. Memisahkan kondisi wajar dari data bermasalah membuat Admin fokus pada baris yang benar-benar perlu diperbaiki. Pelaporan baris terlewat sudah tersedia |
+| K-US-03 | US-1.3 AC-2 | Kriteria direvisi agar menyebut `SIMPEG_SESSION_IDLE_TIMEOUT` sebagai kunci batas idle. Desain dua lapis dipertahankan dengan `SESSION_LIFETIME` sebagai jaring pengaman sesi native | AC-5 pada user story yang sama mewajibkan peristiwa sesi berakhir tercatat di audit log. Kewajiban itu hanya terpenuhi bila penegakan terjadi di lapisan aplikasi sebelum sesi native dihapus, sehingga identitas pengguna masih tersedia saat audit ditulis |
+| K-US-04 | US-9.2 AC-1 | Kriteria dipertahankan. Tombol Export PDF ditambahkan di halaman daftar pegawai memakai rute dan gerbang yang sudah ada | US-9.1 AC-1 sudah menempatkan Export Excel di halaman yang sama, sehingga pengguna wajar mencari PDF di sana. Rute PDF sudah menegakkan peran, izin, dan batas baris, sehingga penambahan pemicu tidak melemahkan kontrol |
+
+Pekerjaan lanjutan yang timbul dari keputusan di atas:
+
+| Kriteria | Sisa pekerjaan | Pelaksana |
+|---|---|---|
+| US-4.10 AC-2 | Aksi penerapan template rantai ke seluruh anggota unit, mengikuti pola backfill yang sudah ada | Jordan |
+| US-3.3 AC-5 | Lepas aturan unik NIP pada validasi import agar cabang baris terlewat tercapai, pertahankan pemeriksaan ulang NIP saat penyisipan, lalu perbarui test yang mengunci perilaku lama | Grantly |
+| US-1.3 AC-2 | Tambahkan keterangan pada `.env.example` bahwa `SIMPEG_SESSION_IDLE_TIMEOUT` adalah batas idle yang ditegakkan dan diaudit, sedangkan `SESSION_LIFETIME` adalah jaring pengaman yang nilainya harus lebih besar | Jordan |
+| US-9.2 AC-1 | Tambahkan tombol Export PDF pada halaman daftar pegawai beserta test gerbang peran dan penerusan filter | Adriel |
 
 ---
 
@@ -108,7 +176,7 @@ Setiap story mengikuti format:
 **Acceptance Criteria:**
 
 - [x] AC-1: Tombol "Keluar" tersedia di navbar/header pada semua halaman.
-- [ ] AC-2: Klik "Keluar" menghapus session Laravel lokal.
+- [x] AC-2: Klik "Keluar" menghapus session Laravel lokal.
 - [x] AC-3: Logout juga memicu single logout di Keycloak (end session endpoint).
 - [x] AC-4: Setelah logout, user diarahkan kembali ke halaman login Keycloak.
 - [x] AC-5: Event logout dicatat di audit log.
@@ -132,9 +200,9 @@ Setiap story mengikuti format:
 **Acceptance Criteria:**
 
 - [x] AC-1: Session Laravel expired setelah 30 menit tanpa aktivitas (request ke server).
-- [ ] AC-2: Durasi timeout bisa dikonfigurasi melalui file `.env` (`SESSION_LIFETIME`).
+- [x] AC-2: Durasi idle timeout bisa dikonfigurasi melalui file `.env` memakai kunci `SIMPEG_SESSION_IDLE_TIMEOUT` dengan nilai bawaan 30 menit. `SESSION_LIFETIME` tetap dipertahankan sebagai jaring pengaman sesi native dan nilainya harus lebih besar dari batas idle. *(Direvisi oleh keputusan K-US-03, 5 Agustus 2026.)*
 - [x] AC-3: Saat session expired dan user mengakses halaman, redirect ke Keycloak untuk login ulang.
-- [ ] AC-4: Tampilkan flash message: *"Sesi Anda telah berakhir. Silakan login kembali."*
+- [x] AC-4: Tampilkan flash message: *"Sesi Anda telah berakhir. Silakan login kembali."*
 - [x] AC-5: Event session timeout dicatat di audit log.
 
 ---
@@ -532,7 +600,7 @@ Setiap story mengikuti format:
 - [x] AC-2: Tampilkan ringkasan validasi: jumlah baris total, baris valid (✅), baris error (❌).
 - [x] AC-3: Untuk baris error, tampilkan detail: nomor baris, kolom yang bermasalah, jenis error.
 - [x] AC-4: Admin bisa memilih: "Import Hanya yang Valid" atau "Batalkan Semua".
-- [ ] AC-5: Baris yang sudah ada (NIP duplikat) ditandai sebagai "Sudah ada — akan di-skip" (bukan error).
+- [ ] AC-5: Baris yang sudah ada (NIP duplikat) ditandai sebagai "Sudah ada — akan di-skip" (bukan error). *(Kriteria dipertahankan dan jalur skip dihidupkan sesuai keputusan K-US-02, 5 Agustus 2026. Batasnya: NIP yang sudah ada di database menjadi baris terlewat; NIP ganda di dalam satu berkas tetap error; email pegawai yang sudah terdaftar tetap error.)*
 
 ---
 
@@ -589,13 +657,13 @@ Setiap story mengikuti format:
   - Alasan (textarea, wajib diisi).
   - Upload lampiran (opsional, maks 10MB, PDF/JPG/PNG).
 - [x] AC-2: Sistem otomatis menghitung jumlah hari kerja (exclude Sabtu, Minggu, hari libur nasional, cuti bersama).
-- [ ] AC-3: Tampilkan jumlah hari kerja secara real-time saat tanggal dipilih.
+- [x] AC-3: Tampilkan jumlah hari kerja secara real-time saat tanggal dipilih.
 - [x] AC-4: Validasi tanggal: satu pengajuan tidak boleh melewati tahun kalender; periode Desember–Januari harus dibuat sebagai dua pengajuan.
 - [x] AC-5: Validasi saldo: jika jenis cuti = Cuti Tahunan dan saldo tidak cukup → tampilkan pesan error, form tidak bisa di-submit.
 - [x] AC-6: Setelah submit:
   - Status = "Menunggu [step pertama approval chain]".
   - Notifikasi in-app + email terkirim ke pihak pertama pada chain.
-- [ ] AC-7: Pegawai tidak bisa mengajukan cuti jika belum memiliki approval chain aktif atau pihak pertama tidak valid.
+- [x] AC-7: Pegawai tidak bisa mengajukan cuti jika belum memiliki approval chain aktif atau pihak pertama tidak valid.
 
 ---
 
@@ -624,7 +692,7 @@ Setiap story mengikuti format:
   - Merah: Tidak Disetujui
 - [x] AC-3: Klik baris membuka detail pengajuan + timeline approval.
 - [ ] AC-4: Filter: tahun, status.
-- [ ] AC-5: Pagination.
+- [x] AC-5: Pagination.
 
 ---
 
@@ -673,7 +741,7 @@ Setiap story mengikuti format:
 **Acceptance Criteria:**
 
 - [x] AC-1: Halaman "Pengajuan Cuti Bawahan" menampilkan daftar pengajuan yang menunggu tindakan saya.
-- [ ] AC-2: Detail pengajuan: nama pegawai, jenis cuti, tanggal mulai–selesai, jumlah hari, alasan, lampiran.
+- [x] AC-2: Detail pengajuan: nama pegawai, jenis cuti, tanggal mulai–selesai, jumlah hari, alasan, lampiran.
 - [x] AC-3: Opsi aksi memakai label resmi: **"Disetujui"**, **"Perubahan"**, **"Ditangguhkan"**, dan **"Tidak Disetujui"**.
 - [x] AC-4: Klik "Disetujui" → konfirmasi → status berubah ke step berikutnya yang dikonfigurasi → notifikasi terkirim ke approver/verifikator berikutnya.
 - [x] AC-5: Klik "Perubahan", "Ditangguhkan", atau "Tidak Disetujui" → muncul textarea keterangan wajib → status dan keterangan tersimpan → notifikasi ke pegawai.
@@ -761,11 +829,11 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Halaman detail pengajuan cuti menampilkan info lengkap (jenis, tanggal, alasan, lampiran).
+- [x] AC-1: Halaman detail pengajuan cuti menampilkan info lengkap (jenis, tanggal, alasan, lampiran).
 - [x] AC-2: Timeline visual (vertikal) menampilkan setiap stage:
   - Step, nama approver/verifikator, aksi (`Disetujui`/`Perubahan`/`Ditangguhkan`/`Tidak Disetujui`), waktu aksi, keterangan.
   - Stage yang belum diproses ditampilkan sebagai "Menunggu".
-- [ ] AC-3: Akses: pegawai yang mengajukan + semua approver di chain + Admin.
+- [x] AC-3: Akses: pegawai yang mengajukan + semua approver di chain + Admin.
 
 ---
 
@@ -836,11 +904,11 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Halaman konfigurasi approval chain cuti.
-- [ ] AC-2: Admin dapat mengatur chain per pegawai/unit: kepala bagian, Ketua Tim Kerja, satu atau lebih verifikator, Kabag/Kepegawaian, dan Pimpinan/PYBMC.
+- [x] AC-1: Halaman konfigurasi approval chain cuti.
+- [ ] AC-2: Admin dapat mengatur chain per pegawai: kepala bagian, Ketua Tim Kerja, satu atau lebih verifikator, Kabag/Kepegawaian, dan Pimpinan/PYBMC. Konfigurasi tersebut dapat diterapkan sekaligus ke seluruh anggota satu unit kerja melalui penyalinan template. *(Direvisi oleh keputusan K-US-01, 5 Agustus 2026: rantai aktif pada runtime tetap tepat satu per pegawai sehingga tidak ada precedence global, unit, dan pegawai yang perlu ditetapkan. Cakupan unit sebagai lapisan resolusi runtime ditunda ke Fase 2. Sisa pekerjaan Fase 1 adalah aksi penerapan template ke unit.)*
 - [x] AC-3: Perubahan konfigurasi tercatat di audit log.
-- [ ] AC-4: Konfigurasi langsung berlaku untuk pengajuan cuti baru.
-- [ ] AC-5: Ketua Tim Kerja dapat dipilih sebagai verifikator tanpa perlu role baru.
+- [x] AC-4: Konfigurasi langsung berlaku untuk pengajuan cuti baru.
+- [x] AC-5: Ketua Tim Kerja dapat dipilih sebagai verifikator tanpa perlu role baru.
 - [x] AC-6: Sistem melakukan skip otomatis jika approver pada dua step adalah orang yang sama.
 
 ---
@@ -861,11 +929,11 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Di halaman detail pegawai, bagian "Kepala Bagian" menampilkan kepala bagian yang saat ini di-assign.
+- [x] AC-1: Di halaman detail pegawai, bagian "Kepala Bagian" menampilkan kepala bagian yang saat ini di-assign.
 - [x] AC-2: Tombol "Ubah Kepala Bagian" membuka form: dropdown semua pegawai (kecuali diri sendiri), tanggal mulai berlaku.
 - [x] AC-3: Satu pegawai hanya bisa memiliki satu kepala bagian aktif.
 - [x] AC-4: Riwayat perubahan kepala bagian tersimpan (tanggal_mulai, tanggal_berakhir).
-- [ ] AC-5: Audit log mencatat perubahan.
+- [x] AC-5: Audit log mencatat perubahan.
 
 ---
 
@@ -885,8 +953,8 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Kalkulasi menghitung hari kerja = total hari kalender dikurangi Sabtu, Minggu, hari libur nasional, dan cuti bersama.
-- [ ] AC-2: Referensi hari libur diambil dari tabel `ref_hari_libur` untuk tahun yang sesuai.
+- [x] AC-1: Kalkulasi menghitung hari kerja = total hari kalender dikurangi Sabtu, Minggu, hari libur nasional, dan cuti bersama.
+- [x] AC-2: Referensi hari libur diambil dari tabel `ref_hari_libur` untuk tahun yang sesuai.
 - [x] AC-3: Hasil kalkulasi ditampilkan real-time di form pengajuan cuti saat user memilih tanggal mulai dan selesai.
 - [x] AC-4: Jika tanggal mulai atau selesai jatuh pada weekend/libur, tampilkan peringatan.
 - [x] AC-5: Hasil kalkulasi disimpan di `jumlah_hari_kerja` saat submit.
@@ -912,14 +980,14 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Laravel scheduler berjalan setiap hari pukul 07:00 WITA (configurable).
+- [x] AC-1: Laravel scheduler berjalan setiap hari pukul 07:00 WITA (configurable). *(Jam dibaca dari konfigurasi EWS; setelah jam tersebut tercapai, pemeriksaan diulang tiap lima menit dengan proteksi overlap agar jadwal yang terlewat tetap terkejar.)*
 - [x] AC-2: Cek semua pegawai aktif terhadap 5 trigger:
   - **Kenaikan Pangkat**: TMT pangkat terakhir + 4 tahun → cek H-90, H-60, H-30.
   - **KGB**: TMT KGB terakhir + 2 tahun → cek H-60, H-30, H-14.
   - **Pensiun (BUP)**: Tanggal lahir + BUP per jabatan → cek H-1thn, H-6bln, H-3bln.
   - **Kontrak PPPK**: Tanggal berakhir kontrak → cek H-6bln, H-3bln, H-1bln.
   - **Satyalancana**: TMT pengangkatan pertama + 10/20/30 tahun → cek H-180, H-90, H-30.
-- [ ] AC-3: Eligibility kenaikan pangkat: (1) 4 tahun terpenuhi, (2) `is_active` hukuman disiplin = false, (3) `is_kinerja_baik` = true.
+- [x] AC-3: Eligibility kenaikan pangkat: (1) 4 tahun terpenuhi, (2) `is_active` hukuman disiplin = false, (3) `is_kinerja_baik` = true. *(Status kelayakan dihitung dan disimpan pada alert; penekanan notifikasi saat flag bernilai false masih menjadi gap US-5.4 AC-2.)*
 - [x] AC-4: Notifikasi **tidak duplikat**: jika notifikasi H-90 sudah dikirim hari ini, tidak kirim H-90 lagi besok. Gunakan tabel `ews_alerts` untuk tracking.
 - [x] AC-5: Log eksekusi scheduler dicatat: waktu mulai, selesai, jumlah alert baru.
 - [x] AC-6: Jika scheduler gagal (error), catat error di log dan kirim notifikasi ke Super Admin.
@@ -1074,7 +1142,7 @@ Setiap story mengikuti format:
 - [ ] AC-2: Indicator visual belum dibaca (bold/background highlight) vs sudah dibaca.
 - [x] AC-3: Tombol "Tandai Semua Sudah Dibaca".
 - [x] AC-4: Pagination.
-- [ ] AC-5: Klik notifikasi → redirect ke halaman terkait.
+- [x] AC-5: Klik notifikasi → redirect ke halaman terkait.
 
 ---
 
@@ -1181,8 +1249,8 @@ Setiap story mengikuti format:
 - [x] AC-2: Filter: jenis event (dropdown), user (dropdown), modul/tabel (dropdown), periode (date range picker).
 - [ ] AC-3: Search berdasarkan nama user atau ID record.
 - [ ] AC-4: Pagination (default 25 per halaman).
-- [ ] AC-5: Urut default: terbaru di atas.
-- [ ] AC-6: Akses: Super Admin dan Admin Kepegawaian saja.
+- [x] AC-5: Urut default: terbaru di atas.
+- [x] AC-6: Akses: Super Admin dan Admin Kepegawaian saja.
 
 ---
 
@@ -1203,12 +1271,12 @@ Setiap story mengikuti format:
 **Acceptance Criteria:**
 
 - [x] AC-1: Klik baris audit log membuka halaman/modal detail.
-- [ ] AC-2: Tampilkan info: user, waktu, IP address, browser, jenis event, model, record ID.
+- [x] AC-2: Tampilkan info: user, waktu, IP address, browser, jenis event, model, record ID.
 - [x] AC-3: Tampilkan diff view:
   - Untuk UPDATE: tabel 2 kolom — "Sebelum" | "Sesudah", hanya field yang berubah (highlight).
   - Untuk CREATE: menampilkan semua `new_values`.
   - Untuk DELETE: menampilkan semua `old_values`.
-- [ ] AC-4: Tombol "Lihat Record" untuk navigasi ke record yang diubah (jika masih ada).
+- [x] AC-4: Tombol "Lihat Record" untuk navigasi ke record yang diubah (jika masih ada).
 
 ---
 
@@ -1230,15 +1298,17 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: **Widget W1 — Komposisi Pegawai**: KPI card jumlah total pegawai aktif + pie chart breakdown PNS vs PPPK.
-- [ ] AC-2: **Widget W2 — Kenaikan Pangkat**: KPI card + daftar pegawai yang naik pangkat bulan ini dan tahun ini.
-- [ ] AC-3: **Widget W3 — Status Cuti**: KPI card jumlah pengajuan pending, disetujui bulan ini, ditunda.
+- [x] AC-1: **Widget W1 — Komposisi Pegawai**: KPI card jumlah total pegawai aktif + pie chart breakdown PNS vs PPPK.
+- [x] AC-2: **Widget W2 — Kenaikan Pangkat**: KPI card + daftar pegawai yang naik pangkat bulan ini dan tahun ini.
+- [x] AC-3: **Widget W3 — Status Cuti**: KPI card jumlah pengajuan pending, disetujui bulan ini, ditunda.
 - [x] AC-4: **Widget W4 — EWS Aktif**: Tabel 5 EWS paling urgent, dengan indikator warna. Link ke halaman EWS lengkap.
-- [ ] AC-5: **Widget W5 — Distribusi Golongan**: Bar chart jumlah pegawai per golongan.
-- [ ] AC-6: **Widget W6 — Audit Terbaru**: List 5 perubahan data terakhir. Link ke audit log.
-- [ ] AC-7: **Widget W7 — Tren Pegawai**: Line chart jumlah pegawai aktif per bulan (12 bulan terakhir).
-- [ ] AC-8: Data dashboard diperbarui setiap kali halaman di-load (server-rendered).
-- [ ] AC-9: Layout responsive — tampil rapi di desktop, tablet, dan mobile.
+- [x] AC-5: **Widget W5 — Distribusi Golongan**: Bar chart jumlah pegawai per golongan.
+- [x] AC-6: **Widget W6 — Audit Terbaru**: List 5 perubahan data terakhir. Link ke audit log.
+- [x] AC-7: **Widget W7 — Tren Pegawai**: Line chart jumlah pegawai aktif per bulan (12 bulan terakhir).
+- [x] AC-8: Data dashboard diperbarui setiap kali halaman di-load (server-rendered).
+- [x] AC-9: Layout responsive — tampil rapi di desktop, tablet, dan mobile.
+
+> **Catatan status Dashboard Admin (5 Agustus 2026):** payload W1–W7 dipasok `BuildAdminDashboardAction` sesuai kontrak K-3, tanpa data contoh dan tanpa tautan mati. Setiap widget memiliki empty state jujur ketika data belum tersedia. Admin Kepegawaian tetap bukan approver cuti sehingga widget cuti hanya menautkan ke halaman pemantauan. Dashboard Pimpinan memakai `BuildPimpinanDashboardAction` terpisah. Penyempurnaan basis tren W7 tetap menjadi pekerjaan lanjutan yang tercatat di tracker Sprint 6.
 
 ---
 
@@ -1287,7 +1357,7 @@ Setiap story mengikuti format:
 
 - [x] AC-1: **Daftar Bawahan**: Nama, jabatan, status (aktif/cuti; *dinas luar ditunda ke Fase 2 — keputusan 26 Juli 2026*).
 - [x] AC-2: **Pengajuan Cuti Pending**: Daftar pengajuan cuti bawahan yang menunggu tindakan saya (quick action sesuai label resmi keputusan cuti).
-- [ ] AC-3: **EWS Bawahan**: Peringatan EWS yang relevan untuk bawahan langsung.
+- [x] AC-3: **EWS Bawahan**: Peringatan EWS yang relevan untuk bawahan langsung.
 - [x] AC-4: Klik nama bawahan membuka detail ringkas (read-only).
 
 ---
@@ -1385,7 +1455,7 @@ Setiap story mengikuti format:
 - [x] AC-1: Halaman export custom menyediakan daftar kolom yang boleh dipilih.
 - [x] AC-2: Filter baris mendukung status pegawai, unit/tim kerja, jenis pegawai, golongan, jabatan, dan periode pensiun.
 - [x] AC-3: Output hanya Excel `.xlsx`.
-- [ ] AC-4: Urutan kolom di file mengikuti pilihan pengguna.
+- [x] AC-4: Urutan kolom di file mengikuti pilihan pengguna.
 - [x] AC-5: Kolom sensitif yang tidak diizinkan tidak muncul di daftar pilihan.
 
 ---
@@ -1406,11 +1476,11 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Tombol "Export PDF" di halaman daftar pegawai.
-- [ ] AC-2: PDF memiliki header: logo (jika ada), nama instansi "LLDIKTI Wilayah XVI", judul "Daftar Pegawai", tanggal cetak.
-- [ ] AC-3: Tabel data pegawai sesuai filter aktif.
-- [ ] AC-4: Footer: halaman X dari Y.
-- [ ] AC-5: Orientasi landscape untuk mengakomodasi banyak kolom.
+- [ ] AC-1: Tombol "Export PDF" di halaman daftar pegawai. *(Kriteria dipertahankan sesuai keputusan K-US-04, 5 Agustus 2026: tombol ditambahkan di halaman daftar pegawai agar sejajar dengan tombol Export Excel pada US-9.1 AC-1, meneruskan filter yang sedang aktif ke rute PDF yang sudah ada, memakai gerbang peran dan izin yang sama, serta menampilkan pesan penyempitan filter bila batas 500 baris terlampaui. Halaman Laporan tetap menjadi permukaan lanjutan untuk pilihan kolom, rentang baris, dan pratinjau. Perilaku baca-saja Pimpinan dipertahankan.)*
+- [x] AC-2: PDF memiliki header: logo (jika ada), nama instansi "LLDIKTI Wilayah XVI", judul "Daftar Pegawai", tanggal cetak.
+- [x] AC-3: Tabel data pegawai sesuai filter aktif.
+- [x] AC-4: Footer: halaman X dari Y.
+- [x] AC-5: Orientasi landscape untuk mengakomodasi banyak kolom.
 
 ---
 
@@ -1456,9 +1526,9 @@ Setiap story mengikuti format:
 
 - [x] AC-1: Filter periode (bulan/tahun) sebelum export.
 - [x] AC-2: PDF memiliki header institusi, judul "Rekap Cuti Pegawai", periode laporan.
-- [ ] AC-3: Tabel rekap per pegawai.
-- [ ] AC-4: Bagian bawah: tempat tanda tangan (Pembuat Laporan, Mengetahui).
-- [ ] AC-5: Footer halaman.
+- [x] AC-3: Tabel rekap per pegawai.
+- [x] AC-4: Bagian bawah: tempat tanda tangan (Pembuat Laporan, Mengetahui).
+- [x] AC-5: Footer halaman.
 
 ---
 

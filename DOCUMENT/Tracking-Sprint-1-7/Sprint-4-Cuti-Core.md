@@ -4,19 +4,15 @@
 |---|---|
 | Periode | 11 – 20 Juli 2026 |
 | Cakupan issue | #26 – #32, #44 (`Issues-SIMPEG-Fase1.md`) |
-| Pembaruan terakhir | 28 Juli 2026 (verifikasi ulang terhadap `development`) |
-| Basis verifikasi | `development` HEAD `478424f` + verifikasi kode dan cakupan test regresi cuti 28 Juli 2026 |
+| Pembaruan terakhir | 5 Agustus 2026 (penyelesaian konflik dokumen dan verifikasi ulang terhadap `development`) |
+| Basis verifikasi | `development` @ `4839ab6` untuk penyelesaian konflik 5 Agustus 2026; status per issue tetap bersumber dari verifikasi kode dan cakupan test regresi cuti pada HEAD `478424f`, 28 Juli 2026 |
 | Menggantikan | `Analisis-Kesesuaian-Sprint-1-5.md` (dihapus 26 Juli 2026) |
 
 Legend: ✅ selesai pada source · ⚠️ sebagian · ❌ belum selesai. Status source, bukan status tracker `Done`.
 
 ## Ringkasan
 
-<<<<<<< HEAD
-**6 ✅ · 2 ⚠️ · 0 ❌.** Sprint ini paling banyak membaik sejak audit 22 Juli: penugasan Kepala Bagian (PR #124/#128), kontrak kalkulasi hari kerja (PR #116), filter jenis cuti PPPK (PR #104), label langkah aktif (PR #119/#125), penghapusan vocabulary legacy `rejected` (PR #128), serta validasi lintas tahun seluruh jenis cuti semuanya sudah tertutup. Sisa gap utama: chain per unit dan ADR skema cuti. Hardening constraint database penugasan Kepala Bagian tetap dicatat sebagai pekerjaan P2 terpisah.
-=======
 **7 ✅ · 1 ⚠️ · 0 ❌.** Sprint ini paling banyak membaik sejak audit 22 Juli: penugasan Kepala Bagian (PR #124/#128), kontrak kalkulasi hari kerja (PR #116), filter jenis cuti PPPK (PR #104), label langkah aktif (PR #119/#125), penghapusan vocabulary legacy `rejected` (PR #128), validasi lintas tahun seluruh jenis cuti, serta penetapan schema cuti canonical semuanya sudah tertutup. Sisa gap utama hanya chain per unit. Hardening constraint database penugasan Kepala Bagian tetap dicatat sebagai pekerjaan P2 terpisah.
->>>>>>> 9a7f966a8a1612375e12cdd2055689c9de664105
 
 ## Status per Issue
 
@@ -34,12 +30,7 @@ Legend: ✅ selesai pada source · ⚠️ sebagian · ❌ belum selesai. Status 
 ## Gap Terbuka
 
 1. **P1 — Approval chain per unit** (#28): **eskalasi keputusan produk dulu** (model precedence pegawai > unit > global, perilaku hierarki unit), catat di dokumen, baru migration + resolver + UI + test.
-<<<<<<< HEAD
-2. **Dokumentasi — ADR skema cuti canonical** (#26): sahkan penamaan `leave_request_steps`/`leave_balance_ledger`/`leave_proofs` dan selaraskan PRD §15.2.
-3. **P2 — Constraint DB penugasan kabag** (#27, opsional): unique/exclusion constraint agar tulis-langsung-DB tidak bisa membuat overlap.
-=======
 2. **P2 — Constraint DB penugasan kabag** (#27, opsional): unique/exclusion constraint agar tulis-langsung-DB tidak bisa membuat overlap.
->>>>>>> 9a7f966a8a1612375e12cdd2055689c9de664105
 
 ## Riwayat Perubahan Status
 
@@ -50,8 +41,5 @@ Legend: ✅ selesai pada source · ⚠️ sebagian · ❌ belum selesai. Status 
 | 24–25 Juli 2026 | PR #124: penugasan Kepala Bagian bertanggal efektif → #27 ✅. |
 | 26 Juli 2026 | PR #128: kompatibilitas `rejected` dihapus → #31 ✅. Verifikasi HEAD `1b2e5b6` menetapkan status di atas. |
 | 27 Juli 2026 | Perbaikan A dieksekusi: validasi lintas tahun seluruh jenis cuti (#30) + test E2E alur pengajuan→approval→potong saldo. Pendukung: penetapan Kepala Bagian inline + penataan ulang halaman konfigurasi approval + pencarian PYBMC mandiri (memperhalus alur #27/#28), serta penyamaan dokumen bukti tersimpan dengan formulir resmi (penyempurnaan #31). |
-<<<<<<< HEAD
-| 28 Juli 2026 | Verifikasi ulang terhadap `development` HEAD `478424f`: perbaikan lintas tahun seluruh jenis cuti telah terintegrasi melalui `952f723` (PR #140), termasuk validasi Store/Resubmit sebelum gate saldo/TMT dan regression test untuk jenis non-tahunan. **#30 ditutup menjadi ✅; status “menunggu review” dihapus.** |
-=======
-| 28 Juli 2026 | Verifikasi ulang terhadap `development` HEAD `478424f`: perbaikan lintas tahun seluruh jenis cuti telah terintegrasi melalui `952f723` (PR #140), termasuk validasi Store/Resubmit sebelum gate saldo/TMT dan regression test untuk jenis non-tahunan. **#30 ditutup menjadi ✅.** Pada tanggal yang sama, keputusan K-SCHEMA-01 menetapkan `leave_request_steps`/`leave_balance_ledger`/`leave_proofs` sebagai schema cuti canonical; PRD §15.2 dan issue breakdown diselaraskan. **#26 ditutup menjadi ✅.** |
->>>>>>> 9a7f966a8a1612375e12cdd2055689c9de664105
+| 28 Juli 2026 | Verifikasi ulang terhadap `development` HEAD `478424f`: perbaikan lintas tahun seluruh jenis cuti telah terintegrasi melalui `952f723` (PR #140), termasuk validasi Store/Resubmit sebelum gate saldo/TMT dan regression test untuk jenis non-tahunan. **#30 ditutup menjadi ✅; status "menunggu review" dihapus.** Pada tanggal yang sama, keputusan K-SCHEMA-01 menetapkan `leave_request_steps`/`leave_balance_ledger`/`leave_proofs` sebagai schema cuti canonical; PRD §15.2 dan issue breakdown diselaraskan. **#26 ditutup menjadi ✅.** |
+| 5 Agustus 2026 | Konflik penggabungan dokumen pada bagian Ringkasan, Gap Terbuka, dan Riwayat Perubahan diselesaikan. Resolusi mengikuti [Keputusan Skema Cuti Canonical](../Keputusan-Skema-Cuti-Canonical.md) yang sudah disetujui dan sudah tercermin pada PRD butir 18 serta §15.2, dan pada tugas 7.2-12 tracker Sprint 7. Konsekuensinya: hitungan resmi menjadi **7 ✅ · 1 ⚠️ · 0 ❌**, dan butir gap "ADR skema cuti" dihapus karena keputusannya sudah terbit. Verifikasi ulang terhadap `development` @ `4839ab6`: nama tabel canonical dipakai runtime dan tidak ada sisa nama lama pada `app/`, `database/`, maupun `tests/`; #28 tetap ⚠️ karena `leave_approval_chains` masih hanya bercakup `employee_id` tanpa `scope_type`/`unit_kerja_id` dan resolver masih memilih chain per pegawai. |
