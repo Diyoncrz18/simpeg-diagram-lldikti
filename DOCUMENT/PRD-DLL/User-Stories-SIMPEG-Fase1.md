@@ -16,6 +16,27 @@
 
 ---
 
+## Pembaruan Status Acceptance Criteria — 7 Agustus 2026
+
+Penyelarasan terhadap modul Cuti setelah peninjauan ulang kriteria US-4.2. Basis pemeriksaan adalah branch `development` @ `9be633d` ditambah PR #171 yang masih terbuka. Mengikuti aturan penyelarasan 5 Agustus 2026, centang tidak diberikan selama perubahan belum berada di `development`.
+
+### Menunggu merge
+
+| User Story | Kriteria | Keadaan |
+|---|---|---|
+| US-4.2 | AC-4 | Filter tahun diimplementasikan pada PR #171. Lapisan query menerima nilai `YYYY` selain `YYYY-MM`, penyaringan dijalankan di basis data sebagai rentang tanggal, dan daftar opsi tahun dibentuk dari rentang data dalam scope pengguna. Centang menunggu merge |
+| US-4.2 | AC-2 | Kriteria sudah bertanda selesai, namun dua warna menyimpang dari ketetapan: Menunggu memakai biru dan Perubahan memakai merah, sehingga permintaan perubahan tampak identik dengan penolakan. PR #171 menyelaraskan kelima warna sesuai AC-2 |
+
+### Butuh keputusan produk
+
+| Pokok | Keadaan | Usul |
+|---|---|---|
+| Warna status di luar AC-2 | Runtime dan skema mengenal `ditangguhkan_tugas_dinas` serta `dikembalikan_karena_rollover`. Keduanya tidak ditemukan pada dokumen mana pun di repositori ini, sedangkan AC-2 hanya mengatur lima status keputusan | `ditangguhkan_tugas_dinas` mengikuti warna Ditangguhkan karena keduanya sama-sama menahan pengajuan; `dikembalikan_karena_rollover` memakai warna netral karena bukan keputusan approval. Perlu ratifikasi agar tercatat sebagai keputusan, bukan asumsi implementasi |
+| Status `Draft` pada PRD | PRD §9 masih menyebut `Draft` sebagai status proses yang harus ditampilkan, sedangkan migrasi dukungan pengembalian rollover memetakan `Draft` menjadi `menunggu_approval` dan batasan kolom status hasil migrasi terbaru tidak lagi mengizinkan nilai tersebut | Hapus `Draft` dari daftar status proses pada PRD, atau kembalikan dukungannya pada skema bila fitur simpan sebagai draf memang masih diinginkan |
+| Cakupan warna lintas halaman | AC-2 melekat pada US-4.2, sedangkan daftar cuti untuk kepala bagian, pimpinan, dan beberapa dashboard memakai peta warna sendiri. Akibatnya satu pengajuan berstatus Perubahan dapat tampil biru bagi pegawai dan merah bagi kepala bagian | Tetapkan apakah ketetapan warna AC-2 berlaku untuk seluruh permukaan yang menampilkan status cuti |
+
+---
+
 ## Pembaruan Status Acceptance Criteria — 5 Agustus 2026
 
 Penyelarasan status dilakukan terhadap kode aktual branch `development` @ `4839ab6`, mencakup hasil PR #123–#162. Centang hanya diberikan pada kriteria yang terbukti pada source dan/atau test, bukan berdasarkan status tracker.
@@ -48,7 +69,7 @@ Penyelarasan status dilakukan terhadap kode aktual branch `development` @ `4839a
 | User Story | Kriteria | Alasan |
 |---|---|---|
 | US-3.2, US-3.3 | AC-4, AC-5 (US-3.2); AC-5 (US-3.3) | Pemetaan kolom manual dan peringatan kolom tidak dikenal belum tersedia. Untuk US-3.3 AC-5, arah kerja sudah ditetapkan keputusan K-US-02 dan menunggu implementasi |
-| US-4.2 | AC-4 | Filter status tersedia, namun filter periode masih berbasis bulan sehingga filter tahun belum terpenuhi |
+| US-4.2 | AC-4 | Implementasi filter tahun tersedia pada PR #171 dan menunggu merge ke `development`. Sebelum PR tersebut, filter periode hanya mengenali format bulan sehingga nilai berisi tahun diabaikan tanpa pesan |
 | US-4.5 | AC-2 | Verifikator belum melihat rincian saldo tahun berjalan beserta riwayat dua tahun sebelumnya pada layar keputusan |
 | US-4.10 | AC-2 | Kriteria sudah direvisi oleh keputusan K-US-01 sehingga precedence tidak lagi menjadi pertanyaan terbuka; sisa pekerjaan adalah aksi penerapan template rantai ke seluruh anggota unit |
 | US-5.4 | AC-2, AC-4 | Alert dan notifikasi kenaikan pangkat masih terbit meskipun flag kinerja bernilai negatif; teks bantuan belum memakai kalimat kriteria |

@@ -263,13 +263,15 @@ DoD Sprint 1:
 
 | Stage | Owner | Yang Dihandle | Output | Status |
 |-------|-------|---------------|--------|--------|
-| Kickoff | Dion | Kunci jenis cuti, validasi saldo, status awal | Kontrak pengajuan | Not Started |
-| Frontend dummy | Adithian | Form pengajuan, daftar cuti, badge status dummy | UI cuti pegawai siap | Not Started |
-| Backend | Jordan | Controller submit, validation, status awal, saldo check | Backend pengajuan siap | Not Started |
-| Backend support | Grantly | Test data saldo, negative case, weekend/holiday | Data QA siap | Not Started |
-| Integrasi | Adithian + Jordan | Form dan daftar memakai real data | Pengajuan real data | Not Started |
-| Review | Adriel | Review PR flow pegawai dan screenshot | Merge atau return bug | Not Started |
-| QA | Grantly | Test submit valid/invalid, saldo habis, hari libur, audit log | QA pass/retest note | Not Started |
+| Kickoff | Dion | Kunci jenis cuti, validasi saldo, status awal | Kontrak pengajuan | Selesai (Keputusan-Skema-Cuti-Canonical, Keputusan-Cuti-Saldo-Tahap-0) |
+| Frontend dummy | Adithian | Form pengajuan, daftar cuti, badge status dummy | UI cuti pegawai siap | Selesai (PR #116) |
+| Backend | Jordan | Controller submit, validation, status awal, saldo check | Backend pengajuan siap | Selesai (PR #104, #107) |
+| Backend support | Grantly | Test data saldo, negative case, weekend/holiday | Data QA siap | Belum terverifikasi |
+| Integrasi | Adithian + Jordan | Form dan daftar memakai real data | Pengajuan real data | Selesai, tanpa dummy data tersisa pada flow utama |
+| Review | Adriel | Review PR flow pegawai dan screenshot | Merge atau return bug | Selesai untuk PR yang sudah masuk `development` |
+| QA | Grantly | Test submit valid/invalid, saldo habis, hari libur, audit log | QA pass/retest note | Belum terverifikasi |
+
+> **Catatan penyelarasan 7 Agustus 2026:** status di atas sebelumnya tercatat `Not Started` untuk seluruh stage, padahal pekerjaan slice ini sudah masuk `development` melalui beberapa PR. Penyelarasan dilakukan hanya untuk stage yang memiliki bukti PR atau dokumen; stage milik Grantly dibiarkan terbuka karena buktinya tidak diperiksa. Sisa pekerjaan US-4.2 adalah AC-4 filter tahun yang menunggu merge PR #171. Mohon koreksi bila ada bukti tambahan.
 
 ### Slice 4.3 - Approval Stage + Timeline
 
