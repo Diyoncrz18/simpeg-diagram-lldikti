@@ -5,8 +5,8 @@
 |-------|--------|
 | **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.4 |
 | **Tanggal** | 22 Juli 2026 |
-| **Pembaruan status terakhir** | 5 Agustus 2026 |
-| **Basis verifikasi status** | Branch `development` @ `4839ab6` (setelah PR #123–#162) |
+| **Pembaruan status terakhir** | 7 Agustus 2026 |
+| **Basis verifikasi status** | Branch `development` @ `9be633d` (setelah PR #123–#166) |
 | **Total User Stories** | 53 |
 | **Total Epics** | 9 |
 
@@ -56,8 +56,7 @@ Penyelarasan status dilakukan terhadap kode aktual branch `development` @ `4839a
 | US-6.2 | AC-2 | Daftar notifikasi membedakan warna menurut jenis, belum menurut status sudah atau belum dibaca |
 | US-7.1 | AC-1, AC-3 | Cakupan kejadian belum diverifikasi menyeluruh dan model audit belum menolak perubahan maupun penghapusan |
 | US-7.2 | AC-3, AC-4 | Halaman masih memuat seluruh catatan sekaligus tanpa paginasi maupun pencarian sisi server |
-| US-8.4 | AC-1 sampai AC-5 | Pengelolaan hari libur pada antarmuka web masih memakai data statis dan pencatatan sementara, belum menyentuh tabel referensi |
-| US-8.5 | AC-1, AC-2, AC-3 | Tujuh dari delapan tabel referensi sudah dapat dikelola; pengelolaan `ref_jabatan` belum tersedia |
+| US-8.5 | AC-3 | Kedelapan tabel referensi sudah dapat dikelola setelah CRUD `ref_jabatan` masuk `development`. Sisa pekerjaan ada pada guard penghapusan `ref_status_pegawai` yang belum menghitung pemakaian pada `employee_status_histories`, sehingga status yang hanya dirujuk riwayat masih dapat dihapus permanen dan relasinya dikosongkan diam-diam |
 | US-9.2 | AC-1 | Kriteria dipertahankan oleh keputusan K-US-04; sisa pekerjaan adalah menambahkan tombol Export PDF di halaman daftar pegawai |
 
 ### Keputusan produk 5 Agustus 2026
@@ -79,6 +78,18 @@ Pekerjaan lanjutan yang timbul dari keputusan di atas:
 | US-3.3 AC-5 | Lepas aturan unik NIP pada validasi import agar cabang baris terlewat tercapai, pertahankan pemeriksaan ulang NIP saat penyisipan, lalu perbarui test yang mengunci perilaku lama | Grantly |
 | US-1.3 AC-2 | Tambahkan keterangan pada `.env.example` bahwa `SIMPEG_SESSION_IDLE_TIMEOUT` adalah batas idle yang ditegakkan dan diaudit, sedangkan `SESSION_LIFETIME` adalah jaring pengaman yang nilainya harus lebih besar | Jordan |
 | US-9.2 AC-1 | Tambahkan tombol Export PDF pada halaman daftar pegawai beserta test gerbang peran dan penerusan filter | Adriel |
+
+---
+
+## Pembaruan Status Acceptance Criteria — 7 Agustus 2026
+
+Penyelarasan tambahan dilakukan terhadap branch `development` @ `9be633d` setelah PR #166 masuk.
+
+### Kriteria yang dinaikkan menjadi selesai
+
+| User Story | Kriteria | Bukti implementasi |
+|---|---|---|
+| US-8.4 | AC-1 sampai AC-5 | Halaman web hari libur membaca `ref_hari_libur` melalui Action halaman dengan filter tahun, filter tipe, pencarian nama, dan paginasi sisi server; tambah, ubah, dan hapus memakai FormRequest beserta Action yang menulis audit resmi. Diverifikasi `HariLiburWebPageTest` (23 test) beserta regresi PostgreSQL 17, dan smoke test browser Super Admin pada 7 Agustus 2026 |
 
 ---
 
@@ -574,9 +585,18 @@ Setiap story mengikuti format:
 - [x] AC-1: Upload file Excel/CSV (maks 10MB).
 - [x] AC-2: Sistem mendeteksi header kolom secara otomatis.
 - [x] AC-3: Tampilkan preview 10 baris pertama dalam bentuk tabel.
-- [ ] AC-4: Tampilkan mapping kolom: kolom Excel/CSV -> field SIMPEG (auto-match berdasarkan header `daftar_pegawai.xlsx`, bisa diubah manual via dropdown).
-- [ ] AC-5: Jika ada kolom yang tidak cocok, tampilkan peringatan.
+- [ ] AC-4: Tampilkan mapping kolom: setiap kolom Excel/CSV dipasangkan ke field SIMPEG atau opsi "Tidak dipakai". Sistem mengisi mapping awal melalui nama header template `daftar_pegawai.xlsx` setelah normalisasi spasi dan huruf besar-kecil; Admin dapat mengubahnya melalui dropdown sebelum validasi. Mapping yang dipilih disimpan pada batch import yang sama dan dipakai kembali oleh preview, validasi, dan eksekusi. Satu field tujuan tidak boleh menerima dua kolom sumber; field wajib yang belum memiliki mapping harus ditolak dengan pesan yang menyebut field tersebut.
+- [ ] AC-5: Jika ada kolom yang tidak cocok, tampilkan peringatan yang menyebut nama kolom dan menjelaskan bahwa nilainya tidak disimpan bila tetap dipetakan ke "Tidak dipakai". Peringatan tidak memblokir import selama seluruh field wajib sudah dipetakan. Sistem juga memperingatkan header wajib yang belum ditemukan. Kolom `Role` tidak dipakai oleh import dan harus diperingatkan sebagai kolom ekstra; penetapan role aplikasi tetap dilakukan melalui Kelola Akses User (US-1.4).
 - [x] AC-6: Tombol "Lanjutkan ke Validasi" dan "Batal".
+
+**Catatan pengerjaan AC-4 dan AC-5 (belum diimplementasikan):**
+
+1. Tetapkan daftar header canonical berdasarkan US-3.1 AC-3. `No` hanya kolom tampilan; `NIK` dan `No KK` boleh tidak ada; `Tanggal Lahir` wajib untuk setiap baris import karena diperlukan oleh kalkulasi BUP/pensiun. Jangan menambah `Role` ke template, mapping, atau validasi import.
+2. Ubah langkah unggah agar berkas dengan header yang belum dikenali tetap membentuk batch import dan masuk ke layar pemetaan, bukan langsung ditolak. Batch menyimpan header sumber, mapping otomatis, mapping pilihan Admin, peringatan kolom, dan batas waktu 30 menit.
+3. Tambahkan endpoint pemetaan yang memakai FormRequest untuk otorisasi serta validasi mapping; controller hanya meneruskan request ke Action. Endpoint preview membatasi respons di server menjadi maksimal 10 baris dan memakai mapping aktif.
+4. Pemeta baris membaca pilihan mapping manual sebagai sumber utama. Nilai kosong pada field wajib membuat hanya baris tersebut gagal; baris valid lain tetap dapat diproses. Heuristik kolom bergeser hanya boleh dipakai sebelum Admin menyimpan mapping manual dan hasilnya harus terlihat sebagai mapping awal yang dapat diubah.
+5. Selaraskan validasi NIP dengan US-3.3 AC-5/K-US-02: NIP yang sudah ada di database menjadi baris terlewat, NIP ganda dalam satu berkas tetap gagal, dan keberadaan NIP diperiksa lagi saat penyisipan untuk mencegah kondisi balapan.
+6. Pertahankan alur `Route → Middleware/RBAC → FormRequest → Controller → Action → Service/Model → Payload → Response`, audit `IMPORT`, pembatasan akses backend, masking data sensitif, serta test PostgreSQL 17 untuk mapping, peringatan, validasi, baris terlewat, dan batas preview.
 
 ---
 
@@ -1378,11 +1398,11 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Halaman daftar hari libur per tahun: tanggal, nama, tipe (Libur Nasional / Cuti Bersama).
-- [ ] AC-2: Form tambah: tanggal (date picker), nama hari libur, tipe.
-- [ ] AC-3: Bisa edit dan hapus hari libur.
-- [ ] AC-4: Filter per tahun.
-- [ ] AC-5: Audit log mencatat perubahan.
+- [x] AC-1: Halaman daftar hari libur per tahun: tanggal, nama, tipe (Libur Nasional / Cuti Bersama).
+- [x] AC-2: Form tambah: tanggal (date picker), nama hari libur, tipe.
+- [x] AC-3: Bisa edit dan hapus hari libur.
+- [x] AC-4: Filter per tahun.
+- [x] AC-5: Audit log mencatat perubahan.
 
 ---
 
@@ -1402,8 +1422,8 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Halaman admin untuk mengelola setiap reference table: ref_golongan, ref_jenis_jabatan, ref_jabatan, ref_status_pegawai, ref_eselon, ref_unit_kerja hierarkis, ref_jenjang_pendidikan, dan ref_notification_channels — **8 tabel**. `ref_bup` dikeluarkan dari cakupan per K-4 (27 Juli 2026) karena tidak dibaca perhitungan BUP mana pun; sumber BUP resmi adalah `ref_jabatan.default_bup` dengan fallback `ref_jenis_jabatan.maks_usia_pensiun`.
-- [ ] AC-2: CRUD per table: lihat daftar, tambah, edit, hapus (soft delete jika sudah dipakai oleh data pegawai).
+- [x] AC-1: Halaman admin untuk mengelola setiap reference table: ref_golongan, ref_jenis_jabatan, ref_jabatan, ref_status_pegawai, ref_eselon, ref_unit_kerja hierarkis, ref_jenjang_pendidikan, dan ref_notification_channels — **8 tabel**. `ref_bup` dikeluarkan dari cakupan per K-4 (27 Juli 2026) karena tidak dibaca perhitungan BUP mana pun; sumber BUP resmi adalah `ref_jabatan.default_bup` dengan fallback `ref_jenis_jabatan.maks_usia_pensiun`. Tujuh tabel dikelola sebagai tab pada halaman `/data-master`, sedangkan `ref_notification_channels` dikelola pada halaman tersendiri `/data-master/channel-notifikasi` yang tertaut dari menu Super Admin.
+- [x] AC-2: CRUD per table: lihat daftar, tambah, edit, hapus (soft delete jika sudah dipakai oleh data pegawai). Frasa *soft delete* di sini dibaca sebagai **nonaktif melalui kolom `is_active`** sesuai K-1 aturan 5 (26 Juli 2026); Fase 1 tidak menambahkan `SoftDeletes` maupun kolom `deleted_at` pada reference table. Item yang belum pernah dipakai boleh dihapus permanen, item yang sudah dipakai hanya boleh dinonaktifkan dan diaktifkan kembali.
 - [ ] AC-3: Validasi: tidak bisa menghapus item reference table yang sedang dipakai oleh data pegawai.
 - [x] AC-4: Perubahan tercatat di audit log.
 - [x] AC-5: Data reference table yang sudah di-seed saat instalasi tidak boleh hilang.
