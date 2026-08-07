@@ -34,13 +34,23 @@ Dengan masuknya AC-4, seluruh acceptance criteria US-4.2 berstatus selesai.
 |---|---|---|
 | US-4.2 | AC-2 | Kriteria sudah bertanda selesai sejak sebelumnya, namun dua warna menyimpang dari ketetapan: Menunggu memakai biru dan Perubahan memakai merah, sehingga permintaan perubahan tampak identik dengan penolakan. Kelima warna kini mengikuti AC-2 dan dikunci test |
 
+### Keputusan warna status cuti
+
+Diputuskan 7 Agustus 2026 oleh Lead Backend sebagai pemilik modul Cuti, karena pokok ini bersifat teknis dan tidak mengubah aturan bisnis. Berlaku sampai ada keputusan yang lebih baru.
+
+| Pokok | Keputusan | Alasan |
+|---|---|---|
+| `ditangguhkan_tugas_dinas` | Mengikuti warna Ditangguhkan, yaitu oranye | Keduanya sama-sama menahan pengajuan tanpa menjadi keputusan akhir, sehingga membedakan warnanya hanya menambah beban baca tanpa menyampaikan informasi baru |
+| `dikembalikan_karena_rollover` | Warna netral, bukan salah satu dari lima warna keputusan | Status ini terbit dari proses rollover saldo, bukan dari keputusan approval, sehingga tidak boleh tampak seperti persetujuan maupun penolakan |
+| Cakupan ketetapan warna AC-2 | Berlaku untuk seluruh permukaan yang menampilkan status cuti, bukan hanya daftar pengajuan pegawai | Satu status yang tampil dengan warna berbeda antar halaman membuat pengguna salah membaca keputusan |
+
+Sisa pekerjaan penerapan cakupan di atas: `resources/views/admin/cuti/show.blade.php`, `resources/views/pegawai/dashboard.blade.php`, dan `resources/views/pimpinan/cuti/index.blade.php` masih memetakan status Perubahan ke warna merah sehingga tampak identik dengan Tidak Disetujui. Halaman detail pengajuan adalah kasus paling terasa karena pengguna membukanya langsung dari daftar dan melihat warna yang berbeda untuk status yang sama. Penerapan ditunda karena ketiga berkas tersebut sedang diubah oleh PR #163, #167, #169, dan #172; mengubahnya lebih dulu hanya akan menimbulkan konflik. Dikerjakan setelah PR tersebut masuk `development`.
+
 ### Butuh keputusan produk
 
 | Pokok | Keadaan | Usul |
 |---|---|---|
-| Warna status di luar AC-2 | Runtime dan skema mengenal `ditangguhkan_tugas_dinas` serta `dikembalikan_karena_rollover`. Keduanya tidak ditemukan pada dokumen mana pun di repositori ini, sedangkan AC-2 hanya mengatur lima status keputusan | `ditangguhkan_tugas_dinas` mengikuti warna Ditangguhkan karena keduanya sama-sama menahan pengajuan; `dikembalikan_karena_rollover` memakai warna netral karena bukan keputusan approval. Perlu ratifikasi agar tercatat sebagai keputusan, bukan asumsi implementasi |
 | Status `Draft` pada PRD | PRD §9 masih menyebut `Draft` sebagai status proses yang harus ditampilkan, sedangkan migrasi dukungan pengembalian rollover memetakan `Draft` menjadi `menunggu_approval` dan batasan kolom status hasil migrasi terbaru tidak lagi mengizinkan nilai tersebut | Hapus `Draft` dari daftar status proses pada PRD, atau kembalikan dukungannya pada skema bila fitur simpan sebagai draf memang masih diinginkan |
-| Cakupan warna lintas halaman | AC-2 melekat pada US-4.2, sedangkan daftar cuti untuk kepala bagian, pimpinan, dan beberapa dashboard memakai peta warna sendiri. Akibatnya satu pengajuan berstatus Perubahan dapat tampil biru bagi pegawai dan merah bagi kepala bagian | Tetapkan apakah ketetapan warna AC-2 berlaku untuk seluruh permukaan yang menampilkan status cuti |
 
 ---
 
