@@ -271,7 +271,7 @@ DoD Sprint 1:
 | Review | Adriel | Review PR flow pegawai dan screenshot | Merge atau return bug | Selesai untuk PR yang sudah masuk `development` |
 | QA | Grantly | Test submit valid/invalid, saldo habis, hari libur, audit log | QA pass/retest note | Belum terverifikasi |
 
-> **Catatan penyelarasan 7 Agustus 2026:** status di atas sebelumnya tercatat `Not Started` untuk seluruh stage, padahal pekerjaan slice ini sudah masuk `development` melalui beberapa PR. Penyelarasan dilakukan hanya untuk stage yang memiliki bukti PR atau dokumen; stage milik Grantly dibiarkan terbuka karena buktinya tidak diperiksa. Sisa pekerjaan US-4.2 adalah AC-4 filter tahun yang menunggu merge PR #171. Mohon koreksi bila ada bukti tambahan.
+> **Catatan penyelarasan 7 Agustus 2026:** status di atas sebelumnya tercatat `Not Started` untuk seluruh stage, padahal pekerjaan slice ini sudah masuk `development` melalui beberapa PR. Penyelarasan dilakukan hanya untuk stage yang memiliki bukti PR atau dokumen; stage milik Grantly dibiarkan terbuka karena buktinya tidak diperiksa. Seluruh acceptance criteria US-4.2 kini selesai setelah PR #171 masuk. Mohon koreksi bila ada bukti tambahan.
 
 ### Slice 4.3 - Approval Stage + Timeline
 

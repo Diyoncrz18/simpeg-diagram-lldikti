@@ -18,14 +18,21 @@
 
 ## Pembaruan Status Acceptance Criteria — 7 Agustus 2026
 
-Penyelarasan terhadap modul Cuti setelah peninjauan ulang kriteria US-4.2. Basis pemeriksaan adalah branch `development` @ `9be633d` ditambah PR #171 yang masih terbuka. Mengikuti aturan penyelarasan 5 Agustus 2026, centang tidak diberikan selama perubahan belum berada di `development`.
+Penyelarasan terhadap modul Cuti setelah peninjauan ulang kriteria US-4.2. Basis pemeriksaan adalah branch `development` @ `eba7f1c` setelah PR #171 masuk. Mengikuti aturan penyelarasan 5 Agustus 2026, centang diberikan karena perubahan sudah berada di `development` dan terbukti pada source beserta test.
 
-### Menunggu merge
+### Kriteria yang dinaikkan menjadi selesai
 
-| User Story | Kriteria | Keadaan |
+| User Story | Kriteria | Bukti implementasi |
 |---|---|---|
-| US-4.2 | AC-4 | Filter tahun diimplementasikan pada PR #171. Lapisan query menerima nilai `YYYY` selain `YYYY-MM`, penyaringan dijalankan di basis data sebagai rentang tanggal, dan daftar opsi tahun dibentuk dari rentang data dalam scope pengguna. Centang menunggu merge |
-| US-4.2 | AC-2 | Kriteria sudah bertanda selesai, namun dua warna menyimpang dari ketetapan: Menunggu memakai biru dan Perubahan memakai merah, sehingga permintaan perubahan tampak identik dengan penolakan. PR #171 menyelaraskan kelima warna sesuai AC-2 |
+| US-4.2 | AC-4 | Lapisan query menerima nilai `YYYY` selain `YYYY-MM` melalui `App\Support\Cuti\CutiPeriodFilter`, penyaringan dijalankan di basis data sebagai rentang tanggal setengah terbuka, dan daftar opsi tahun dibentuk dari rentang data dalam scope pengguna. Dikunci `tests/Unit/Cuti/CutiPeriodFilterTest.php` dan `tests/Feature/CutiListPeriodFilterTest.php` |
+
+Dengan masuknya AC-4, seluruh acceptance criteria US-4.2 berstatus selesai.
+
+### Koreksi kriteria yang sudah bertanda selesai
+
+| User Story | Kriteria | Koreksi |
+|---|---|---|
+| US-4.2 | AC-2 | Kriteria sudah bertanda selesai sejak sebelumnya, namun dua warna menyimpang dari ketetapan: Menunggu memakai biru dan Perubahan memakai merah, sehingga permintaan perubahan tampak identik dengan penolakan. Kelima warna kini mengikuti AC-2 dan dikunci test |
 
 ### Butuh keputusan produk
 
@@ -69,7 +76,6 @@ Penyelarasan status dilakukan terhadap kode aktual branch `development` @ `4839a
 | User Story | Kriteria | Alasan |
 |---|---|---|
 | US-3.2, US-3.3 | AC-4, AC-5 (US-3.2); AC-5 (US-3.3) | Pemetaan kolom manual dan peringatan kolom tidak dikenal belum tersedia. Untuk US-3.3 AC-5, arah kerja sudah ditetapkan keputusan K-US-02 dan menunggu implementasi |
-| US-4.2 | AC-4 | Implementasi filter tahun tersedia pada PR #171 dan menunggu merge ke `development`. Sebelum PR tersebut, filter periode hanya mengenali format bulan sehingga nilai berisi tahun diabaikan tanpa pesan |
 | US-4.5 | AC-2 | Verifikator belum melihat rincian saldo tahun berjalan beserta riwayat dua tahun sebelumnya pada layar keputusan |
 | US-4.10 | AC-2 | Kriteria sudah direvisi oleh keputusan K-US-01 sehingga precedence tidak lagi menjadi pertanyaan terbuka; sisa pekerjaan adalah aksi penerapan template rantai ke seluruh anggota unit |
 | US-5.4 | AC-2, AC-4 | Alert dan notifikasi kenaikan pangkat masih terbit meskipun flag kinerja bernilai negatif; teks bantuan belum memakai kalimat kriteria |
@@ -732,7 +738,7 @@ Setiap story mengikuti format:
   - Oranye: Ditangguhkan
   - Merah: Tidak Disetujui
 - [x] AC-3: Klik baris membuka detail pengajuan + timeline approval.
-- [ ] AC-4: Filter: tahun, status.
+- [x] AC-4: Filter: tahun, status.
 - [x] AC-5: Pagination.
 
 ---
