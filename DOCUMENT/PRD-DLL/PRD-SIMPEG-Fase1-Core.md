@@ -985,8 +985,11 @@ EWS adalah scheduler otomatis yang berjalan setiap hari untuk memeriksa momen pe
 
 **Acceptance Criteria:**
 1. Di halaman detail pegawai, ada toggle "Kinerja Baik" (default: Ya).
-2. Jika diubah ke "Tidak", pegawai tidak muncul di EWS kenaikan pangkat.
-3. Perubahan tercatat di audit log.
+2. Jika diubah ke "Tidak", pegawai menjadi tidak eligible kenaikan pangkat dan EWS tidak menerbitkan notifikasi kenaikan pangkat untuk pegawai tersebut, baik notifikasi dalam aplikasi maupun email, kepada seluruh penerima termasuk Admin Kepegawaian.
+3. Baris EWS kenaikan pangkat pegawai tersebut tetap tampil pada halaman daftar EWS aktif maupun pada EWS pribadi, dengan status eligibility apa adanya beserta alasannya.
+4. Perubahan tercatat di audit log.
+
+> **Keputusan 7 Agustus 2026 (K-EWS-01):** rumusan butir 2 sebelumnya menyatakan pegawai "tidak muncul di EWS kenaikan pangkat". Rumusan itu diselaraskan menjadi penahanan notifikasi karena menyembunyikan barisnya akan mengosongkan kolom Status Eligibility pada halaman daftar EWS aktif dan menghilangkan status eligibility pada EWS pribadi, padahal keduanya sudah ditetapkan sebagai kriteria terpisah. Yang ditahan adalah penerbitan pengingat, bukan keberadaan datanya.
 
 ### 10.4 Kalkulasi TMT Otomatis
 
