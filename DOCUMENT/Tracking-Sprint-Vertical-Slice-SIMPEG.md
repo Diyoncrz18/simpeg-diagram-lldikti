@@ -326,14 +326,16 @@ DoD Sprint 1:
 
 | Stage | Owner | Yang Dihandle | Output | Status |
 |-------|-------|---------------|--------|--------|
-| Kickoff | Dion | Kunci role access dan status urgency | Kontrak EWS UI | Not Started |
-| Frontend dummy | Adithian | Tabel EWS, warna urgency, EWS pribadi dummy | UI EWS siap | Not Started |
-| Frontend support | Adriel | Toggle flag kinerja dan empty/error state | UI support siap | Not Started |
-| Backend | Jordan | Filter EWS, role access, update flag | Backend EWS siap | Not Started |
-| Backend support | Grantly | Edge case alert dan role access test data | QA data siap | Not Started |
-| Integrasi | Adithian + Jordan | Tabel EWS memakai real data | EWS real data | Not Started |
-| Review | Adriel | Review PR EWS dan UI evidence | Merge atau return bug | Not Started |
-| QA | Grantly | Test role, urgency, flag, EWS pribadi | QA pass/retest note | Not Started |
+| Kickoff | Dion | Kunci role access dan status urgency | Kontrak EWS UI | Selesai, kontrak terbaca pada kriteria US-5.2 dan US-5.3 yang sudah selesai |
+| Frontend dummy | Adithian | Tabel EWS, warna urgency, EWS pribadi dummy | UI EWS siap | Selesai |
+| Frontend support | Adriel | Toggle flag kinerja dan empty/error state | UI support siap | Selesai |
+| Backend | Jordan | Filter EWS, role access, update flag | Backend EWS siap | Selesai (PR #173 melengkapi penahanan pengingat dan teks bantuan flag kinerja) |
+| Backend support | Grantly | Edge case alert dan role access test data | QA data siap | Belum terverifikasi |
+| Integrasi | Adithian + Jordan | Tabel EWS memakai real data | EWS real data | Selesai, daftar EWS aktif dan EWS pribadi membaca data nyata |
+| Review | Adriel | Review PR EWS dan UI evidence | Merge atau return bug | Selesai untuk PR yang sudah masuk `development` |
+| QA | Grantly | Test role, urgency, flag, EWS pribadi | QA pass/retest note | Belum terverifikasi |
+
+> **Catatan penyelarasan 8 Agustus 2026:** status di atas sebelumnya tercatat `Not Started` untuk seluruh stage, padahal seluruh acceptance criteria US-5.2, US-5.3, dan US-5.4 sudah berstatus selesai pada branch `development` @ `7e831c1`. Stage milik Grantly dibiarkan belum terverifikasi karena tidak ada bukti pelaksanaan yang dapat ditelusuri.
 
 ### Slice 5.3 - Notifikasi & Session Timeout
 

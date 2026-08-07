@@ -5,8 +5,8 @@
 |-------|--------|
 | **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.4 |
 | **Tanggal** | 22 Juli 2026 |
-| **Pembaruan status terakhir** | 7 Agustus 2026 |
-| **Basis verifikasi status** | Branch `development` @ `9be633d` (setelah PR #123–#166) |
+| **Pembaruan status terakhir** | 8 Agustus 2026 |
+| **Basis verifikasi status** | Branch `development` @ `7e831c1` (setelah PR #123–#173) |
 | **Total User Stories** | 53 |
 | **Total Epics** | 9 |
 
@@ -15,6 +15,28 @@
 > **Keputusan import Fase 1 (kanonis, disetujui pengguna 22 Juli 2026):** import massal hanya mengaktifkan template Data Utama. Import membuat record pegawai beserta field snapshot awal, tidak membuat riwayat kepangkatan/jabatan/KGB, dan tidak memanggil kalkulasi TMT. Riwayat resmi diinput per pegawai melalui CRUD append-only. Tanggal pensiun hasil import dipertahankan apa adanya. Kalkulasi TMT dipicu saat riwayat/sumber resmi disimpan, bukan saat import selesai. Template lanjutan multi-jenis tidak termasuk ruang lingkup saat ini.
 
 ---
+
+## Pembaruan Status Acceptance Criteria - 8 Agustus 2026
+
+Penyelarasan terhadap modul EWS setelah peninjauan ulang kriteria US-5.4. Basis pemeriksaan adalah branch `development` @ `7e831c1` setelah PR #173 masuk.
+
+### Kriteria yang dinaikkan menjadi selesai
+
+| User Story | Kriteria | Bukti implementasi |
+|---|---|---|
+| US-5.4 | AC-2 | Penjadwalan EWS menahan penerbitan pengingat kenaikan pangkat selama pegawai belum memenuhi syarat kelayakan, baik karena flag kinerja bernilai negatif maupun karena hukuman disiplin aktif. Penahanan menutup notifikasi dalam aplikasi maupun email untuk seluruh penerima termasuk Admin Kepegawaian, dan `notified_at` dibiarkan kosong agar alert tidak tampak sudah memberi tahu pegawai. Alert tetap disimpan dan tetap tampil pada daftar EWS aktif maupun EWS pribadi, dan status kelayakan tersimpan diselaraskan setiap penjadwalan berjalan sehingga nilainya tidak tertinggal ketika keadaan pegawai berubah. Penahanan dibatasi pada kenaikan pangkat sehingga pengingat Satyalancana tidak ikut tertahan. Diuji pada `tests/Feature/EwsSchedulerTest.php`, `tests/Feature/MyEwsPageTest.php`, dan `tests/Feature/EmailNotificationTest.php` |
+| US-5.4 | AC-4 | Teks bantuan pada toggle Kinerja Baik di halaman detail pegawai memakai kalimat kriteria apa adanya, dikunci oleh `tests/Feature/EmployeePerformanceFlagTest.php` |
+
+Dengan masuknya AC-2 dan AC-4, seluruh acceptance criteria US-5.4 berstatus selesai.
+
+### Penyelarasan rumusan PRD
+
+| Pokok | Keadaan sebelumnya | Penyelesaian |
+|---|---|---|
+| Kriteria flag kinerja pada PRD bagian update flag kinerja | Rumusan menyatakan pegawai dengan flag kinerja negatif tidak muncul di EWS kenaikan pangkat, sedangkan kriteria pada dokumen ini sejak awal menyatakan EWS tidak mengirim notifikasi. Perbedaan itu membuat hasil pengujian penerimaan dapat ditafsirkan dua arah | Rumusan PRD diselaraskan menjadi penahanan penerbitan notifikasi dengan baris EWS tetap tampil beserta status kelayakannya, disertai catatan keputusan pada dokumen tersebut. Menyembunyikan baris akan mengosongkan kolom Status Eligibility pada US-5.2 AC-2 dan menghilangkan status kelayakan pada US-5.3 AC-2, padahal keduanya sudah berstatus selesai |
+
+---
+
 
 ## Pembaruan Status Acceptance Criteria — 7 Agustus 2026
 
@@ -88,7 +110,6 @@ Penyelarasan status dilakukan terhadap kode aktual branch `development` @ `4839a
 | US-3.2, US-3.3 | AC-4, AC-5 (US-3.2); AC-5 (US-3.3) | Pemetaan kolom manual dan peringatan kolom tidak dikenal belum tersedia. Untuk US-3.3 AC-5, arah kerja sudah ditetapkan keputusan K-US-02 dan menunggu implementasi |
 | US-4.5 | AC-2 | Verifikator belum melihat rincian saldo tahun berjalan beserta riwayat dua tahun sebelumnya pada layar keputusan |
 | US-4.10 | AC-2 | Kriteria sudah direvisi oleh keputusan K-US-01 sehingga precedence tidak lagi menjadi pertanyaan terbuka; sisa pekerjaan adalah aksi penerapan template rantai ke seluruh anggota unit |
-| US-5.4 | AC-2, AC-4 | Alert dan notifikasi kenaikan pangkat masih terbit meskipun flag kinerja bernilai negatif; teks bantuan belum memakai kalimat kriteria |
 | US-5.5 | AC-4, AC-5 | Milestone Satyalancana belum disimpan sebagai hasil kalkulasi sehingga masih dihitung ulang saat penjadwalan |
 | US-6.2 | AC-2 | Daftar notifikasi membedakan warna menurut jenis, belum menurut status sudah atau belum dibaca |
 | US-7.1 | AC-1, AC-3 | Cakupan kejadian belum diverifikasi menyeluruh dan model audit belum menolak perubahan maupun penghapusan |
@@ -1120,9 +1141,9 @@ Setiap story mengikuti format:
 **Acceptance Criteria:**
 
 - [x] AC-1: Di halaman detail pegawai, toggle "Kinerja Baik" (default: Ya / `true`).
-- [ ] AC-2: Jika diubah ke "Tidak" → pegawai **tidak eligible** kenaikan pangkat → EWS tidak mengirim notifikasi kenaikan pangkat untuk pegawai ini.
+- [x] AC-2: Jika diubah ke "Tidak" → pegawai **tidak eligible** kenaikan pangkat → EWS tidak mengirim notifikasi kenaikan pangkat untuk pegawai ini.
 - [x] AC-3: Perubahan flag dicatat di audit log.
-- [ ] AC-4: Tooltip penjelasan: *"Flag ini menggantikan penilaian SKP yang belum tersedia di Fase 1. Akan digantikan oleh modul Penilaian Kinerja di fase selanjutnya."*
+- [x] AC-4: Tooltip penjelasan: *"Flag ini menggantikan penilaian SKP yang belum tersedia di Fase 1. Akan digantikan oleh modul Penilaian Kinerja di fase selanjutnya."*
 - [x] AC-5: Untuk Satyalancana, Admin dapat mengisi flag/catatan kelayakan manual sampai data SKP terintegrasi.
 
 ---
