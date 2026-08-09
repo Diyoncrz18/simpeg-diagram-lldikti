@@ -6,7 +6,7 @@
 | **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.4 |
 | **Tanggal** | 22 Juli 2026 |
 | **Pembaruan status terakhir** | 8 Agustus 2026 |
-| **Basis verifikasi status** | Branch `development` @ `7e831c1` (setelah PR #123–#173) |
+| **Basis verifikasi status** | Branch `development` @ `54ab90d` (setelah PR #123–#176) |
 | **Total User Stories** | 53 |
 | **Total Epics** | 9 |
 
@@ -28,6 +28,30 @@ Penyelarasan terhadap modul EWS setelah peninjauan ulang kriteria US-5.4. Basis 
 | US-5.4 | AC-4 | Teks bantuan pada toggle Kinerja Baik di halaman detail pegawai memakai kalimat kriteria apa adanya, dikunci oleh `tests/Feature/EmployeePerformanceFlagTest.php` |
 
 Dengan masuknya AC-2 dan AC-4, seluruh acceptance criteria US-5.4 berstatus selesai.
+
+### Modul Audit Log
+
+Basis pemeriksaan adalah branch `development` @ `037e137` setelah PR #174 masuk untuk AC-3 US-7.1 dan kedua kriteria US-7.2, serta @ `54ab90d` setelah PR #176 masuk untuk AC-1 US-7.1.
+
+| User Story | Kriteria | Bukti implementasi |
+|---|---|---|
+| US-7.1 | AC-1 | Seluruh operasi yang disyaratkan menghasilkan record audit. Kosakata keputusan cuti dipisah sehingga verifikasi tahap menengah tercatat `VERIFY` dan keputusan akhir tercatat `DECIDE`, sedangkan Perubahan, Ditangguhkan, dan Tidak Disetujui tercatat `CHANGE_REQUESTED`, `DEFER`, serta `NOT_APPROVED`. Perubahan hak akses peran, arsip dokumen pegawai, dan perubahan kata sandi yang sebelumnya tidak berjejak kini tercatat, dan pencatatannya menyatu dalam transaksi mutasinya sehingga tidak ada perubahan yang berlaku tanpa jejak. Kejadian `CREATE`, `UPDATE`, `SOFT_DELETE`, `RESTORE`, `LOGIN`, `LOGOUT`, dan `IMPORT` diverifikasi masih tercakup. Diuji pada `tests/Feature/LeaveDecisionAuditTest.php`, `tests/Feature/RolePermissionMatrixAuditTest.php`, `tests/Feature/DocumentAuditTest.php`, `tests/Feature/SystemSettingsAuditTest.php`, `tests/Feature/AuditEventLabelTest.php`, dan `tests/Feature/ProfileTest.php` |
+| US-7.1 | AC-3 | Audit log tidak dapat diubah maupun dihapus melalui aplikasi. Penegakan dipasang dua lapis, yaitu penjaga pada model yang menolak pembaruan dan penghapusan, serta trigger PostgreSQL yang menutup jalur di luar model seperti query builder, tinker, seeder, dan sesi basis data langsung. Pengosongan tabel lewat `TRUNCATE` juga ditolak. Diuji pada `tests/Feature/AuditImmutabilityTest.php` |
+| US-7.2 | AC-3 | Pencarian pada halaman audit menerima nama operator maupun pengenal record, termasuk pengenal berbentuk kunci konfigurasi, dan dijalankan di basis data. Diuji pada `tests/Feature/AuditPageServerSideFilterTest.php` |
+| US-7.2 | AC-4 | Halaman audit memakai paginasi sisi peladen dengan bawaan dua puluh lima baris per halaman beserta pilihan jumlah baris, dan penyaringan serta pengurutan ikut berpindah ke basis data. Diuji pada `tests/Feature/AuditPageServerSideFilterTest.php` dan `tests/Feature/AuditPageIntegrationTest.php` |
+
+Dengan masuknya AC-1 dan AC-3, seluruh acceptance criteria US-7.1 berstatus selesai. Seluruh acceptance criteria US-7.2 juga sudah selesai, sehingga modul audit log tidak lagi memiliki kriteria terbuka.
+
+Catatan tambahan yang timbul dari pekerjaan ini:
+
+| Pokok | Keadaan | Tindak lanjut |
+|---|---|---|
+| Nomor identitas pada payload audit | Nomor induk, nomor kartu keluarga, dan hash nomor induk sebelumnya tersimpan terang pada `old_values` dan `new_values`. Kini disamarkan pada satu tempat, berlaku saat disimpan maupun saat dibaca, karena baris audit yang sudah ada tidak dapat diperbaiki lagi | Selesai, menyertai AC-3 |
+| Data pribadi lain pada payload audit | Surel, nomor telepon, alamat, tempat, dan tanggal lahir masih tersimpan utuh. Penyebabnya lebar payload, yaitu pembaruan pegawai menyimpan salinan seluruh kolom meskipun yang berubah hanya satu | Menunggu keputusan produk, dan tidak lagi digabung ke AC-1. Pola salinan penuh ada di tiga belas tempat sementara pemeriksaan `old_values` dan `new_values` tersebar di dua puluh sembilan berkas uji, dan permukaan baca harus menerima dua bentuk payload karena baris lama tidak dapat diperbaiki. Aturan bentuk payload perlu diputuskan lebih dulu, termasuk perlakuan untuk kejadian `CREATE` yang tidak mengenal konsep field berubah |
+| Perlindungan terhadap pemegang akses basis data langsung | Trigger menutup kecelakaan operasional, namun pemegang role pemilik skema masih dapat melepas trigger atau melepas tabel | Perlu keputusan penggelaran untuk memisahkan peran aplikasi dari peran pemilik skema |
+| Istilah tampilan untuk verifikasi tahap menengah | Empat istilah resmi yang ditetapkan adalah Disetujui, Perubahan, Ditangguhkan, dan Tidak Disetujui, sedangkan verifikasi tahap menengah belum punya istilah. Sementara ini dipakai Diverifikasi | Sudah dikonfirmasi dipakai. Bila kemudian diubah, yang terpengaruh hanya satu pemetaan label beserta ujinya |
+| Halaman pengaturan sistem | Halaman ini sebelumnya menyatakan berhasil menyimpan dan menulis audit, padahal tidak ada penyimpanan sama sekali. Seluruh masukan tidak punya nama field dan tidak ada tabel penyimpanannya. Pengakuan berhasil dan audit tanpa dasar tersebut sudah dihentikan | Perlu menjadi story tersendiri. Isinya menyentuh asumsi infrastruktur seperti peladen surel dan masa sesi, sehingga tidak dapat ditetapkan dari sisi teknis |
+| Audit pada berkas lain di arsip dokumen | Jalur unggah berkas lainnya menulis audit di dalam controller memakai salinan seluruh kolom model, bukan lewat Action seperti jalur dokumen lainnya | Perlu diseragamkan pada pekerjaan yang memang menyentuh berkas tersebut |
 
 ### Penyelarasan rumusan PRD
 
@@ -112,8 +136,6 @@ Penyelarasan status dilakukan terhadap kode aktual branch `development` @ `4839a
 | US-4.10 | AC-2 | Kriteria sudah direvisi oleh keputusan K-US-01 sehingga precedence tidak lagi menjadi pertanyaan terbuka; sisa pekerjaan adalah aksi penerapan template rantai ke seluruh anggota unit |
 | US-5.5 | AC-4, AC-5 | Milestone Satyalancana belum disimpan sebagai hasil kalkulasi sehingga masih dihitung ulang saat penjadwalan |
 | US-6.2 | AC-2 | Daftar notifikasi membedakan warna menurut jenis, belum menurut status sudah atau belum dibaca |
-| US-7.1 | AC-1, AC-3 | Cakupan kejadian belum diverifikasi menyeluruh dan model audit belum menolak perubahan maupun penghapusan |
-| US-7.2 | AC-3, AC-4 | Halaman masih memuat seluruh catatan sekaligus tanpa paginasi maupun pencarian sisi server |
 | US-8.5 | AC-3 | Kedelapan tabel referensi sudah dapat dikelola setelah CRUD `ref_jabatan` masuk `development`. Sisa pekerjaan ada pada guard penghapusan `ref_status_pegawai` yang belum menghitung pemakaian pada `employee_status_histories`, sehingga status yang hanya dirujuk riwayat masih dapat dihapus permanen dan relasinya dikosongkan diam-diam |
 | US-9.2 | AC-1 | Kriteria dipertahankan oleh keputusan K-US-04; sisa pekerjaan adalah menambahkan tombol Export PDF di halaman daftar pegawai |
 
@@ -1291,7 +1313,7 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Setiap operasi berikut otomatis menghasilkan record di `audit_logs`:
+- [x] AC-1: Setiap operasi berikut otomatis menghasilkan record di `audit_logs`:
   - CREATE (tambah pegawai, tambah riwayat, tambah keluarga, dll)
   - UPDATE (edit data pegawai, koreksi saldo cuti, dll)
   - SOFT_DELETE (nonaktifkan pegawai)
@@ -1302,7 +1324,7 @@ Setiap story mengikuti format:
   - LOGOUT (logout manual atau session timeout)
   - IMPORT (import CSV)
 - [x] AC-2: Setiap record audit log menyimpan: `user_id`, `user_name`, `event`, `auditable_type` (model), `auditable_id`, `old_values` (JSON), `new_values` (JSON), `ip_address`, `user_agent`, `created_at`.
-- [ ] AC-3: Audit log **immutable** — tidak bisa diedit atau dihapus melalui aplikasi oleh siapa pun.
+- [x] AC-3: Audit log **immutable** — tidak bisa diedit atau dihapus melalui aplikasi oleh siapa pun.
 - [x] AC-4: Implementasi via Laravel Model Events atau package audit (misal: `owen-it/laravel-auditing`).
 
 ---
@@ -1325,8 +1347,8 @@ Setiap story mengikuti format:
 
 - [x] AC-1: Tabel audit log: Waktu, User, Jenis Event, Modul/Tabel, Ringkasan Perubahan.
 - [x] AC-2: Filter: jenis event (dropdown), user (dropdown), modul/tabel (dropdown), periode (date range picker).
-- [ ] AC-3: Search berdasarkan nama user atau ID record.
-- [ ] AC-4: Pagination (default 25 per halaman).
+- [x] AC-3: Search berdasarkan nama user atau ID record.
+- [x] AC-4: Pagination (default 25 per halaman).
 - [x] AC-5: Urut default: terbaru di atas.
 - [x] AC-6: Akses: Super Admin dan Admin Kepegawaian saja.
 
