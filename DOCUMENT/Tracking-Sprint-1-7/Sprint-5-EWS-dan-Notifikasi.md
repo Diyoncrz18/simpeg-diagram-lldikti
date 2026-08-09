@@ -4,17 +4,23 @@
 |---|---|
 | Periode | 21 – 30 Juli 2026 |
 | Cakupan issue | #33 – #38, #49 (`Issues-SIMPEG-Fase1.md`) |
-| Pembaruan terakhir | 26 Juli 2026 |
-| Basis verifikasi | Source HEAD `1b2e5b6` + verifikasi kode 26 Juli 2026 |
+| Pembaruan terakhir | 10 Agustus 2026 |
+| Basis verifikasi | Branch `development` @ `54ab90d` setelah PR #176 |
 | Menggantikan | `Analisis-Kesesuaian-Sprint-1-5.md` (dihapus 26 Juli 2026) |
 
 Legend: ✅ selesai pada source · ⚠️ sebagian · ❌ belum selesai. Status source, bukan status tracker `Done`.
 
 ## Ringkasan
 
-**3 ✅ · 4 ⚠️ · 0 ❌.** Kemenangan besar sejak audit: dispatcher notifikasi per event kini berbasis database (PR #122) — gap P0 tertutup. Dua P0 tersisa: **registrasi ganda scheduler `app:run-ews`** (risiko eksekusi 2×/hari) dan **perilaku flag kinerja yang bertentangan dengan PRD**.
+**4 ✅ · 3 ⚠️ · 0 ❌ pada source.** Issue #36 telah selesai melalui PR #173/#167. Perilaku canonical flag kinerja ialah alert kenaikan pangkat tetap disimpan dan tampil sebagai tidak eligible, sementara notifikasi in-app/email ditahan dan `notified_at` tetap kosong; rumusan lama “alert tidak dibuat” tidak lagi berlaku.
 
-## Status per Issue
+### Rekonsiliasi issue #36 — 10 Agustus 2026
+
+- ✅ PR #173 (`7e831c1`) menutup perilaku flag kinerja dan penahanan pengingat untuk seluruh penerima tanpa menghilangkan alert dari EWS.
+- ✅ Teks bantuan kinerja diselaraskan dan ikut diverifikasi pada rangkaian PR #173/#167.
+- Baris audit 26 Juli di bawah dipertahankan sebagai kronologi; status aktif issue #36 adalah selesai pada source.
+
+## Arsip Status per Issue — snapshot 26 Juli 2026
 
 | Issue | Deliverable | Status | Bukti & catatan |
 |---:|---|:---:|---|
@@ -29,15 +35,15 @@ Legend: ✅ selesai pada source · ⚠️ sebagian · ❌ belum selesai. Status 
 ## Gap Terbuka (urutan prioritas)
 
 1. **P0 — Hapus registrasi ganda `app:run-ews`** (#34): pertahankan satu registrasi (versi configurable `EwsConfig`), perkuat test agar menghitung jumlah event terdaftar.
-2. **P0 — Selaraskan flag kinerja dengan PRD** (#36): skip pembuatan alert pangkat saat flag false (atau ubah PRD secara eksplisit bila tim memilih perilaku sekarang); bereskan dead-code guard resolver.
-3. **P1 — Kolom snapshot `ews_alerts`** (#34): tambah `is_eligible` + `tahun` (milestone), isi saat engine membuat alert.
-4. **P1 — TMT lanjutan** (#33): simpan milestone Satyalancana konsisten; rekalkulasi saat referensi BUP berubah; tinjau guard skip `tanggal_pensiun` (hormati keputusan import 22 Juli: nilai import tidak ditimpa).
-5. **P2 — `.env.example` SESSION_LIFETIME** (#38) dan teks helper flag kinerja (#36).
+2. **P1 — Kolom snapshot `ews_alerts`** (#34): verifikasi lanjutan konsistensi snapshot milestone Satyalancana.
+3. **P1 — TMT lanjutan** (#33): simpan milestone Satyalancana konsisten; rekalkulasi saat referensi BUP berubah; tinjau guard skip `tanggal_pensiun` (hormati keputusan import 22 Juli: nilai import tidak ditimpa).
+4. **P2 — dokumentasi `.env.example`** (#38): jelaskan `SIMPEG_SESSION_IDLE_TIMEOUT=30` sebagai batas idle yang ditegakkan/audited dan `SESSION_LIFETIME` yang lebih besar sebagai jaring pengaman.
 
 ## Riwayat Perubahan Status
 
 | Tanggal | Perubahan |
 |---|---|
+| 10 Agustus 2026 | #36 ditutup pada source oleh PR #173 (`7e831c1`) dan penyelarasan UI terkait PR #167: alert tetap ada, tetapi notifikasi ditahan saat tidak eligible. Rumusan lama yang meminta alert tidak dibuat dinyatakan superseded oleh keputusan canonical. |
 | 22 Juli 2026 | Baseline audit: #35 ✅; #33/#34/#36/#37/#38 ⚠️. Reklasifikasi: kalkulasi TMT pasca-import sengaja tidak ada (keputusan import). |
 | 23 Juli 2026 | PR #122: kebijakan channel per event berbasis DB → #37 ✅; in-app Admin untuk EWS tertutup (sebagian #34). PR #123: EWS pribadi dashboard pegawai ditata ulang → #49 dikonfirmasi ✅. |
 | 26 Juli 2026 | Verifikasi HEAD `1b2e5b6`: double scheduler (#34) dan perilaku flag kinerja (#36) dikonfirmasi belum berubah — keduanya P0 tersisa sprint ini. |

@@ -40,7 +40,7 @@ Nama lama pada kolom ketiga adalah istilah dokumentasi historis, **bukan** alias
 4. `leave_balance_ledger` menyimpan seluruh event mutasi saldo yang diaudit, termasuk hak tahunan, carry-over, pemotongan final, dan koreksi manual. Ia lebih luas daripada konsep koreksi saldo manual semata.
 5. `leave_proofs` menyimpan bukti formulir resmi yang telah diterbitkan, token QR, path/mime PDF, serta metadata snapshot. Ia bukan tabel arsip umum untuk semua dokumen kepegawaian.
 6. Kebutuhan bisnis dokumen eksternal pada alur `external_approval` tidak dihapus oleh keputusan ini. Runtime saat ini tidak memiliki kolom `external_approval` atau `external_document_path` pada `leave_proofs`; bila kebutuhan tersebut akan diaktifkan, desain storage, migration, otorisasi, audit, dan retensi harus disetujui dalam keputusan terpisah sebelum implementasi.
-7. Gap approval chain per unit tetap terpisah pada Sprint 4 #28. Keputusan ini tidak menetapkan precedence pegawai/unit/global dan tidak mengubah schema `leave_approval_chains`.
+7. Pada saat keputusan ini dibuat, approval chain per unit masih menjadi gap terpisah Sprint 4 #28. Status terbaru: K-US-01 menetapkan tepat satu chain runtime per pegawai dengan unit sebagai target penyalinan template, dan implementasinya selesai melalui PR #177 (`1fd99cb`) tanpa mengubah schema `leave_approval_chains` menjadi scoped per unit.
 
 ### Batas penerapan
 

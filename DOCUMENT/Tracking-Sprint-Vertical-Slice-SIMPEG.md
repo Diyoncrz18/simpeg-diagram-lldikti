@@ -10,7 +10,7 @@
 | Tanggal mulai project | 8 Juni 2026 |
 | Tanggal selesai Sprint 1 | 20 Juni 2026 |
 | Target selesai project | 20 Agustus 2026 |
-| Branch integrasi | `develop` |
+| Branch integrasi | `development` |
 
 ---
 
@@ -45,7 +45,7 @@ Aturan pindah ke slice berikutnya:
 
 - Semua acceptance criteria slice aktif sudah terpenuhi.
 - Frontend flow utama sudah memakai real data jika backend sudah tersedia.
-- PR sudah direview dan dimerge ke `develop`.
+- PR sudah direview dan dimerge ke `development`.
 - Bug critical/major sudah diperbaiki dan diretest.
 - Grantly memberi status QA `Pass` atau `Pass with Note`.
 
@@ -103,7 +103,7 @@ Sprint 1 belum memakai vertical slice penuh. Fokusnya menyiapkan fondasi agar Sp
 
 DoD Sprint 1:
 
-- [ ] `develop` menjadi branch integrasi.
+- [x] `development` menjadi branch integrasi.
 - [ ] Layout utama dan komponen dasar tersedia.
 - [ ] Auth, mapping role, audit log, notification base, dan reference table minimal tersedia.
 - [ ] PR template dan aturan review sudah dipakai.
@@ -360,6 +360,8 @@ DoD Sprint 1:
 
 ## 9. Sprint 6 - Dashboard & Laporan (31 Juli 2026 - 9 Agustus 2026)
 
+> **Rekonsiliasi 10 Agustus 2026:** seluruh issue Sprint 6 (#39, #40, #41, #42, #43, #46) sudah selesai pada source. Tabel stage di bawah adalah rencana/pembagian kerja awal dan tidak boleh dipakai sebagai status implementasi terkini; bukti PR per issue berada di `Tracking-Sprint-1-7/Sprint-6-Dashboard-dan-Laporan.md`. Formal QA/UAT tetap mengikuti Sprint 7.
+
 ### Slice 6.1 - Dashboard Admin & Pegawai
 
 | Field | Detail |
@@ -420,6 +422,8 @@ DoD Sprint 1:
 
 ## 10. Sprint 7 - Stabilization, Regression, UAT, Go-Live Prep (10 Agustus 2026 - 20 Agustus 2026)
 
+> **Rekonsiliasi 10 Agustus 2026:** audit server-side/masking/immutability, EWS flag kinerja, Hari Libur database-backed, validasi lintas tahun, carry-over source Sprint 6, dan template rantai approval unit sudah selesai melalui PR #140/#166/#170/#173/#174/#176/#177. Audit fail-closed menyeluruh serta QA/UAT/release gate masih terbuka. Issue #178 merupakan follow-up hardening terpisah. Rincian status aktif berada di `Tracking-Sprint-1-7/Sprint-7-Stabilization-Regression-UAT.md`.
+
 ### Slice 7.1 - Audit View + Redirect Role + Polish P1
 
 | Field | Detail |
@@ -468,7 +472,7 @@ DoD Sprint 1:
 |-------|-------|---------------|--------|--------|
 | UAT prep | Dion | Jadwal UAT, skenario demo, data demo, daftar fitur | UAT plan siap | Not Started |
 | Regression run | Grantly | Full regression auth, pegawai, import, cuti, EWS, dashboard, export, audit, notif | Regression evidence | Not Started |
-| Release gate | Adriel | Tahan merge tanpa evidence, cek branch `develop`, conflict, PR final | Branch siap RC | Not Started |
+| Release gate | Adriel | Tahan merge tanpa evidence, cek branch `development`, conflict, PR final | Branch siap RC | Not Started |
 | Backend fix | Jordan | Fix bug backend dari regression/UAT | Backend stabil | Not Started |
 | Frontend fix | Adithian | Fix bug UI dari regression/UAT | Frontend stabil | Not Started |
 | Retest | Grantly | Retest bug UAT dan update status | UAT bug status jelas | Not Started |
@@ -476,7 +480,7 @@ DoD Sprint 1:
 
 DoD Sprint 7:
 
-- [ ] Semua P0 dan P1 kritis sudah merge ke `develop`.
+- [ ] Semua P0 dan P1 kritis sudah merge ke `development`.
 - [ ] Tidak ada bug critical/major terbuka.
 - [ ] Full regression selesai dengan evidence.
 - [ ] UAT selesai atau daftar issue UAT sudah diprioritaskan.
@@ -493,7 +497,7 @@ Gunakan checklist ini untuk semua PR sebelum merge.
 - [ ] Acceptance criteria dicentang.
 - [ ] Screenshot/evidence UI tersedia untuk perubahan frontend.
 - [ ] Test/checks lokal atau CI sudah dijalankan sesuai kebutuhan.
-- [ ] Tidak ada conflict dengan `develop`.
+- [ ] Tidak ada conflict dengan `development`.
 - [ ] Tidak ada dummy data tersisa di flow utama setelah backend real data tersedia.
 - [ ] Jika ada bug/error, PR diberi komentar dan dikembalikan ke owner task.
 - [ ] PR milik Adriel direview dan dimerge oleh Dion atau Adithian.

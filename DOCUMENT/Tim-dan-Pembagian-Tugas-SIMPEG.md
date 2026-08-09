@@ -1,7 +1,7 @@
 # Komposisi Tim & Pembagian Tugas
 ## SIMPEG Fase 1 — LLDIKTI Wilayah XVI
 
-> Sinkron dengan PRD-SIMPEG-Fase1-Core.md v1.3. Acuan utama teknis: Laravel 12, Blade, PostgreSQL 17, Keycloak SSO untuk autentikasi, RBAC internal SIMPEG, development DB via container, production diarahkan ke Podman, approval cuti berbasis chain dinamis per pegawai/unit, notifikasi channel-configurable, dan export nominatif Excel custom.
+> Sinkron dengan PRD-SIMPEG-Fase1-Core.md v1.4. Acuan utama teknis: Laravel 12, Blade, PostgreSQL 17, Keycloak SSO untuk autentikasi, RBAC internal SIMPEG, development DB via container, production diarahkan ke Podman, approval cuti memakai tepat satu chain runtime per pegawai dengan penyalinan template ke anggota unit, notifikasi channel-configurable, dan export nominatif Excel custom.
 
 ---
 
@@ -140,7 +140,7 @@ Dengan pendekatan **vertical slice per fitur**, semua orang membantu satu fitur 
 
 **Mandat Frontend + GitHub Gatekeeper:**
 - Membantu frontend saat Adithian membutuhkan support, tetapi porsi frontend Adriel lebih kecil daripada Adithian.
-- Menjadi reviewer/merge gate GitHub untuk PR harian ke `develop`.
+- Menjadi reviewer/merge gate GitHub untuk PR harian ke `development`.
 - Mengecek deskripsi PR, checklist acceptance criteria, screenshot/evidence UI, hasil test/checks, dan conflict sebelum merge.
 - Jika ada bug/error dari review atau QA, mengembalikan PR/task ke developer pemilik task dengan catatan perbaikan yang jelas.
 - Menyelesaikan conflict GitHub jika conflict bersifat integrasi; jika conflict mengubah business logic, Adriel meminta owner fitur ikut memperbaiki.
@@ -149,7 +149,7 @@ Dengan pendekatan **vertical slice per fitur**, semua orang membantu satu fitur 
 **Ringkasan Ownership:**
 | Area | Stories |
 |------|---------|
-| GitHub Review/Merge | PR checklist, review, conflict check, merge gate ke `develop` |
+| GitHub Review/Merge | PR checklist, review, conflict check, merge gate ke `development` |
 | Reusable Components | Modal, alert, toast, form elements, empty state, breadcrumb |
 | Frontend Pegawai | US-2.5, US-2.8, US-2.9, US-2.10 views |
 | Frontend Cuti | US-4.3, US-4.7 partial, US-4.11 views |
@@ -246,7 +246,7 @@ Sprint 4 dibuat 3 minggu karena cuti punya dependensi business rule, role approv
 
 | Sprint | Harus selesai dulu | Baru bisa dilanjutkan ke | Cara agar tetap jalan |
 |--------|--------------------|--------------------------|-----------------------|
-| Sprint 1 | Project Laravel, `.env.example`, koneksi DB, branch `develop`, PR template | Semua slice Sprint 2-7 | Frontend mulai dari Blade static dan dummy data; backend menyiapkan kontrak field |
+| Sprint 1 | Project Laravel, `.env.example`, koneksi DB, branch `development`, PR template | Semua slice Sprint 2-7 | Frontend mulai dari Blade static dan dummy data; backend menyiapkan kontrak field |
 | Sprint 1 | Layout master dan komponen dasar form/table/badge/modal | Semua halaman fitur | Adithian pegang komponen utama, Adriel bantu komponen kecil dan review |
 | Sprint 1 | Employee model, auth mapping, role/permission dasar | Data pegawai, cuti, dashboard, EWS | Jordan/Grantly sepakati nama tabel/field sebelum UI real data |
 | Sprint 2 | Data pegawai core | Import, cuti, EWS, dashboard, laporan | Jika backend belum final, frontend memakai fixture yang sama dengan kontrak field |
@@ -300,7 +300,7 @@ Sprint 4 dibuat 3 minggu karena cuti punya dependensi business rule, role approv
 ### Git Workflow
 ```
 main (production)
-  └── develop (integration)
+  └── development (integration)
        ├── feature/US-1.1-login-sso         (Grantly)
        ├── feature/US-1.4-mapping-user       (Jordan)
        ├── feature/design-system             (Adithian)
@@ -309,7 +309,7 @@ main (production)
 
 ### Code Review Rules
 - Setiap PR **wajib di-review minimal 1 orang** sebelum merge.
-- Adriel menjadi **GitHub review/merge gate**: cek deskripsi PR, checklist AC, screenshot/evidence, conflict, dan hasil test/checks sebelum merge ke `develop`.
+- Adriel menjadi **GitHub review/merge gate**: cek deskripsi PR, checklist AC, screenshot/evidence, conflict, dan hasil test/checks sebelum merge ke `development`.
 - PR backend direview teknis oleh Jordan, Grantly, atau Dion; setelah approve, Adriel melakukan merge.
 - PR frontend direview teknis oleh Adithian atau Adriel; setelah approve/checks aman, Adriel melakukan merge.
 - Jika review menemukan bug/error, Adriel mengembalikan PR ke developer pemilik task dengan catatan perbaikan.
@@ -319,7 +319,7 @@ main (production)
 
 ### Definition of Done (DoD)
 Sebuah user story dianggap "Done" jika:
-- [ ] Code sudah di-merge ke branch `develop`
+- [ ] Code sudah di-merge ke branch `development`
 - [ ] Semua acceptance criteria terpenuhi
 - [ ] Frontend sudah tidak memakai dummy data untuk flow utama setelah backend real data tersedia
 - [ ] Unit test untuk business logic kritis sudah ada

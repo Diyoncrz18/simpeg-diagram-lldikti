@@ -3,7 +3,9 @@
 
 > Dokumen ini berisi daftar issues yang siap dipindahkan ke GitHub Issues / Notion Board.
 > Setiap issue diturunkan dari User Stories dan dipecah menjadi task teknis yang actionable.
-> Sinkron dengan PRD-SIMPEG-Fase1-Core.md v1.3: Keycloak hanya untuk SSO, RBAC internal aplikasi, approval cuti memakai chain dinamis per pegawai/unit, status cuti memakai label resmi, PostgreSQL development via container, production diarahkan ke Podman, notifikasi channel-configurable, dan laporan mendukung export nominatif Excel custom.
+> Sinkron dengan PRD-SIMPEG-Fase1-Core.md v1.4: Keycloak hanya untuk SSO, RBAC internal aplikasi, approval cuti memakai tepat satu chain runtime per pegawai dengan penyalinan template ke anggota unit, status cuti memakai label resmi, PostgreSQL development via container, production diarahkan ke Podman, notifikasi channel-configurable, dan laporan mendukung export nominatif Excel custom.
+>
+> **Catatan status:** checkbox pada dokumen ini adalah dekomposisi scope/import-ready, bukan tracker implementasi terkini. Gunakan `User-Stories-SIMPEG-Fase1.md` untuk status acceptance criteria dan tracker sprint untuk status source/QA.
 >
 > **Keputusan import Fase 1 (kanonis, disetujui pengguna 22 Juli 2026):** import massal hanya mengaktifkan template Data Utama. Import membuat record pegawai beserta field snapshot awal, tidak membuat riwayat kepangkatan/jabatan/KGB, dan tidak memanggil kalkulasi TMT. Riwayat resmi diinput per pegawai melalui CRUD append-only. Tanggal pensiun hasil import dipertahankan apa adanya. Kalkulasi TMT dipicu saat riwayat/sumber resmi disimpan, bukan saat import selesai. Template lanjutan multi-jenis tidak termasuk ruang lingkup saat ini dan tidak dipulihkan tanpa keputusan eksplisit baru.
 
@@ -63,7 +65,7 @@ Setup project Laravel baru beserta konfigurasi environment dasar untuk proyek SI
 - [ ] Buat file compose/container development (PostgreSQL 17 + Mailpit opsional)
 - [ ] Buat `README.md` dengan instruksi setup lokal
 - [ ] Setup `.editorconfig` dan `.php-cs-fixer` untuk konsistensi kode
-- [ ] Push ke GitHub repository + setup branch `main` dan `develop`
+- [ ] Push ke GitHub repository + setup branch `main` dan `development`
 
 **Definition of Done:**
 - [ ] `php artisan serve` berjalan tanpa error
@@ -883,12 +885,14 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 
 **Tasks:**
 - [ ] Halaman konfigurasi approval chain cuti (Super Admin only)
-- [ ] Konfigurasi chain per pegawai/unit: Kepala Bagian, Ketua Tim Kerja, satu atau lebih verifikator, Kabag/Kepegawaian, Pimpinan/PYBMC
+- [ ] Konfigurasi satu chain runtime per pegawai: Kepala Bagian, Ketua Tim Kerja, satu atau lebih verifikator, Kabag/Kepegawaian, Pimpinan/PYBMC
 - [ ] Ketua Tim Kerja dapat dipilih sebagai verifikator tanpa role baru
-- [ ] Simpan urutan approval per pegawai/unit
+- [ ] Terapkan konfigurasi pegawai sebagai template ke seluruh anggota unit kerja tanpa menambah lapisan resolusi runtime per unit
 - [ ] Tambahkan flag/logic skip jika approver pada dua step adalah orang yang sama
 - [ ] Simpan ke tabel `leave_approval_chains`
 - [ ] Audit log
+
+> Keputusan K-US-01: tidak ada precedence runtime global/unit/pegawai pada Fase 1. Unit hanya menjadi target penyalinan template. Implementasi AC-2 telah merge melalui PR #177 (`1fd99cb`); issue #178 tetap open sebagai hardening invarian pada titik tulis bersama dan bukan blocker AC-2.
 
 ---
 

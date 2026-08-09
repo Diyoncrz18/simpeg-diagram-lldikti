@@ -4,17 +4,23 @@
 |---|---|
 | Periode | 8 – 20 Juni 2026 |
 | Cakupan issue | #1 – #12 (`Issues-SIMPEG-Fase1.md`) |
-| Pembaruan terakhir | 7 Agustus 2026 |
-| Basis verifikasi | Source HEAD `9be633d` (branch `development`) + verifikasi kode 7 Agustus 2026 |
+| Pembaruan terakhir | 10 Agustus 2026 |
+| Basis verifikasi | Branch `development` @ `54ab90d` setelah PR #176 |
 | Menggantikan | `Analisis-Kesesuaian-Sprint-1-5.md` (dokumen monolitik lama, dihapus 26 Juli 2026) |
 
 Legend: ✅ selesai pada source · ⚠️ sebagian (ada gap requirement/kualitas) · ❌ belum selesai/tidak sesuai. Ikon menyatakan status source; status tracker `Done` tetap membutuhkan review PR, QA/retest, dan evidence.
 
 ## Ringkasan
 
-**7 ✅ · 5 ⚠️ · 0 ❌.** Fondasi (auth, notifikasi, design system, reference tables, testing framework) berdiri. Gap terberat ada di kualitas audit log (P0: masking NIK/No. KK dan guard immutable).
+**7 ✅ · 5 ⚠️ · 0 ❌.** Fondasi (auth, notifikasi, design system, reference tables, testing framework) berdiri. Masking NIK/No. KK dan immutability audit telah ditutup PR #174. Issue #5 tetap ⚠️ hanya karena perluasan kebijakan audit fail-closed untuk CRUD pegawai/import belum selesai menyeluruh.
 
-## Status per Issue
+### Rekonsiliasi issue #5 — 10 Agustus 2026
+
+- ✅ PR #174 (`037e137`) menyelesaikan masking NIK/No. KK pada tulis dan baca audit serta menegakkan immutability melalui guard model dan trigger PostgreSQL.
+- ⚠️ PR #176 (`54ab90d`) menyelesaikan event wajib US-7.1 AC-1 dan memperkeras mutasi yang disentuh, tetapi belum menutup seluruh CRUD pegawai/import maupun dokumentasi kebijakan dan regression test rollback.
+- Baris status issue di bawah dipertahankan sebagai kronologi audit sebelum PR #174/#176; rekonsiliasi ini yang berlaku untuk status terkini.
+
+## Arsip Status per Issue — snapshot sebelum PR #174/#176
 
 | Issue | Deliverable | Status | Bukti & catatan |
 |---:|---|:---:|---|
@@ -33,17 +39,16 @@ Legend: ✅ selesai pada source · ⚠️ sebagian (ada gap requirement/kualitas
 
 ## Gap Terbuka (urutan prioritas)
 
-1. **P0 — Masking NIK/No. KK di audit pegawai** (#5): payload allowlist di `UpdateEmployeeAction`/`CreateEmployeeAction`, masking saat baca, test regresi "NIK tidak pernah muncul di audit".
-2. **P0 — Guard immutable `AuditLog`** (#5): `booted()` menolak update/delete + test.
-3. **P1 — Logout GET tanpa CSRF** (#3).
-4. **P1 — Perluas audit fail-closed** (#5): tetapkan daftar mutation wajib `logOrFail()` (keputusan cuti, CRUD pegawai, import) + dokumentasikan kebijakan.
-5. **P2 — README komponen** (#9) dan perapian `design-system.md`.
-6. **Proses** — samakan PHP lokal/CI, uji login IdP nyata saat credential diterima, evidence Podman production.
+1. **P1 — Logout GET tanpa CSRF** (#3).
+2. **P1 — Perluas audit fail-closed** (#5): tetapkan daftar mutation wajib `logOrFail()` untuk sisa CRUD pegawai/import, dokumentasikan kebijakan, dan tambah regression test rollback.
+3. **P2 — README komponen** (#9) dan perapian `design-system.md`.
+4. **Proses** — samakan PHP lokal/CI, uji login IdP nyata saat credential diterima, evidence Podman production.
 
 ## Riwayat Perubahan Status
 
 | Tanggal | Perubahan |
 |---|---|
+| 10 Agustus 2026 | PR #174 menutup masking identitas dan immutability audit. PR #176 menutup event wajib US-7.1 AC-1 serta memperluas strict audit secara parsial. Issue #5 tetap ⚠️ hanya untuk hardening fail-closed CRUD pegawai/import dan kebijakan/test rollback. |
 | 22 Juli 2026 | Baseline audit (HEAD `9a27caa`): #4/#6/#7/#8/#11/#12 ✅, sisanya ⚠️. |
 | 23–26 Juli 2026 | #4 diperkuat PR #126 + QA lulus penuh. `logOrFail()` (audit strict) tersedia sejak PR #124 — #5 tetap ⚠️ karena adopsi masih sempit dan masking NIK/No. KK belum ada. Verifikasi 26 Juli mengonfirmasi #3, #9, #10 belum berubah. |
 | 7 Agustus 2026 | #10 ditutup PR #166 (`9be633d`): halaman web Hari Libur memakai `ref_hari_libur` dengan audit resmi dan query sisi server. Evidence test otomatis, regresi PostgreSQL 17, dan smoke test browser tersedia sehingga status naik menjadi ✅. Ringkasan sprint menjadi 7 ✅ · 5 ⚠️ · 0 ❌. |

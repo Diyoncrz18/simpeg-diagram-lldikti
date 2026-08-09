@@ -5,14 +5,35 @@
 |-------|--------|
 | **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.4 |
 | **Tanggal** | 22 Juli 2026 |
-| **Pembaruan status terakhir** | 8 Agustus 2026 |
-| **Basis verifikasi status** | Branch `development` @ `54ab90d` (setelah PR #123–#176) |
+| **Pembaruan status terakhir** | 10 Agustus 2026 |
+| **Basis verifikasi status** | Branch `development` @ `1fd99cb` (setelah PR #123–#177) |
 | **Total User Stories** | 53 |
 | **Total Epics** | 9 |
 
-> **Catatan sinkronisasi PRD 1.3:** Keycloak digunakan hanya untuk SSO/login. Role dan permission dikelola di database SIMPEG. Approval cuti memakai chain dinamis per pegawai/unit, status keputusan resmi (`Disetujui`, `Perubahan`, `Ditangguhkan`, `Tidak Disetujui`), cuti tahunan tidak boleh lintas tahun, EWS menambahkan Satyalancana, notifikasi harus channel-configurable, dan laporan mendukung export nominatif Excel custom.
+> **Catatan sinkronisasi PRD 1.4:** Keycloak digunakan hanya untuk SSO/login. Role dan permission dikelola di database SIMPEG. Approval cuti memakai tepat satu chain runtime per pegawai; unit hanya menjadi target penyalinan template sesuai K-US-01. Status keputusan resmi adalah `Disetujui`, `Perubahan`, `Ditangguhkan`, dan `Tidak Disetujui`; cuti tahunan tidak boleh lintas tahun; EWS menambahkan Satyalancana; notifikasi harus channel-configurable; dan laporan mendukung export nominatif Excel custom.
 >
 > **Keputusan import Fase 1 (kanonis, disetujui pengguna 22 Juli 2026):** import massal hanya mengaktifkan template Data Utama. Import membuat record pegawai beserta field snapshot awal, tidak membuat riwayat kepangkatan/jabatan/KGB, dan tidak memanggil kalkulasi TMT. Riwayat resmi diinput per pegawai melalui CRUD append-only. Tanggal pensiun hasil import dipertahankan apa adanya. Kalkulasi TMT dipicu saat riwayat/sumber resmi disimpan, bukan saat import selesai. Template lanjutan multi-jenis tidak termasuk ruang lingkup saat ini.
+
+---
+
+## Pembaruan Status Acceptance Criteria — 10 Agustus 2026
+
+Penyelarasan terhadap hasil merge yang sudah tercakup pada branch `development` @ `1fd99cb`. Status hanya dinaikkan bila perubahan telah merge dan memiliki bukti implementasi/test.
+
+### Kriteria yang dinaikkan menjadi selesai
+
+| User Story | Kriteria | Bukti implementasi |
+|---|---|---|
+| US-4.10 | AC-2 | PR #177 (`1fd99cb`) menambahkan penyalinan rantai dari satu pegawai sumber ke seluruh anggota unit kerja. Setiap pegawai tetap memiliki tepat satu chain runtime; Kepala Bagian diturunkan dari atasan efektif pegawai tujuan, pegawai yang tidak layak dilaporkan per kategori, snapshot pengajuan berjalan tidak diubah, dan audit dua lapis bersifat fail-closed. CI hijau dengan 1.627 test / 8.143 assertion serta focused test 65 test / 217 assertion. |
+| US-8.5 | AC-3 | PR #170 (`7bf5e24`) memperluas katalog pemakaian `ref_status_pegawai` ke `employee_status_histories`, menolak penghapusan melalui Action ketika status masih dipakai, dan mengubah foreign key menjadi `RESTRICT` agar jalur langsung basis data juga gagal aman. Regression test mencakup penjagaan pada lapisan aplikasi dan PostgreSQL. |
+| US-9.2 | AC-1 | PR #167 (`800fac2`) menambahkan tombol Export PDF pada halaman daftar pegawai, meneruskan filter aktif ke rute PDF, mempertahankan gerbang peran/izin, dan menambahkan pengujian export PDF. |
+
+Dengan masuknya AC-2, seluruh acceptance criteria US-4.10 terpenuhi pada source. Seluruh acceptance criteria US-8.5 dan US-9.2 juga terpenuhi pada source. Status ini belum menggantikan kewajiban regression/UAT formal Sprint 7.
+
+### Catatan pekerjaan aktif
+
+- Issue #178 tetap open sebagai hardening lanjutan untuk memusatkan invarian bentuk rantai pada titik tulis bersama. Follow-up ini terpisah dan bukan blocker penyelesaian US-4.10 AC-2 oleh PR #177.
+- Catatan lama US-8.1 tentang tren W7 telah ditutup PR #164 (`0940760`): tren pegawai kini dihitung dari riwayat pengangkatan, bukan `created_at` data pegawai.
 
 ---
 
@@ -90,7 +111,7 @@ Diputuskan 7 Agustus 2026 oleh Lead Backend sebagai pemilik modul Cuti, karena p
 | `dikembalikan_karena_rollover` | Warna netral, bukan salah satu dari lima warna keputusan | Status ini terbit dari proses rollover saldo, bukan dari keputusan approval, sehingga tidak boleh tampak seperti persetujuan maupun penolakan |
 | Cakupan ketetapan warna AC-2 | Berlaku untuk seluruh permukaan yang menampilkan status cuti, bukan hanya daftar pengajuan pegawai | Satu status yang tampil dengan warna berbeda antar halaman membuat pengguna salah membaca keputusan |
 
-Sisa pekerjaan penerapan cakupan di atas: `resources/views/admin/cuti/show.blade.php`, `resources/views/pegawai/dashboard.blade.php`, dan `resources/views/pimpinan/cuti/index.blade.php` masih memetakan status Perubahan ke warna merah sehingga tampak identik dengan Tidak Disetujui. Halaman detail pengajuan adalah kasus paling terasa karena pengguna membukanya langsung dari daftar dan melihat warna yang berbeda untuk status yang sama. Penerapan ditunda karena ketiga berkas tersebut sedang diubah oleh PR #163, #167, #169, dan #172; mengubahnya lebih dulu hanya akan menimbulkan konflik. Dikerjakan setelah PR tersebut masuk `development`.
+Penerapan warna pada `resources/views/admin/cuti/show.blade.php`, `resources/views/pegawai/dashboard.blade.php`, dan `resources/views/pimpinan/cuti/index.blade.php` telah diselaraskan melalui PR #167. Status Perubahan tidak lagi tampil identik dengan Tidak Disetujui pada permukaan tersebut.
 
 ### Butuh keputusan produk
 
@@ -133,11 +154,8 @@ Penyelarasan status dilakukan terhadap kode aktual branch `development` @ `4839a
 |---|---|---|
 | US-3.2, US-3.3 | AC-4, AC-5 (US-3.2); AC-5 (US-3.3) | Pemetaan kolom manual dan peringatan kolom tidak dikenal belum tersedia. Untuk US-3.3 AC-5, arah kerja sudah ditetapkan keputusan K-US-02 dan menunggu implementasi |
 | US-4.5 | AC-2 | Verifikator belum melihat rincian saldo tahun berjalan beserta riwayat dua tahun sebelumnya pada layar keputusan |
-| US-4.10 | AC-2 | Kriteria sudah direvisi oleh keputusan K-US-01 sehingga precedence tidak lagi menjadi pertanyaan terbuka; sisa pekerjaan adalah aksi penerapan template rantai ke seluruh anggota unit |
 | US-5.5 | AC-4, AC-5 | Milestone Satyalancana belum disimpan sebagai hasil kalkulasi sehingga masih dihitung ulang saat penjadwalan |
 | US-6.2 | AC-2 | Daftar notifikasi membedakan warna menurut jenis, belum menurut status sudah atau belum dibaca |
-| US-8.5 | AC-3 | Kedelapan tabel referensi sudah dapat dikelola setelah CRUD `ref_jabatan` masuk `development`. Sisa pekerjaan ada pada guard penghapusan `ref_status_pegawai` yang belum menghitung pemakaian pada `employee_status_histories`, sehingga status yang hanya dirujuk riwayat masih dapat dihapus permanen dan relasinya dikosongkan diam-diam |
-| US-9.2 | AC-1 | Kriteria dipertahankan oleh keputusan K-US-04; sisa pekerjaan adalah menambahkan tombol Export PDF di halaman daftar pegawai |
 
 ### Keputusan produk 5 Agustus 2026
 
@@ -154,10 +172,8 @@ Pekerjaan lanjutan yang timbul dari keputusan di atas:
 
 | Kriteria | Sisa pekerjaan | Pelaksana |
 |---|---|---|
-| US-4.10 AC-2 | Aksi penerapan template rantai ke seluruh anggota unit, mengikuti pola backfill yang sudah ada | Jordan |
 | US-3.3 AC-5 | Lepas aturan unik NIP pada validasi import agar cabang baris terlewat tercapai, pertahankan pemeriksaan ulang NIP saat penyisipan, lalu perbarui test yang mengunci perilaku lama | Grantly |
 | US-1.3 AC-2 | Tambahkan keterangan pada `.env.example` bahwa `SIMPEG_SESSION_IDLE_TIMEOUT` adalah batas idle yang ditegakkan dan diaudit, sedangkan `SESSION_LIFETIME` adalah jaring pengaman yang nilainya harus lebih besar | Jordan |
-| US-9.2 AC-1 | Tambahkan tombol Export PDF pada halaman daftar pegawai beserta test gerbang peran dan penerusan filter | Adriel |
 
 ---
 
@@ -1005,7 +1021,7 @@ Setiap story mengikuti format:
 **Acceptance Criteria:**
 
 - [x] AC-1: Halaman konfigurasi approval chain cuti.
-- [ ] AC-2: Admin dapat mengatur chain per pegawai: kepala bagian, Ketua Tim Kerja, satu atau lebih verifikator, Kabag/Kepegawaian, dan Pimpinan/PYBMC. Konfigurasi tersebut dapat diterapkan sekaligus ke seluruh anggota satu unit kerja melalui penyalinan template. *(Direvisi oleh keputusan K-US-01, 5 Agustus 2026: rantai aktif pada runtime tetap tepat satu per pegawai sehingga tidak ada precedence global, unit, dan pegawai yang perlu ditetapkan. Cakupan unit sebagai lapisan resolusi runtime ditunda ke Fase 2. Sisa pekerjaan Fase 1 adalah aksi penerapan template ke unit.)*
+- [x] AC-2: Admin dapat mengatur chain per pegawai: kepala bagian, Ketua Tim Kerja, satu atau lebih verifikator, Kabag/Kepegawaian, dan Pimpinan/PYBMC. Konfigurasi tersebut dapat diterapkan sekaligus ke seluruh anggota satu unit kerja melalui penyalinan template. *(Direvisi oleh keputusan K-US-01, 5 Agustus 2026: rantai aktif pada runtime tetap tepat satu per pegawai sehingga tidak ada precedence global, unit, dan pegawai yang perlu ditetapkan. Cakupan unit sebagai lapisan resolusi runtime ditunda ke Fase 2. Implementasi penyalinan template selesai melalui PR #177; issue #178 adalah hardening follow-up terpisah.)*
 - [x] AC-3: Perubahan konfigurasi tercatat di audit log.
 - [x] AC-4: Konfigurasi langsung berlaku untuk pengajuan cuti baru.
 - [x] AC-5: Ketua Tim Kerja dapat dipilih sebagai verifikator tanpa perlu role baru.
@@ -1408,7 +1424,7 @@ Setiap story mengikuti format:
 - [x] AC-8: Data dashboard diperbarui setiap kali halaman di-load (server-rendered).
 - [x] AC-9: Layout responsive — tampil rapi di desktop, tablet, dan mobile.
 
-> **Catatan status Dashboard Admin (5 Agustus 2026):** payload W1–W7 dipasok `BuildAdminDashboardAction` sesuai kontrak K-3, tanpa data contoh dan tanpa tautan mati. Setiap widget memiliki empty state jujur ketika data belum tersedia. Admin Kepegawaian tetap bukan approver cuti sehingga widget cuti hanya menautkan ke halaman pemantauan. Dashboard Pimpinan memakai `BuildPimpinanDashboardAction` terpisah. Penyempurnaan basis tren W7 tetap menjadi pekerjaan lanjutan yang tercatat di tracker Sprint 6.
+> **Catatan status Dashboard Admin (diperbarui 10 Agustus 2026):** payload W1–W7 dipasok `BuildAdminDashboardAction` sesuai kontrak K-3, tanpa data contoh dan tanpa tautan mati. Setiap widget memiliki empty state jujur ketika data belum tersedia. Admin Kepegawaian tetap bukan approver cuti sehingga widget cuti hanya menautkan ke halaman pemantauan. Dashboard Pimpinan memakai `BuildPimpinanDashboardAction` terpisah. Basis tren W7 telah diselesaikan PR #164 dengan perhitungan dari riwayat pengangkatan.
 
 ---
 
@@ -1504,7 +1520,7 @@ Setiap story mengikuti format:
 
 - [x] AC-1: Halaman admin untuk mengelola setiap reference table: ref_golongan, ref_jenis_jabatan, ref_jabatan, ref_status_pegawai, ref_eselon, ref_unit_kerja hierarkis, ref_jenjang_pendidikan, dan ref_notification_channels — **8 tabel**. `ref_bup` dikeluarkan dari cakupan per K-4 (27 Juli 2026) karena tidak dibaca perhitungan BUP mana pun; sumber BUP resmi adalah `ref_jabatan.default_bup` dengan fallback `ref_jenis_jabatan.maks_usia_pensiun`. Tujuh tabel dikelola sebagai tab pada halaman `/data-master`, sedangkan `ref_notification_channels` dikelola pada halaman tersendiri `/data-master/channel-notifikasi` yang tertaut dari menu Super Admin.
 - [x] AC-2: CRUD per table: lihat daftar, tambah, edit, hapus (soft delete jika sudah dipakai oleh data pegawai). Frasa *soft delete* di sini dibaca sebagai **nonaktif melalui kolom `is_active`** sesuai K-1 aturan 5 (26 Juli 2026); Fase 1 tidak menambahkan `SoftDeletes` maupun kolom `deleted_at` pada reference table. Item yang belum pernah dipakai boleh dihapus permanen, item yang sudah dipakai hanya boleh dinonaktifkan dan diaktifkan kembali.
-- [ ] AC-3: Validasi: tidak bisa menghapus item reference table yang sedang dipakai oleh data pegawai.
+- [x] AC-3: Validasi: tidak bisa menghapus item reference table yang sedang dipakai oleh data pegawai. PR #170 memperluas guard ke `employee_status_histories` dan menegakkannya kembali melalui foreign key `RESTRICT` pada PostgreSQL.
 - [x] AC-4: Perubahan tercatat di audit log.
 - [x] AC-5: Data reference table yang sudah di-seed saat instalasi tidak boleh hilang.
 
@@ -1576,7 +1592,7 @@ Setiap story mengikuti format:
 
 **Acceptance Criteria:**
 
-- [ ] AC-1: Tombol "Export PDF" di halaman daftar pegawai. *(Kriteria dipertahankan sesuai keputusan K-US-04, 5 Agustus 2026: tombol ditambahkan di halaman daftar pegawai agar sejajar dengan tombol Export Excel pada US-9.1 AC-1, meneruskan filter yang sedang aktif ke rute PDF yang sudah ada, memakai gerbang peran dan izin yang sama, serta menampilkan pesan penyempitan filter bila batas 500 baris terlampaui. Halaman Laporan tetap menjadi permukaan lanjutan untuk pilihan kolom, rentang baris, dan pratinjau. Perilaku baca-saja Pimpinan dipertahankan.)*
+- [x] AC-1: Tombol "Export PDF" di halaman daftar pegawai. *(Kriteria dipertahankan sesuai keputusan K-US-04, 5 Agustus 2026, dan diselesaikan PR #167: tombol sejajar dengan Export Excel, meneruskan filter aktif ke rute PDF yang sudah ada, memakai gerbang peran dan izin yang sama, serta mempertahankan perilaku baca-saja Pimpinan.)*
 - [x] AC-2: PDF memiliki header: logo (jika ada), nama instansi "LLDIKTI Wilayah XVI", judul "Daftar Pegawai", tanggal cetak.
 - [x] AC-3: Tabel data pegawai sesuai filter aktif.
 - [x] AC-4: Footer: halaman X dari Y.

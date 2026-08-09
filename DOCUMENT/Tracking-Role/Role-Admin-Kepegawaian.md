@@ -3,10 +3,10 @@
 | Field | Nilai |
 |---|---|
 | Role internal | `admin_kepegawaian` |
-| Tanggal analisis ulang | 27 Juli 2026 |
-| Basis verifikasi | Branch `development` @ `e82b527` (sesudah PR #121–#131) |
+| Tanggal analisis ulang | 10 Agustus 2026 |
+| Basis verifikasi | Branch `development` @ `1fd99cb` setelah PR #177 |
 | Dokumen asal (dikonsolidasi ke file ini) | `Analisis-Frontend-Backend-Role-Admin-Kepegawaian.md` — audit 21 Juli 2026 |
-| Acuan produk | PRD v1.3 matriks role (CRUD pegawai + soft delete/restore + set atasan, dokumen, cuti non-approver, EWS, laporan, audit read) |
+| Acuan produk | PRD v1.4 matriks role (CRUD pegawai + soft delete/restore + set atasan, dokumen, cuti non-approver, EWS, laporan, audit read) |
 | Status keseluruhan | ⚠️ **Belum sepenuhnya sesuai** — dari 4 gap utama audit lama, 1 sudah tuntas (set atasan); lifecycle nonaktif, laporan, dan audit-sensitif masih terbuka |
 
 ## Ringkasan
@@ -16,6 +16,17 @@ delete/restore tidak bisa dituntaskan dari UI Admin, (3) laporan L1/L1b/L3 belum
 (4) audit pegawai berisiko menyimpan NIK/No. KK plaintext. Verifikasi ulang 27 Juli: **gap 1 sudah
 ditutup penuh**, gap 2 membaik di lapisan route tapi memburuk di navigasi, gap 3 dan 4 masih
 terbuka dan sudah terpetakan ke task tracker Sprint 6–7.
+
+## Rekonsiliasi Temuan — 10 Agustus 2026
+
+Bagian audit 27 Juli di bawah dipertahankan sebagai kronologi. Temuan yang sudah ditutup:
+
+- masking NIK/No. KK dan audit log server-side/immutable selesai melalui PR #174;
+- Dashboard Admin data nyata dan tren W7 selesai melalui PR #150/#158/#164;
+- export pegawai custom/PDF dan penerusan filter selesai melalui PR #154/#162/#167;
+- event audit wajib US-7.1 AC-1 selesai melalui PR #176.
+
+Hardening fail-closed CRUD pegawai/import, navigasi lifecycle pegawai, batas pengelolaan dokumen, dan keputusan password lokal/Keycloak tetap terbuka. Status baru ini menggantikan baris lama yang masih menyebut dashboard dummy, PDF belum ada, atau audit tanpa masking.
 
 ## ✅ Sudah Sesuai (terverifikasi 27 Juli)
 
@@ -34,7 +45,7 @@ terbuka dan sudah terpetakan ke task tracker Sprint 6–7.
 | 11 | Inbox notifikasi — paginator, tandai dibaca, ownership, CSRF | `notifications.index` |
 | 12 | Audit log dapat dibaca Admin sesuai permission (kualitas halamannya lihat ⚠️ #6) | `routes/web.php:485-491` |
 
-## ❌ / ⚠️ Belum Sesuai
+## Arsip ❌ / ⚠️ Belum Sesuai — snapshot 27 Juli 2026
 
 | # | Prioritas | Temuan (terverifikasi 27 Juli) | Tindak lanjut |
 |---|:---:|---|---|

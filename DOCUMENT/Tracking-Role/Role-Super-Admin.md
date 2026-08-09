@@ -3,10 +3,10 @@
 | Field | Nilai |
 |---|---|
 | Role internal | `super_admin` |
-| Tanggal analisis ulang | 27 Juli 2026 |
-| Basis verifikasi | Source `development` @ `0b94960` (PR #147) + working tree Slice 4 terverifikasi lokal pada PostgreSQL dan browser, 29 Juli 2026 |
+| Tanggal analisis ulang | 10 Agustus 2026 |
+| Basis verifikasi | Branch `development` @ `1fd99cb` setelah PR #177 |
 | Dokumen asal (dikonsolidasi ke file ini) | `Analisis-Frontend-Backend-Role-Super-Admin.md` (audit 21 Juli) dan `Analisis-Kesesuaian-Administrasi-Sistem-Super-Admin.md` (audit 23 Juli) |
-| Acuan produk | PRD v1.3 §4.2 (konfigurasi sistem, user management, seluruh kemampuan Admin), §12 (audit immutable), §15–16 (RBAC & master dari database), US-1.4 |
+| Acuan produk | PRD v1.4 §4.2 (konfigurasi sistem, user management, seluruh kemampuan Admin), §12 (audit immutable), §15–16 (RBAC & master dari database), US-1.4 |
 | Status keseluruhan | ⚠️ **Belum sepenuhnya sesuai** — operasional harian kuat; halaman konfigurasi sistem masih titik terlemah |
 
 ## Ringkasan
@@ -18,6 +18,20 @@ User** — sudah dituntaskan penuh (PR #126, QA 23 Juli lulus termasuk verifikas
 Halaman **Hari Libur web** juga sudah dituntaskan pada 7 Agustus 2026 (PR #166) sehingga tidak lagi
 menjadi gap. Yang tersisa terkonsentrasi pada: Data Master, Pengaturan Sistem, RBAC, dashboard,
 dan pengerasan audit log.
+
+## Rekonsiliasi Temuan — 10 Agustus 2026
+
+Bagian audit 27–29 Juli di bawah dipertahankan sebagai kronologi. Temuan berikut sudah tidak aktif:
+
+- audit log server-side, masking NIK/No. KK, dan immutability selesai melalui PR #174;
+- Dashboard Admin data nyata dan tren W7 selesai melalui PR #150/#158/#164;
+- export custom/PDF pegawai selesai melalui PR #154/#162/#167;
+- Data Master selesai melalui PR #151 (`ref_notification_channels`), PR #165 (`ref_jabatan`), dan PR #170 (guard `employee_status_histories` + FK `RESTRICT`);
+- Hari Libur web selesai melalui PR #166;
+- event audit wajib US-7.1 AC-1 selesai melalui PR #176.
+- penerapan template rantai approval ke seluruh anggota unit selesai melalui PR #177; setiap pegawai tetap memiliki tepat satu chain runtime dan issue #178 tetap follow-up hardening terpisah.
+
+Hardening audit fail-closed untuk seluruh CRUD pegawai/import masih ⚠️. Pengaturan Sistem, keputusan sinkronisasi password lokal dengan Keycloak, dan gap lain yang tidak disebut selesai di atas tetap terbuka.
 
 ## ✅ Sudah Sesuai (terverifikasi 27 Juli)
 
@@ -38,7 +52,7 @@ dan pengerasan audit log.
 | 13 | Notifikasi in-app — paginator, tandai dibaca, ownership | `notifications.index` |
 | 14 | `CreateEmployeeAction` tidak lagi mengaudit NIK/No. KK plaintext — memakai `getRawOriginal()` (ciphertext) | `CreateEmployeeAction.php:253` |
 
-## ❌ / ⚠️ Belum Sesuai
+## Arsip ❌ / ⚠️ Belum Sesuai — snapshot 27–29 Juli 2026
 
 | # | Prioritas | Temuan (terverifikasi 27 Juli) | Tindak lanjut |
 |---|:---:|---|---|

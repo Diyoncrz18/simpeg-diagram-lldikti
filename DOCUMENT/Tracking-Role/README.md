@@ -1,32 +1,31 @@
 # Tracking Role — SIMPEG Fase 1
 
 Folder ini menampung tracking kesesuaian implementasi untuk **kelima role** SIMPEG terhadap PRD
-v1.3, User Stories, dan Panduan Kode. Satu file per role, masing-masing berisi: apa yang **sudah
+v1.4, User Stories, dan Panduan Kode. Satu file per role, masing-masing berisi: apa yang **sudah
 sesuai** (✅) dan apa yang **belum sesuai** (⚠️/❌) beserta bukti `file:line` dan rujukan task
 tracker.
 
 Folder ini menggantikan lima dokumen analisis role terpisah (audit 21–23 Juli 2026). Seluruh
-temuan lama telah **diverifikasi ulang terhadap kode aktual** branch `development` @ `e82b527`
-pada 27 Juli 2026 — sesudah PR #121–#131 — sehingga status di sini mencerminkan kondisi sekarang,
-bukan kondisi saat audit awal.
+temuan lama direkonsiliasi terakhir terhadap branch `development` @ `1fd99cb` pada 10 Agustus
+2026. File role masih mempertahankan tabel audit Juli sebagai kronologi; bagian “Rekonsiliasi
+Temuan” pada tiap file menjadi status aktif bila ada pernyataan lama yang bertentangan.
 
 ## Ringkasan Lintas Role
 
 | Role | File | Status | Sorotan |
 |---|---|:---:|---|
-| Super Admin | [Role-Super-Admin.md](Role-Super-Admin.md) | ⚠️ | Operasional kuat; Kelola Akses User tuntas (PR #126). Sisa terbesar: Data Master, Hari Libur web, Pengaturan Sistem, RBAC, dashboard, pengerasan audit |
-| Admin Kepegawaian | [Role-Admin-Kepegawaian.md](Role-Admin-Kepegawaian.md) | ⚠️ | Penetapan atasan tuntas; sisa: navigasi pegawai nonaktif, konsistensi tombol vs permission, laporan L1/L3, audit NIK |
-| Pimpinan | [Role-Pimpinan.md](Role-Pimpinan.md) | ⚠️→✅ | Hampir tuntas (read-only UI, laporan, dashboard via PR #125); sisa: tren W7, label `Perubahan`, keputusan produk link audit W6 |
+| Super Admin | [Role-Super-Admin.md](Role-Super-Admin.md) | ⚠️ | Data Master, Hari Libur, dashboard, laporan, masking, immutability, dan audit server-side sudah ditutup. Sisa utama: Pengaturan Sistem, beberapa gap RBAC/integrasi, dan hardening fail-closed menyeluruh |
+| Admin Kepegawaian | [Role-Admin-Kepegawaian.md](Role-Admin-Kepegawaian.md) | ⚠️ | Dashboard/laporan/audit utama sudah ditutup; sisa: navigasi lifecycle pegawai, konsistensi tombol vs permission, batas kelola dokumen, dan hardening fail-closed |
+| Pimpinan | [Role-Pimpinan.md](Role-Pimpinan.md) | ⚠️→✅ | Read-only UI, laporan, dashboard, dan tren W7 sudah tersedia; sisa: keputusan produk link audit W6 dan verifikasi akhir lintas-role |
 | Kepala Bagian | [Role-Kepala-Bagian.md](Role-Kepala-Bagian.md) | ✅ | Paling sesuai; sisa: bersih-bersih kode Dinas Luar (keputusan K-2) dan paginasi EWS |
-| Pegawai | [Role-Pegawai.md](Role-Pegawai.md) | ⚠️ | Semua halaman target ada dan self-scoped; sisa: bug widget notifikasi, 2 halaman tanpa tautan navigasi, validasi lintas tahun |
+| Pegawai | [Role-Pegawai.md](Role-Pegawai.md) | ⚠️ | Widget notifikasi dan validasi lintas tahun sudah ditutup; sisa utama dua halaman fungsional yang belum memiliki tautan navigasi |
 
 ## Temuan Lintas Role (berlaku untuk lebih dari satu role)
 
 | Temuan | Role terdampak | Rujukan |
 |---|---|---|
-| Audit update pegawai bocor NIK/No. KK plaintext; halaman Audit Log tanpa masking + tanpa paginasi server-side; model `AuditLog` tanpa guard immutable | Super Admin, Admin | Task #2, #3; Sprint 7 (7.1-1, 7.2-1, 7.2-2) |
-| Preview laporan pegawai (closure lama, PII ke browser), modal custom mati, PDF L1 belum ada, L3 belum tersedia untuk Admin | Super Admin, Admin | Task #18, #19, #20 |
-| Dashboard admin masih dummy kecuali panel EWS | Super Admin, Admin | Task #16 (kontrak K-3) |
+| Hardening audit fail-closed belum menyeluruh pada CRUD pegawai/import; masking, immutability, dan audit server-side sudah ditutup PR #174 | Super Admin, Admin | Sprint 7 (7.2-9) |
+| L3 belum tersedia untuk Admin dan beberapa gap lifecycle/navigasi masih terbuka; export custom/PDF utama sudah ditutup PR #154/#162/#167 | Super Admin, Admin | Backlog role Admin |
 | Label `Perlu Perubahan` (istilah resmi: `Perubahan`) di view cuti bersama | Pimpinan, Admin, Pegawai | Task #25 |
 | Form ubah password lokal tidak sinkron dengan SSO Keycloak | Semua role | Keputusan produk |
 

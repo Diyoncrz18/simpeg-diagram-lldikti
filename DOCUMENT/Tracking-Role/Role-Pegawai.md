@@ -3,10 +3,10 @@
 | Field | Nilai |
 |---|---|
 | Role internal | `pegawai` |
-| Tanggal analisis | 27 Juli 2026 — **audit implementasi pertama** untuk role ini |
-| Basis verifikasi | Branch `development` @ `e82b527` (sesudah PR #121–#131) |
+| Tanggal analisis | 10 Agustus 2026 — rekonsiliasi dari audit implementasi 27 Juli |
+| Basis verifikasi | Branch `development` @ `1fd99cb` setelah PR #177 |
 | Dokumen asal (dikonsolidasi ke file ini) | `Halaman-dan-Hak-Akses-Role-Pegawai.md` — dokumen target produk 22 Juli (bukan audit); daftar halaman targetnya menjadi kerangka penilaian di bawah |
-| Acuan produk | PRD v1.3 §4.2 (Pegawai & Verifikator Cuti), §9, §13.2–13.4; US-2.5, US-4.1–4.3, US-4.7, US-5.3, US-6.1/6.2/6.4, US-8.2 |
+| Acuan produk | PRD v1.4 §4.2 (Pegawai & Verifikator Cuti), §9, §13.2–13.4; US-2.5, US-4.1–4.3, US-4.7, US-5.3, US-6.1/6.2/6.4, US-8.2 |
 | Status keseluruhan | ⚠️ **Sebagian besar terbangun** — 11 halaman target hampir semua ada dan self-scoped; gap utama: 1 bug data (widget notifikasi) dan 2 halaman tanpa tautan navigasi |
 
 ## Catatan struktural
@@ -16,6 +16,14 @@ route/view area admin yang membatasi diri ke data milik sendiri (self-scoped). F
 `resources/views/pegawai/` hanya berisi `dashboard.blade.php`. Pola ini berfungsi, tetapi membuat
 batas akses bergantung pada scoping per-controller, bukan prefix + middleware role seperti dua role
 lainnya.
+
+## Rekonsiliasi Temuan — 10 Agustus 2026
+
+- Bug widget notifikasi dashboard tetap tertutup sejak PR #132; empty state saldo diselaraskan PR #167.
+- Validasi lintas tahun seluruh jenis cuti sudah selesai dan merge melalui PR #140 (`952f723`), bukan lagi “PR #136 menunggu review”.
+- Dua gap navigasi yang dicatat audit 27 Juli (halaman saldo dan antrean verifikator) tetap terbuka sampai ada bukti implementasi/QA baru.
+
+Baris audit lama di bawah dipertahankan sebagai kronologi; rekonsiliasi ini yang berlaku bila ada status yang bertentangan.
 
 ## Status per Halaman Target
 
@@ -48,7 +56,7 @@ lainnya.
 |---|:---:|---|---|
 | 1 | P1 | **Halaman Saldo Cuti tak terjangkau dari UI** — grep `route('cuti.saldo')` di seluruh views = 0; hanya bisa diakses ketik URL. Dokumen target menempatkannya sebagai halaman inti pegawai | Gabungkan dengan task #17 (finalisasi dashboard/navigasi pegawai) |
 | 2 | P1 | **Antrean verifikator tak terjangkau dari UI** — grep `route('cuti.approval')` di seluruh views = 0; pegawai yang ditunjuk di approval chain hanya bisa menindaklanjuti lewat link notifikasi per-pengajuan. AC "Pengajuan Menunggu Tindakan" belum selesai dari sisi navigasi | Perlu diangkat ke backlog (kandidat gabung Issue #40/#44) |
-| 3 | P1 | **Validasi lintas tahun baru untuk Cuti Tahunan** — PRD meminta larangan untuk semua jenis cuti. **→ Dikerjakan: PR #136 menunggu review (27 Juli)** | Task tracker #7 |
+| ~~3~~ | — | **Selesai PR #140 (`952f723`)** — validasi lintas tahun berlaku untuk semua jenis cuti pada submit dan resubmit | Ditutup; regression test seluruh jenis non-tahunan tersedia |
 | 4 | P2 | Label `Perlu Perubahan` masih tampil di daftar/detail cuti yang dipakai pegawai (`admin/cuti/index.blade.php:17`, `show.blade.php:305`) — istilah resmi `Perubahan` | Task tracker #25 |
 | 5 | P2 | Route `cuti.saldo` tanpa middleware `permission:` (hanya allowlist role grup) — aman karena controller resolve employee dari sesi, tetapi berbeda pola dari route lain yang bergerbang ganda | Catatan konsistensi — rapikan saat menyentuh route cuti |
 
@@ -59,6 +67,6 @@ lainnya.
 Fondasi role pegawai lebih sehat daripada yang terlihat: semua alur inti (profil, cuti end-to-end,
 EWS pribadi, notifikasi, QR) ada dan pembatasan datanya ditegakkan server-side. Bug widget
 notifikasi dan ekstraksi `BuildPegawaiDashboardAction` sudah ditutup PR #132 (merged 27 Juli);
-validasi lintas tahun semua jenis dikerjakan di PR #136 (menunggu review). Sisa yang membuat
+validasi lintas tahun semua jenis selesai melalui PR #140. Sisa yang membuat
 US-8.2/4.7 belum selesai penuh: dua halaman fungsional tanpa tautan navigasi (saldo & antrean
 verifikator) — kandidat slice dashboard pegawai (Issue #40) di Sprint 6.
