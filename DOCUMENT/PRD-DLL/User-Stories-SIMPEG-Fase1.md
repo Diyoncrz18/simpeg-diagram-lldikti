@@ -6,7 +6,7 @@
 | **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.4 |
 | **Tanggal** | 22 Juli 2026 |
 | **Pembaruan status terakhir** | 10 Agustus 2026 |
-| **Basis verifikasi status** | Branch `development` @ `1fd99cb` (setelah PR #123–#177) |
+| **Basis verifikasi status** | Branch `development` @ `7e9a0b2` (setelah PR #169 masuk) |
 | **Total User Stories** | 53 |
 | **Total Epics** | 9 |
 
@@ -18,17 +18,18 @@
 
 ## Pembaruan Status Acceptance Criteria — 10 Agustus 2026
 
-Penyelarasan terhadap hasil merge yang sudah tercakup pada branch `development` @ `1fd99cb`. Status hanya dinaikkan bila perubahan telah merge dan memiliki bukti implementasi/test.
+Penyelarasan terhadap hasil merge yang sudah tercakup pada branch `development` @ `7e9a0b2`. Status hanya dinaikkan bila perubahan telah merge dan memiliki bukti implementasi/test.
 
 ### Kriteria yang dinaikkan menjadi selesai
 
 | User Story | Kriteria | Bukti implementasi |
 |---|---|---|
+| US-1.5 | AC-1 sampai AC-4 | PR #169 (`7e9a0b2`) mengunci dispatcher `/dashboard` berdasarkan role internal dari database: Super Admin dan Admin Kepegawaian memakai Dashboard Admin, Pimpinan diarahkan ke `pimpinan.dashboard`, Kepala Bagian ke `kepala-bagian.dashboard`, dan Pegawai menerima Dashboard Pribadi. Hardening akun demo menghapus route development `/set-super-admin` yang dapat menaikkan role tanpa audit dan membuat seeder kompatibilitas memilih akun demo berdasarkan role, sehingga `KEYCLOAK_TEST_USERNAME` tidak dapat mengubah akun Pimpinan menjadi Super Admin. Regresi dikunci oleh `DemoRoleLoginTest` dan `DashboardRoleGateTest`; verifikasi sebelum merge mencatat focused test 11 test / 35 assertion, quality gate penuh 1.541 test / 7.898 assertion, serta smoke HTTP `demo-klabat-pimpinan` berakhir di `/pimpinan/dashboard`. |
 | US-4.10 | AC-2 | PR #177 (`1fd99cb`) menambahkan penyalinan rantai dari satu pegawai sumber ke seluruh anggota unit kerja. Setiap pegawai tetap memiliki tepat satu chain runtime; Kepala Bagian diturunkan dari atasan efektif pegawai tujuan, pegawai yang tidak layak dilaporkan per kategori, snapshot pengajuan berjalan tidak diubah, dan audit dua lapis bersifat fail-closed. CI hijau dengan 1.627 test / 8.143 assertion serta focused test 65 test / 217 assertion. |
 | US-8.5 | AC-3 | PR #170 (`7bf5e24`) memperluas katalog pemakaian `ref_status_pegawai` ke `employee_status_histories`, menolak penghapusan melalui Action ketika status masih dipakai, dan mengubah foreign key menjadi `RESTRICT` agar jalur langsung basis data juga gagal aman. Regression test mencakup penjagaan pada lapisan aplikasi dan PostgreSQL. |
 | US-9.2 | AC-1 | PR #167 (`800fac2`) menambahkan tombol Export PDF pada halaman daftar pegawai, meneruskan filter aktif ke rute PDF, mempertahankan gerbang peran/izin, dan menambahkan pengujian export PDF. |
 
-Dengan masuknya AC-2, seluruh acceptance criteria US-4.10 terpenuhi pada source. Seluruh acceptance criteria US-8.5 dan US-9.2 juga terpenuhi pada source. Status ini belum menggantikan kewajiban regression/UAT formal Sprint 7.
+Seluruh acceptance criteria US-1.5 dikonfirmasi selesai pada source setelah redirect role dan hardening akun demo merge. Dengan masuknya AC-2, seluruh acceptance criteria US-4.10 juga terpenuhi pada source. Seluruh acceptance criteria US-8.5 dan US-9.2 tetap terpenuhi pada source. Status ini belum menggantikan kewajiban regression/UAT formal Sprint 7.
 
 ### Catatan pekerjaan aktif
 
@@ -362,6 +363,8 @@ Setiap story mengikuti format:
 - [x] AC-2: Pimpinan → Dashboard Pimpinan.
 - [x] AC-3: Kepala Bagian → Dashboard Kepala Bagian (daftar bawahan + pengajuan pending).
 - [x] AC-4: Pegawai → Dashboard Pribadi (profil ringkas + saldo cuti).
+
+> **Catatan status implementasi (10 Agustus 2026):** ✅ Selesai pada source melalui PR #169 (`7e9a0b2`). Callback login tetap menuju dispatcher bersama `/dashboard`; dispatcher kemudian merender Dashboard Admin untuk Super Admin/Admin Kepegawaian, mengarahkan Pimpinan dan Kepala Bagian ke route dashboard khususnya, serta merender Dashboard Pribadi untuk Pegawai. Role internal pada tabel `users` tetap menjadi sumber otorisasi. Jalur development `/set-super-admin` telah dihapus dan seeder role lama tidak lagi memakai satu `KEYCLOAK_TEST_USERNAME`, sehingga akun demo Pimpinan tidak dapat tertimpa menjadi Super Admin. Perilaku dikunci oleh `DemoRoleLoginTest` dan `DashboardRoleGateTest`; smoke HTTP akun `demo-klabat-pimpinan` berakhir di `/pimpinan/dashboard` dengan status 200. QA/UAT lintas-role Sprint 7 tetap wajib sebagai release gate terpisah.
 
 ---
 
