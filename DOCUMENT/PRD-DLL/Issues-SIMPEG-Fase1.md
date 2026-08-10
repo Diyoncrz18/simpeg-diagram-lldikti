@@ -892,7 +892,7 @@ Implementasi penambahan riwayat kepangkatan, jabatan, dan KGB. Data bersifat app
 - [ ] Simpan ke tabel `leave_approval_chains`
 - [ ] Audit log
 
-> Keputusan K-US-01: tidak ada precedence runtime global/unit/pegawai pada Fase 1. Unit hanya menjadi target penyalinan template. Implementasi AC-2 telah merge melalui PR #177 (`1fd99cb`); issue #178 tetap open sebagai hardening invarian pada titik tulis bersama dan bukan blocker AC-2.
+> Keputusan K-US-01: tidak ada precedence runtime global/unit/pegawai pada Fase 1. Unit hanya menjadi target penyalinan template. Implementasi AC-2 telah merge melalui PR #177 (`1fd99cb`). Hardening issue #178 telah ditutup melalui PR #179 (`ff260a5`) dengan invarian terpusat pada writer bersama, lock konfigurasi deterministik, validasi approver aktif/tidak terhapus, serta audit fail-closed beraktor eksplisit; hardening ini tidak mengubah status AC-2.
 
 ---
 

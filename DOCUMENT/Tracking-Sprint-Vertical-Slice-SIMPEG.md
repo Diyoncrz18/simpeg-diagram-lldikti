@@ -422,7 +422,7 @@ DoD Sprint 1:
 
 ## 10. Sprint 7 - Stabilization, Regression, UAT, Go-Live Prep (10 Agustus 2026 - 20 Agustus 2026)
 
-> **Rekonsiliasi 10 Agustus 2026:** audit server-side/masking/immutability, EWS flag kinerja, Hari Libur database-backed, validasi lintas tahun, carry-over source Sprint 6, dan template rantai approval unit sudah selesai melalui PR #140/#166/#170/#173/#174/#176/#177. Audit fail-closed menyeluruh serta QA/UAT/release gate masih terbuka. Issue #178 merupakan follow-up hardening terpisah. Rincian status aktif berada di `Tracking-Sprint-1-7/Sprint-7-Stabilization-Regression-UAT.md`.
+> **Rekonsiliasi 10 Agustus 2026:** audit server-side/masking/immutability, EWS flag kinerja, Hari Libur database-backed, validasi lintas tahun, carry-over source Sprint 6, penyalinan template rantai ke anggota unit, dan hardening invarian writer issue #178 sudah selesai melalui PR #140/#166/#170/#173/#174/#176/#177/#179. Audit fail-closed menyeluruh serta QA/UAT/release gate masih terbuka. Rincian status aktif berada di `Tracking-Sprint-1-7/Sprint-7-Stabilization-Regression-UAT.md`.
 
 ### Slice 7.1 - Audit View + Redirect Role + Polish P1
 

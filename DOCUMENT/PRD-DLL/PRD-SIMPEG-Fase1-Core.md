@@ -21,7 +21,7 @@ PRD ini menjadi **sumber kebenaran utama** untuk Fase 1. Keputusan meeting tekni
 4. Database development menggunakan PostgreSQL 17 melalui container.
 5. Production diprioritaskan menggunakan Podman karena pertimbangan keamanan.
 6. Notifikasi tidak boleh mengunci channel ke in-app/email saja; Fase 1 menyediakan in-app dan email, dengan arsitektur channel-configurable agar WhatsApp Business dapat ditambahkan saat layanan/credential tersedia.
-7. Approval cuti tidak boleh hardcoded 3 stage seragam. Rantai verifikasi/approval harus dinamis per pegawai/unit, dapat memuat 1, 2, 3, atau lebih verifikator, dan dapat menunjuk pegawai tertentu seperti Ketua Tim Kerja tanpa membuat role baru.
+7. Approval cuti tidak boleh hardcoded 3 stage seragam. Sesuai K-US-01, setiap pegawai memakai tepat satu rantai runtime yang dinamis; konfigurasi satu pegawai dapat disalin ke seluruh anggota unit sebagai template, tetapi unit bukan scope resolver runtime. Rantai dapat memuat 1, 2, 3, atau lebih verifikator dan dapat menunjuk pegawai tertentu seperti Ketua Tim Kerja tanpa membuat role baru.
 8. Keputusan cuti mengikuti label resmi pada formulir: `Disetujui`, `Perubahan`, `Ditangguhkan`, dan `Tidak Disetujui`. Istilah formal `Ditolak` tidak digunakan pada keputusan cuti.
 9. Cuti tahunan tidak boleh lintas tahun kalender; periode Desember–Januari harus dipecah menjadi dua pengajuan terpisah. Kuota tahunan 12 hari dengan carry-over maksimal 6 hari dari N-1, kecuali pegawai tidak mengambil cuti tahunan dua tahun berturut-turut sehingga total tahun berjalan dapat mencapai 24 hari.
 10. Pengajuan cuti yang selesai diproses harus dapat menghasilkan formulir cuti resmi dengan QR Code verifikasi SIMPEG. Tanda tangan elektronik tersertifikasi belum wajib di Fase 1.
@@ -261,7 +261,7 @@ Admin Kepegawaian meng-assign kepala bagian per pegawai. Mapping ini menentukan:
 - Setiap pegawai harus memiliki tepat satu kepala bagian.
 - Kepala bagian bisa memiliki banyak bawahan.
 - Admin bisa mengubah mapping kapan saja (perubahan tercatat di audit log).
-- Approval chain cuti tidak boleh hanya bergantung pada role. Chain dapat dikonfigurasi per pegawai atau unit, berisi urutan pihak mengetahui/verifikator/final approver.
+- Approval chain cuti tidak boleh hanya bergantung pada role. Setiap pegawai memiliki tepat satu chain runtime berisi urutan pihak mengetahui/verifikator/final approver; konfigurasi tersebut dapat disalin ke anggota unit sebagai template tanpa menjadikan unit sebagai scope resolver runtime.
 - Jumlah verifikator fleksibel: 1, 2, 3, atau lebih sesuai kebutuhan LLDIKTI.
 - Pegawai yang sama tidak boleh diminta menyetujui dua langkah berurutan; sistem harus otomatis melewati langkah duplikat atau mencegah konfigurasi yang tidak valid.
 - Untuk cuti Kepala Lembaga sendiri, approval internal SIMPEG tidak berlaku sebagai keputusan final. Fase 1 cukup menyediakan pencatatan oleh Admin Kepegawaian dengan upload dokumen eksternal yang sudah disetujui oleh jalur kementerian/pejabat di atasnya.
@@ -722,7 +722,7 @@ Sesuai keputusan pengguna 22 Juli 2026, hanya satu jenis import yang aktif di Fa
 
 Modul cuti mendigitalisasi seluruh proses pengajuan dan persetujuan cuti sesuai PP 11/2017 jo PP 17/2020. Terdapat 6 jenis cuti dengan perbedaan hak antara PNS dan PPPK.
 
-Berdasarkan meeting teknis terbaru, Fase 1 harus memakai engine approval cuti yang dinamis. Pengajuan dapat melalui kepala bagian, satu atau lebih verifikator, Ketua Tim Kerja bila ditunjuk, Kabag/Kepegawaian, dan final approver/PYBMC sesuai konfigurasi per pegawai/unit. Kepegawaian/verifikator wajib dapat memeriksa hak cuti, saldo, kelayakan, dan kelengkapan sebelum keputusan final.
+Berdasarkan meeting teknis terbaru, Fase 1 harus memakai engine approval cuti yang dinamis. Pengajuan dapat melalui kepala bagian, satu atau lebih verifikator, Ketua Tim Kerja bila ditunjuk, Kabag/Kepegawaian, dan final approver/PYBMC sesuai satu konfigurasi runtime per pegawai. Konfigurasi pegawai dapat disalin ke seluruh anggota unit sebagai template, tetapi unit bukan scope resolver runtime. Kepegawaian/verifikator wajib dapat memeriksa hak cuti, saldo, kelayakan, dan kelengkapan sebelum keputusan final.
 
 Ketua Tim Kerja tidak memerlukan role baru. Jika perlu mengetahui atau memverifikasi cuti pegawai pada tim kerja substansi, Ketua Tim cukup ditunjuk sebagai salah satu step dalam approval chain. Untuk cuti pegawai internal biasa, final PYBMC tetap Kepala Lembaga sesuai konfigurasi. Untuk cuti Kepala Lembaga sendiri, SIMPEG Fase 1 hanya mencatat dan mengarsipkan dokumen persetujuan eksternal dari jalur kementerian/pejabat yang lebih tinggi.
 
@@ -1483,7 +1483,7 @@ Fase 1 menyediakan export laporan dasar ke format PDF dan Excel. Selain export f
 
 | Tabel | Catatan |
 |-------|---------|
-| `leave_approval_chains` | Template/konfigurasi chain per pegawai/unit; memuat urutan step, tipe step, dan pegawai approver/verifikator |
+| `leave_approval_chains` | Satu konfigurasi chain runtime per pegawai; dapat disalin ke anggota unit sebagai template dan memuat urutan step, tipe step, serta pegawai approver/verifikator |
 | `leave_request_steps` | Snapshot chain per pengajuan: urutan, tipe langkah, approver, status, keputusan/keterangan, dan waktu tindakan; perubahan konfigurasi tidak mengubah riwayat pengajuan lama |
 | `leave_proofs` | Bukti formulir cuti resmi final: token QR, path/mime PDF, penerbit, waktu terbit, dan metadata snapshot |
 | `leave_balance_ledger` | Ledger append-only mutasi saldo tahunan, termasuk hak, carry-over, pemotongan final, dan koreksi manual beserta alasan serta audit trail |
