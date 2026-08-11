@@ -113,6 +113,8 @@ DoD Sprint 1:
 
 ## 5. Sprint 2 - Data Pegawai Core (21 Juni 2026 - 30 Juni 2026)
 
+> **Catatan penyelarasan 11 Agustus 2026:** PR #180 (`71d2dae`, exact head `9c1c1e9`) telah merge ke `development` dan menutup BUG-01 pada US-2.4 AC-2 serta melengkapi US-2.6 AC-1 sampai AC-5. Halaman detail kini memiliki kontrol tambah Kepangkatan/Jabatan/KGB yang digate permission, Upload SK, dan multipart submission. Tabel stage di bawah adalah rencana awal dan status `Not Started` tidak boleh dibaca sebagai status source terkini. Bukti source dan review menyatakan kriteria terkait selesai, sedangkan full browser/E2E submit multipart serta regression/UAT formal tetap menjadi tindak lanjut QA.
+
 ### Slice 2.1 - CRUD Pegawai Core
 
 | Field | Detail |
@@ -171,6 +173,8 @@ DoD Sprint 1:
 ---
 
 ## 6. Sprint 3 - Import & Pelengkap Data Pegawai (1 Juli 2026 - 10 Juli 2026)
+
+> **Catatan penyelarasan 11 Agustus 2026:** PR #183 (`4f3f2c3`, exact head `cbf907b`) telah merge ke `development` dan menyelesaikan US-3.2 AC-4/AC-5 pada level source. Mapping header dapat diubah melalui dropdown, disimpan pada batch, dipakai kembali oleh preview/validasi/eksekusi, serta menolak target ganda dan field wajib yang belum dipetakan. Warning header asing, klasifikasi canonical/ignored, normalisasi UI/backend, dan enforcement fail-closed source `Role` juga tersedia. Tabel stage di bawah adalah rencana awal dan status `Not Started` tidak boleh dibaca sebagai status source terkini. Laravel Dusk belum menjadi quality gate CI; browser regression/UAT formal tetap menjadi tindak lanjut QA.
 
 ### Slice 3.1 - Import Excel/CSV
 

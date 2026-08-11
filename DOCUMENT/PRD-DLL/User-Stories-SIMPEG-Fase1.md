@@ -5,14 +5,44 @@
 |-------|--------|
 | **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.4 |
 | **Tanggal** | 22 Juli 2026 |
-| **Pembaruan status terakhir** | 10 Agustus 2026 |
-| **Basis verifikasi status** | Branch `development` @ `7e9a0b2` (setelah PR #169 masuk) |
+| **Pembaruan status terakhir** | 11 Agustus 2026 |
+| **Basis verifikasi status** | Branch `development` @ `4f3f2c3` (setelah PR #183 masuk) |
 | **Total User Stories** | 53 |
 | **Total Epics** | 9 |
 
 > **Catatan sinkronisasi PRD 1.4:** Keycloak digunakan hanya untuk SSO/login. Role dan permission dikelola di database SIMPEG. Approval cuti memakai tepat satu chain runtime per pegawai; unit hanya menjadi target penyalinan template sesuai K-US-01. Status keputusan resmi adalah `Disetujui`, `Perubahan`, `Ditangguhkan`, dan `Tidak Disetujui`; cuti tahunan tidak boleh lintas tahun; EWS menambahkan Satyalancana; notifikasi harus channel-configurable; dan laporan mendukung export nominatif Excel custom.
 >
 > **Keputusan import Fase 1 (kanonis, disetujui pengguna 22 Juli 2026):** import massal hanya mengaktifkan template Data Utama. Import membuat record pegawai beserta field snapshot awal, tidak membuat riwayat kepangkatan/jabatan/KGB, dan tidak memanggil kalkulasi TMT. Riwayat resmi diinput per pegawai melalui CRUD append-only. Tanggal pensiun hasil import dipertahankan apa adanya. Kalkulasi TMT dipicu saat riwayat/sumber resmi disimpan, bukan saat import selesai. Template lanjutan multi-jenis tidak termasuk ruang lingkup saat ini.
+
+---
+
+## Pembaruan Status Acceptance Criteria — 11 Agustus 2026
+
+Penyelarasan dilakukan setelah PR #180 dan PR #183 merge ke branch `development` pada 11 Agustus 2026. Pembaruan PR #180 mengoreksi jejak bukti untuk kriteria US-2.4 dan US-2.6 yang sudah bertanda selesai sejak 3 Agustus 2026, tetapi kemudian terbukti masih memiliki gap UI melalui BUG-01 pada testing browser 8 Agustus 2026. Pembaruan PR #183 menutup kriteria US-3.2 AC-4 dan AC-5 yang sebelumnya sengaja dibiarkan terbuka. Status selesai kini didasarkan pada source hasil merge dan review exact head masing-masing PR, bukan pada tanda centang atau tracker lama semata.
+
+### Kriteria yang dikonfirmasi selesai
+
+| User Story | Kriteria | Bukti implementasi |
+|---|---|---|
+| US-2.4 | AC-2 | PR #180 (`71d2dae`, exact head `9c1c1e9`) menambahkan kontrol **Tambah Riwayat Kepangkatan**, **Tambah Riwayat Jabatan**, dan **Tambah Riwayat KGB** pada halaman detail pegawai. Kontrol hanya tampil bagi pengguna dengan permission `employee_histories.create`, menggunakan modal riwayat yang tersedia, dan selaras dengan permission endpoint backend. |
+| US-2.6 | AC-1 sampai AC-5 | PR #180 melengkapi alur UI penambahan riwayat dengan input Upload SK pada ketiga modal dan submission `FormData`/multipart. Backend yang sudah ada tetap menangani validasi PDF/JPG/JPEG/PNG maksimal 10 MB, penyimpanan melalui Action dan `EmployeeHistoryService`, append-only, rekonsiliasi `is_latest`, kalkulasi TMT, audit CREATE, serta pembentukan dokumen SK. Review exact head menyatakan AC-1 sampai AC-5 PASS; CI exact head hijau. |
+| US-3.2 | AC-4 | PR #183 (`4f3f2c3`, exact head `cbf907b`) menambahkan dropdown mapping setiap header sumber ke field SIMPEG atau `Tidak dipakai`, menyimpan mapping pada batch sebelum validasi, menggunakan mapping aktif kembali pada preview/validasi/eksekusi, menolak target ganda, dan memblokir field wajib yang belum dipetakan dengan pesan field-specific. Error validasi ditautkan kembali ke header sumber yang dipilih Admin. |
+| US-3.2 | AC-5 | PR #183 memisahkan header asing, kolom kanonis yang sengaja tidak dipakai, dan source reserved. Peringatan kolom tidak dikenal tidak memblokir proses selama field wajib lengkap. Source `Role` dan `No` dikunci sebagai `Tidak dipakai` pada UI; backend menolak mapping source `Role` ke target SIMPEG setelah mapping parsial digabungkan, sedangkan domain helper tetap fail-closed agar state batch lama/rusak tidak dapat memasukkan nilai `Role` ke pipeline import. Normalisasi header UI diselaraskan dengan backend. |
+
+### Bukti pengujian dan catatan QA PR #180
+
+- Focused automated test yang dicatat pada PR: `EmployeeShowTest` dan `EmployeeHistoryTest`, 41 test lulus dengan 166 assertion.
+- Retest browser membuktikan ketiga tombol tersedia untuk Admin Kepegawaian berizin dan masing-masing modal dapat dibuka.
+- Full browser/E2E untuk alur `buka modal → pilih file → submit multipart → riwayat tersimpan → dokumen SK terbentuk → baris baru tampil` belum tercatat. Ini merupakan gap bukti regresi non-blocking, bukan gap requirement yang teridentifikasi pada source hasil merge.
+- Merge PR #180 menutup BUG-01 pada level source dan retest kontrol UI. Regression/UAT formal Sprint 7 tetap wajib sebelum release candidate.
+
+### Bukti pengujian dan catatan QA PR #183
+
+- CI exact head `cbf907b` berhasil pada job **Pint + PHPStan + Test** sebelum merge.
+- Feature test mencakup UI mapping, penyimpanan mapping, source reserved dengan variasi kapitalisasi/whitespace, serta penolakan request langsung `Role → target SIMPEG`.
+- Domain regression membuktikan nilai source `Role` tidak dapat diterapkan ke `NIP`, `Pangkat`, maupun target import lain walaupun mapping berbahaya mencapai helper.
+- Laravel Dusk regression tersedia untuk interaksi mapping, konflik target, field wajib, urutan simpan mapping sebelum validasi, dan pencocokan header error secara eksak. Dusk belum menjadi quality gate CI dan bukti eksekusi manual penuh belum tercatat, sehingga status QA dicatat `Pass with Note` sampai browser regression/UAT formal dijalankan.
+- Merge PR #183 menutup BUG-03 dan menyelesaikan US-3.2 AC-4/AC-5 pada level source. Keputusan import Fase 1 tetap berlaku: `Role` tidak diimpor dan akses aplikasi tetap dikelola melalui US-1.4.
 
 ---
 
@@ -153,7 +183,7 @@ Penyelarasan status dilakukan terhadap kode aktual branch `development` @ `4839a
 
 | User Story | Kriteria | Alasan |
 |---|---|---|
-| US-3.2, US-3.3 | AC-4, AC-5 (US-3.2); AC-5 (US-3.3) | Pemetaan kolom manual dan peringatan kolom tidak dikenal belum tersedia. Untuk US-3.3 AC-5, arah kerja sudah ditetapkan keputusan K-US-02 dan menunggu implementasi |
+| US-3.3 | AC-5 | Arah kerja sudah ditetapkan keputusan K-US-02 dan menunggu implementasi: NIP yang sudah ada di database menjadi baris terlewat, NIP ganda dalam satu berkas tetap error, dan email terdaftar tetap error |
 | US-4.5 | AC-2 | Verifikator belum melihat rincian saldo tahun berjalan beserta riwayat dua tahun sebelumnya pada layar keputusan |
 | US-5.5 | AC-4, AC-5 | Milestone Satyalancana belum disimpan sebagai hasil kalkulasi sehingga masih dihitung ulang saat penjadwalan |
 | US-6.2 | AC-2 | Daftar notifikasi membedakan warna menurut jenis, belum menurut status sudah atau belum dibaca |
@@ -684,18 +714,18 @@ Setiap story mengikuti format:
 - [x] AC-1: Upload file Excel/CSV (maks 10MB).
 - [x] AC-2: Sistem mendeteksi header kolom secara otomatis.
 - [x] AC-3: Tampilkan preview 10 baris pertama dalam bentuk tabel.
-- [ ] AC-4: Tampilkan mapping kolom: setiap kolom Excel/CSV dipasangkan ke field SIMPEG atau opsi "Tidak dipakai". Sistem mengisi mapping awal melalui nama header template `daftar_pegawai.xlsx` setelah normalisasi spasi dan huruf besar-kecil; Admin dapat mengubahnya melalui dropdown sebelum validasi. Mapping yang dipilih disimpan pada batch import yang sama dan dipakai kembali oleh preview, validasi, dan eksekusi. Satu field tujuan tidak boleh menerima dua kolom sumber; field wajib yang belum memiliki mapping harus ditolak dengan pesan yang menyebut field tersebut.
-- [ ] AC-5: Jika ada kolom yang tidak cocok, tampilkan peringatan yang menyebut nama kolom dan menjelaskan bahwa nilainya tidak disimpan bila tetap dipetakan ke "Tidak dipakai". Peringatan tidak memblokir import selama seluruh field wajib sudah dipetakan. Sistem juga memperingatkan header wajib yang belum ditemukan. Kolom `Role` tidak dipakai oleh import dan harus diperingatkan sebagai kolom ekstra; penetapan role aplikasi tetap dilakukan melalui Kelola Akses User (US-1.4).
+- [x] AC-4: Tampilkan mapping kolom: setiap kolom Excel/CSV dipasangkan ke field SIMPEG atau opsi "Tidak dipakai". Sistem mengisi mapping awal melalui nama header template `daftar_pegawai.xlsx` setelah normalisasi spasi dan huruf besar-kecil; Admin dapat mengubahnya melalui dropdown sebelum validasi. Mapping yang dipilih disimpan pada batch import yang sama dan dipakai kembali oleh preview, validasi, dan eksekusi. Satu field tujuan tidak boleh menerima dua kolom sumber; field wajib yang belum memiliki mapping harus ditolak dengan pesan yang menyebut field tersebut.
+- [x] AC-5: Jika ada kolom yang tidak cocok, tampilkan peringatan yang menyebut nama kolom dan menjelaskan bahwa nilainya tidak disimpan bila tetap dipetakan ke "Tidak dipakai". Peringatan tidak memblokir import selama seluruh field wajib sudah dipetakan. Sistem juga memperingatkan header wajib yang belum ditemukan. Kolom `Role` tidak dipakai oleh import dan harus diperingatkan sebagai kolom ekstra; penetapan role aplikasi tetap dilakukan melalui Kelola Akses User (US-1.4).
 - [x] AC-6: Tombol "Lanjutkan ke Validasi" dan "Batal".
 
-**Catatan pengerjaan AC-4 dan AC-5 (belum diimplementasikan):**
+**Catatan penyelesaian AC-4 dan AC-5 — PR #183:**
 
-1. Tetapkan daftar header canonical berdasarkan US-3.1 AC-3. `No` hanya kolom tampilan; `NIK` dan `No KK` boleh tidak ada; `Tanggal Lahir` wajib untuk setiap baris import karena diperlukan oleh kalkulasi BUP/pensiun. Jangan menambah `Role` ke template, mapping, atau validasi import.
-2. Ubah langkah unggah agar berkas dengan header yang belum dikenali tetap membentuk batch import dan masuk ke layar pemetaan, bukan langsung ditolak. Batch menyimpan header sumber, mapping otomatis, mapping pilihan Admin, peringatan kolom, dan batas waktu 30 menit.
-3. Tambahkan endpoint pemetaan yang memakai FormRequest untuk otorisasi serta validasi mapping; controller hanya meneruskan request ke Action. Endpoint preview membatasi respons di server menjadi maksimal 10 baris dan memakai mapping aktif.
-4. Pemeta baris membaca pilihan mapping manual sebagai sumber utama. Nilai kosong pada field wajib membuat hanya baris tersebut gagal; baris valid lain tetap dapat diproses. Heuristik kolom bergeser hanya boleh dipakai sebelum Admin menyimpan mapping manual dan hasilnya harus terlihat sebagai mapping awal yang dapat diubah.
-5. Selaraskan validasi NIP dengan US-3.3 AC-5/K-US-02: NIP yang sudah ada di database menjadi baris terlewat, NIP ganda dalam satu berkas tetap gagal, dan keberadaan NIP diperiksa lagi saat penyisipan untuk mencegah kondisi balapan.
-6. Pertahankan alur `Route → Middleware/RBAC → FormRequest → Controller → Action → Service/Model → Payload → Response`, audit `IMPORT`, pembatasan akses backend, masking data sensitif, serta test PostgreSQL 17 untuk mapping, peringatan, validasi, baris terlewat, dan batas preview.
+1. Mapping aktif berasal dari state batch server, dapat diubah melalui dropdown, disimpan sebelum validasi, dan dipakai kembali oleh preview, validasi, serta eksekusi.
+2. Konflik target ganda dan field wajib yang belum dipetakan memblokir validasi dengan pesan yang dapat ditindaklanjuti. Kolom asing dapat tetap `Tidak dipakai` tanpa memblokir proses selama seluruh field wajib tersedia.
+3. Header asing, kolom kanonis yang sengaja dilewati, dan source reserved dibedakan pada UI. Pencocokan header error menggunakan kecocokan eksak agar header serupa tidak ikut tersorot.
+4. Source `Role` dan `No` tidak digunakan oleh import. Penguncian UI dilengkapi enforcement server-side dan pertahanan fail-closed pada domain helper; penetapan role aplikasi tetap dilakukan melalui Kelola Akses User (US-1.4).
+5. Normalisasi header UI dan backend sama-sama memakai trim, penyatuan spasi, dan pencocokan tanpa membedakan kapitalisasi; tanda baca tetap bermakna.
+6. AC-4 dan AC-5 selesai pada source setelah merge commit `4f3f2c3`. Dusk/manual browser regression dan UAT formal tetap menjadi gate QA terpisah.
 
 ---
 

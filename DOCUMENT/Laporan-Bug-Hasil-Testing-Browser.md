@@ -18,9 +18,9 @@ Testing browser langsung terhadap modul Data Pegawai (Babak 2) dan Import Excel/
 
 | ID | Judul Singkat | Severity | Modul | Status |
 |----|---------------|:--------:|-------|--------|
-| BUG-01 | Tombol "Tambah Riwayat" (Kepangkatan/Jabatan/KGB) tidak ada di UI | 🔴 Critical | Data Pegawai | Open |
+| BUG-01 | Tombol "Tambah Riwayat" (Kepangkatan/Jabatan/KGB) tidak ada di UI | 🔴 Critical | Data Pegawai | Fixed / Merged — PR #180 |
 | BUG-02 | Soft delete hanya muncul untuk Super Admin (route mengizinkan Admin) | 🟠 Major | Data Pegawai | Open |
-| BUG-03 | Auto-match pemetaan kolom salah petakan (substring) → validasi import terblokir | 🔴 Critical | Import Excel/CSV | Open |
+| BUG-03 | Auto-match pemetaan kolom salah petakan (substring) → validasi import terblokir | 🔴 Critical | Import Excel/CSV | Fixed / Merged — PR #183 |
 | BUG-04 | NIP duplikat dari DB ditandai ERROR, bukan SKIP (K-US-02 belum terimplementasi) | 🟠 Major | Import Excel/CSV | Open |
 
 **Yang terverifikasi BERFUNGSI BAIK (bukan bug):** login SSO Keycloak, dashboard Admin real data, daftar pegawai (render, search Enter-triggered, filter jenis, pagination, sorting), detail pegawai 8 tab, tambah riwayat via API (backend), soft delete + restore via API (backend), wizard import lengkap (download template, upload, preview, validasi, eksekusi queue), hasil import sesuai keputusan 22 Juli (snapshot tanpa riwayat, tanggal pensiun apa adanya), dan audit log mencatat import.
@@ -59,7 +59,14 @@ Backend untuk menambah riwayat kepangkatan/jabatan/KGB **berfungsi** (terbukti s
 
 **Rekomendasi perbaikan:** Tambahkan tombol pemanggil modal riwayat di setiap tab (Kepangkatan/Jabatan/KGB) pada halaman detail, yang memanggil `openModal('pangkat'|'jabatan'|'kgb', ...)`, mengikuti pola tombol yang sudah ada di tab Keluarga/Disiplin/Pendidikan. Atau sambungkan pemanggil `openRiwayatModal(...)` yang sudah ada di `index.blade.php`.
 
-**Status retest:** Belum — menunggu perbaikan.
+**Penyelesaian:**
+
+- PR #180 (`fix(pegawai): tampilkan kontrol tambah riwayat`) merge ke `development` pada 11 Agustus 2026 melalui merge commit `71d2dae52f95dff84b8aac0ccb70a568cdc52f59`.
+- Halaman detail pegawai sekarang menampilkan tombol **Tambah Riwayat Kepangkatan**, **Tambah Riwayat Jabatan**, dan **Tambah Riwayat KGB** untuk Admin Kepegawaian yang memiliki permission `employee_histories.create`.
+- Ketiga modal menyediakan Upload SK dan mengirim data menggunakan `FormData`/multipart; permission UI selaras dengan endpoint backend.
+- Backend existing tetap menegakkan append-only, rekonsiliasi `is_latest`, kalkulasi TMT, audit CREATE, validasi file, dan pembentukan dokumen SK.
+
+**Status retest:** Pass with Note — retest browser membuktikan ketiga kontrol tampil dan masing-masing modal dapat dibuka; pengguna tanpa permission tidak melihat kontrol. Focused automated test mencatat 41 test lulus dengan 166 assertion dan CI exact head hijau. Full browser/E2E yang benar-benar memilih file lalu melakukan submit multipart sampai dokumen SK dan baris riwayat terbentuk belum tercatat; gap ini menjadi tindak lanjut QA non-blocking.
 
 ---
 
@@ -137,7 +144,14 @@ Akibatnya muncul **3 pemetaan ganda** (field `Jabatan`, `Pendidikan Terakhir`, d
 
 **Rekomendasi perbaikan:** Perbaiki `autoMatchHeaders()` agar mengutamakan exact-match (cocok penuh key/label) sebelum substring, dan/atau urutkan pencocokan dari nama field terpanjang ke terpendek; kolom alias `Person Formula` sebaiknya default `ignore`.
 
-**Status retest:** Belum — menunggu perbaikan.
+**Penyelesaian:**
+
+- PR #183 (`feat(import-pegawai): selesaikan pemetaan kolom Excel/CSV US-3.2`) merge ke `development` pada 11 Agustus 2026 melalui merge commit `4f3f2c3ad5a977de6d3e73035b5e81762a48349c`.
+- Mapping setiap header sumber sekarang dapat diarahkan ke field SIMPEG atau `Tidak dipakai`, disimpan pada batch sebelum validasi, dan digunakan kembali oleh preview, validasi, serta eksekusi.
+- Konflik target ganda dan field wajib yang belum dipetakan memblokir validasi. Header asing, kolom kanonis yang sengaja dilewati, serta source reserved dibedakan; pencocokan error header dilakukan secara eksak.
+- Source `Role` dikunci di UI, ditolak server-side bila dipetakan ke target SIMPEG, dan tetap dibuang secara fail-closed pada domain helper. Normalisasi header UI telah diselaraskan dengan backend.
+
+**Status retest:** Pass with Note — review exact head `cbf907b` menyatakan US-3.2 AC-4 dan AC-5 PASS, dan CI exact head berhasil pada Pint, PHPStan, serta Laravel tests. Laravel Dusk regression tersedia tetapi belum menjadi quality gate CI dan bukti eksekusi manual penuh belum tercatat; browser regression/UAT formal tetap menjadi tindak lanjut QA.
 
 ---
 
@@ -163,7 +177,7 @@ Per keputusan K-US-02, baris dengan NIP yang sudah ada di database seharusnya di
 **Langkah Reproduksi:**
 1. Login sebagai Admin Kepegawaian.
 2. Buka `/pegawai/import-data`, upload CSV yang berisi NIP yang sudah terdaftar di database (contoh: NIP pegawai existing).
-3. Perbaiki pemetaan kolom (lihat BUG-03), lalu jalankan validasi.
+3. Tinjau pemetaan kolom, pastikan seluruh field wajib sudah dipetakan, lalu jalankan validasi.
 4. Amati: baris NIP duplikat ditandai **ERROR**, bukan **SKIP**.
 
 **Expected result (per K-US-02):** NIP yang sudah ada di database → status **SKIP**; NIP ganda dalam satu file → tetap **ERROR**; email yang sudah terdaftar → tetap **ERROR**.
