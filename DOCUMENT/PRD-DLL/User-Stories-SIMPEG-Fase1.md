@@ -5,8 +5,13 @@
 |-------|--------|
 | **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.4 |
 | **Tanggal** | 22 Juli 2026 |
+<<<<<<< HEAD
 | **Pembaruan status terakhir** | 11 Agustus 2026 |
 | **Basis verifikasi status** | Branch `development` @ `4f3f2c3` (setelah PR #183 masuk) |
+=======
+| **Pembaruan status terakhir** | 10 Agustus 2026 |
+| **Basis verifikasi status** | Branch `development` @ `ff260a5` (setelah PR #179 masuk) |
+>>>>>>> 640b7bb97afdf5fc399579668f6a19e6a576e5f3
 | **Total User Stories** | 53 |
 | **Total Epics** | 9 |
 
@@ -48,7 +53,7 @@ Penyelarasan dilakukan setelah PR #180 dan PR #183 merge ke branch `development`
 
 ## Pembaruan Status Acceptance Criteria — 10 Agustus 2026
 
-Penyelarasan terhadap hasil merge yang sudah tercakup pada branch `development` @ `7e9a0b2`. Status hanya dinaikkan bila perubahan telah merge dan memiliki bukti implementasi/test.
+Penyelarasan terhadap hasil merge yang sudah tercakup pada branch `development` @ `ff260a5`. Status hanya dinaikkan bila perubahan telah merge dan memiliki bukti implementasi/test.
 
 ### Kriteria yang dinaikkan menjadi selesai
 
@@ -63,7 +68,7 @@ Seluruh acceptance criteria US-1.5 dikonfirmasi selesai pada source setelah redi
 
 ### Catatan pekerjaan aktif
 
-- Issue #178 tetap open sebagai hardening lanjutan untuk memusatkan invarian bentuk rantai pada titik tulis bersama. Follow-up ini terpisah dan bukan blocker penyelesaian US-4.10 AC-2 oleh PR #177.
+- Issue #178 telah ditutup melalui PR #179 (`ff260a5`). Hardening memusatkan invarian bentuk dan kelayakan rantai pada writer bersama, menserialkan writer konfigurasi, serta mempertahankan audit fail-closed dengan aktor eksplisit. US-4.10 AC-2 tetap diselesaikan oleh PR #177; PR #179 tidak menambah acceptance criteria baru.
 - Catatan lama US-8.1 tentang tren W7 telah ditutup PR #164 (`0940760`): tren pegawai kini dihitung dari riwayat pengangkatan, bukan `created_at` data pegawai.
 
 ---
@@ -1054,7 +1059,7 @@ Setiap story mengikuti format:
 **Acceptance Criteria:**
 
 - [x] AC-1: Halaman konfigurasi approval chain cuti.
-- [x] AC-2: Admin dapat mengatur chain per pegawai: kepala bagian, Ketua Tim Kerja, satu atau lebih verifikator, Kabag/Kepegawaian, dan Pimpinan/PYBMC. Konfigurasi tersebut dapat diterapkan sekaligus ke seluruh anggota satu unit kerja melalui penyalinan template. *(Direvisi oleh keputusan K-US-01, 5 Agustus 2026: rantai aktif pada runtime tetap tepat satu per pegawai sehingga tidak ada precedence global, unit, dan pegawai yang perlu ditetapkan. Cakupan unit sebagai lapisan resolusi runtime ditunda ke Fase 2. Implementasi penyalinan template selesai melalui PR #177; issue #178 adalah hardening follow-up terpisah.)*
+- [x] AC-2: Admin dapat mengatur chain per pegawai: kepala bagian, Ketua Tim Kerja, satu atau lebih verifikator, Kabag/Kepegawaian, dan Pimpinan/PYBMC. Konfigurasi tersebut dapat diterapkan sekaligus ke seluruh anggota satu unit kerja melalui penyalinan template. *(Direvisi oleh keputusan K-US-01, 5 Agustus 2026: rantai aktif pada runtime tetap tepat satu per pegawai sehingga tidak ada precedence global, unit, dan pegawai yang perlu ditetapkan. Cakupan unit sebagai lapisan resolusi runtime ditunda ke Fase 2. Implementasi penyalinan template selesai melalui PR #177; hardening invarian writer pada issue #178 selesai melalui PR #179.)*
 - [x] AC-3: Perubahan konfigurasi tercatat di audit log.
 - [x] AC-4: Konfigurasi langsung berlaku untuk pengajuan cuti baru.
 - [x] AC-5: Ketua Tim Kerja dapat dipilih sebagai verifikator tanpa perlu role baru.

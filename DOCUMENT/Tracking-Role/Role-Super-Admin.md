@@ -4,7 +4,7 @@
 |---|---|
 | Role internal | `super_admin` |
 | Tanggal analisis ulang | 10 Agustus 2026 |
-| Basis verifikasi | Branch `development` @ `1fd99cb` setelah PR #177 |
+| Basis verifikasi | Branch `development` @ `ff260a5` setelah PR #179 |
 | Dokumen asal (dikonsolidasi ke file ini) | `Analisis-Frontend-Backend-Role-Super-Admin.md` (audit 21 Juli) dan `Analisis-Kesesuaian-Administrasi-Sistem-Super-Admin.md` (audit 23 Juli) |
 | Acuan produk | PRD v1.4 §4.2 (konfigurasi sistem, user management, seluruh kemampuan Admin), §12 (audit immutable), §15–16 (RBAC & master dari database), US-1.4 |
 | Status keseluruhan | ⚠️ **Belum sepenuhnya sesuai** — operasional harian kuat; halaman konfigurasi sistem masih titik terlemah |
@@ -29,7 +29,7 @@ Bagian audit 27–29 Juli di bawah dipertahankan sebagai kronologi. Temuan berik
 - Data Master selesai melalui PR #151 (`ref_notification_channels`), PR #165 (`ref_jabatan`), dan PR #170 (guard `employee_status_histories` + FK `RESTRICT`);
 - Hari Libur web selesai melalui PR #166;
 - event audit wajib US-7.1 AC-1 selesai melalui PR #176.
-- penerapan template rantai approval ke seluruh anggota unit selesai melalui PR #177; setiap pegawai tetap memiliki tepat satu chain runtime dan issue #178 tetap follow-up hardening terpisah.
+- penerapan template rantai approval ke seluruh anggota unit selesai melalui PR #177; setiap pegawai tetap memiliki tepat satu chain runtime. Hardening issue #178 selesai melalui PR #179 dengan invarian terpusat pada writer bersama, lock konfigurasi deterministik, dan audit aktor eksplisit.
 
 Hardening audit fail-closed untuk seluruh CRUD pegawai/import masih ⚠️. Pengaturan Sistem, keputusan sinkronisasi password lokal dengan Keycloak, dan gap lain yang tidak disebut selesai di atas tetap terbuka.
 

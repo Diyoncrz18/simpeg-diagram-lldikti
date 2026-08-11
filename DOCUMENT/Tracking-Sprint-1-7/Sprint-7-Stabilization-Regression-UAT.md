@@ -5,8 +5,8 @@
 | Periode | 10 – 20 Agustus 2026 (gate akhir: release candidate siap, go-live 20 Agustus) |
 | Cakupan issue | #45, #47, #48, #50, #52 (`Issues-SIMPEG-Fase1.md`) + jendela bugfix seluruh sisa temuan Sprint 1–6 |
 | Slice | 7.1 Audit view + redirect + polish P1 (hari 1–4) · 7.2 Bugfix backlog (hari 5–8) · 7.3 Full regression + UAT + RC (hari 9–15) |
-| Pembaruan terakhir | 10 Agustus 2026 (rekonsiliasi source awal Sprint 7) |
-| Basis verifikasi | `development` @ `1fd99cb` setelah PR #177 |
+| Pembaruan terakhir | 10 Agustus 2026 (rekonsiliasi source setelah PR #179) |
+| Basis verifikasi | `development` @ `ff260a5` setelah PR #179 |
 | Acuan | User-Stories US-7.2/7.3, US-1.5, US-6.2/6.4, US-4.8/4.9 · Tracking-Sprint-Vertical-Slice §10 · Tim-dan-Pembagian-Tugas §4 Sprint 7 |
 
 Legend: ✅ selesai pada source · ⚠️ sebagian · ❌ belum. Status source ≠ tracker `Done` (tetap butuh review, QA/retest, evidence).
@@ -28,11 +28,12 @@ Kabar baik: **3 dari 4 issue fitur Sprint 7 sudah jadi lebih awal** — #45 (daf
 | 7.2-6 | ✅ | PR #140 (`952f723`) menegakkan batas tahun kalender pada seluruh jenis cuti untuk submit dan resubmit. |
 | 7.2-9 | ⚠️ | PR #176 (`54ab90d`) menutup event wajib US-7.1 AC-1 dan memperkeras mutasi yang disentuh. Perluasan fail-closed untuk CRUD pegawai/import beserta kebijakan dan test rollback masih terbuka. |
 | 7.2-10 | ✅ | Seluruh enam issue Sprint 6 telah selesai pada source melalui rangkaian PR #125/#132/#141/#150/#151/#154/#155/#158/#162/#164/#165/#167/#170. Formal regression/UAT tetap berada di Sprint 7. |
+| #178 / 7.2-13 | ✅ | PR #179 (`ff260a5`) memusatkan invarian rantai approval pada writer bersama, menolak approver tidak sah, menserialkan writer konfigurasi, memperkeras backfill/PYBMC/sinkronisasi Kepala Bagian, dan mempertahankan audit fail-closed beraktor eksplisit. Status ini source-complete; formal QA/UAT Sprint 7 tetap terbuka. |
 
 ### Status PR dan follow-up
 
 - PR #177 telah **merged** (`1fd99cb`) dan menutup US-4.10 AC-2 melalui penerapan template rantai ke anggota unit.
-- Issue #178 tetap **open** sebagai hardening lanjutan untuk memusatkan invarian rantai pada titik tulis bersama; follow-up ini bukan blocker AC-2 maupun merge PR #177.
+- PR #179 telah **merged** (`ff260a5`) dan Issue #178 telah **closed** setelah hardening invarian rantai pada seluruh writer bersama. Follow-up ini tidak mengubah status AC-2 yang telah ditutup PR #177.
 
 ## Status Awal per Issue
 
@@ -85,7 +86,7 @@ Prioritas P2 & dokumen:
 |---|---|---|
 | 7.2-11 | Item kecil: dokumentasikan `SIMPEG_SESSION_IDLE_TIMEOUT=30` sebagai batas idle yang ditegakkan/audited dan pertahankan `SESSION_LIFETIME` lebih besar sebagai jaring pengaman; tambah `resources/views/components/README.md`. Teks helper flag kinerja sudah selesai PR #173/#167 | Adriel |
 | 7.2-12 | ✅ Selesai 28 Juli — [Keputusan Skema Cuti Canonical](../Keputusan-Skema-Cuti-Canonical.md) menetapkan `leave_request_steps`/`leave_balance_ledger`/`leave_proofs`; PRD §15.2 dan issue breakdown telah diselaraskan | Dion |
-| 7.2-13 | ✅ Keputusan K-US-01 dan implementasi selesai: runtime memakai tepat satu chain per pegawai; unit hanya target penyalinan template; penerapan massal merge melalui PR #177 (`1fd99cb`). Issue #178 tetap follow-up hardening terpisah | Dion + Jordan |
+| 7.2-13 | ✅ Keputusan K-US-01 dan implementasi selesai: runtime memakai tepat satu chain per pegawai; unit hanya target penyalinan template; penerapan massal merge melalui PR #177 (`1fd99cb`) dan hardening invarian writer issue #178 selesai melalui PR #179 (`ff260a5`) | Dion + Jordan |
 | 7.2-14 | Bereskan hygiene lokal yang mengganjal `composer qa`: perubahan menggantung `bootstrap/app.php` (formatting) & `test_show.php` — commit/buang agar gate QA lokal hijau | Dion |
 
 ### Slice 7.3 — Full Regression, UAT, Release Candidate (hari 9–15)
@@ -111,5 +112,6 @@ Prioritas P2 & dokumen:
 
 | Tanggal | Perubahan |
 |---|---|
+| 10 Agustus 2026 | Sinkronisasi terhadap `development` @ `ff260a5`: PR #179 menutup Issue #178 dan menyelesaikan hardening 7.2-13 pada source. Browser QA 7.1-4, hardening audit menyeluruh 7.2-9, full regression, UAT, dan release gate tetap terbuka. |
 | 10 Agustus 2026 | Sinkronisasi terhadap `development` @ `1fd99cb`: 7.1-1, 7.2-1, dan 7.2-2 selesai melalui PR #174; 7.2-4 melalui PR #173; 7.2-5 melalui PR #166; 7.2-6 melalui PR #140; carry-over Sprint 6 selesai pada source; dan US-4.10 AC-2 selesai melalui PR #177. Task 7.1-4 tetap terbuka untuk browser QA/evidence final dan 7.2-9 masih sebagian. Issue #178 tetap open sebagai hardening follow-up terpisah. |
 | 26 Juli 2026 | File dibuat pra-sprint. Status awal: #45 ✅, #48 ✅, #50 ⚠️ (perlu test formal), #47 ⚠️ (pagination server + masking), #52 ❌. Daftar task disusun dari Issues #45–#52 + backlog terverifikasi Sprint 1–6; item EWS ditandai "verifikasi dulu" karena PR #127 kemungkinan sudah menutup sebagian. |
