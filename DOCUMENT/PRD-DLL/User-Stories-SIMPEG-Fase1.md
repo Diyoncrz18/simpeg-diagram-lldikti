@@ -5,19 +5,53 @@
 |-------|--------|
 | **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.4 |
 | **Tanggal** | 22 Juli 2026 |
-<<<<<<< HEAD
-| **Pembaruan status terakhir** | 11 Agustus 2026 |
-| **Basis verifikasi status** | Branch `development` @ `4f3f2c3` (setelah PR #183 masuk) |
-=======
-| **Pembaruan status terakhir** | 10 Agustus 2026 |
-| **Basis verifikasi status** | Branch `development` @ `ff260a5` (setelah PR #179 masuk) |
->>>>>>> 640b7bb97afdf5fc399579668f6a19e6a576e5f3
+| **Pembaruan status terakhir** | 12 Agustus 2026 |
+| **Basis verifikasi status** | Branch `development` @ `1d3e450` (setelah PR #172 masuk) |
 | **Total User Stories** | 53 |
 | **Total Epics** | 9 |
 
 > **Catatan sinkronisasi PRD 1.4:** Keycloak digunakan hanya untuk SSO/login. Role dan permission dikelola di database SIMPEG. Approval cuti memakai tepat satu chain runtime per pegawai; unit hanya menjadi target penyalinan template sesuai K-US-01. Status keputusan resmi adalah `Disetujui`, `Perubahan`, `Ditangguhkan`, dan `Tidak Disetujui`; cuti tahunan tidak boleh lintas tahun; EWS menambahkan Satyalancana; notifikasi harus channel-configurable; dan laporan mendukung export nominatif Excel custom.
 >
 > **Keputusan import Fase 1 (kanonis, disetujui pengguna 22 Juli 2026):** import massal hanya mengaktifkan template Data Utama. Import membuat record pegawai beserta field snapshot awal, tidak membuat riwayat kepangkatan/jabatan/KGB, dan tidak memanggil kalkulasi TMT. Riwayat resmi diinput per pegawai melalui CRUD append-only. Tanggal pensiun hasil import dipertahankan apa adanya. Kalkulasi TMT dipicu saat riwayat/sumber resmi disimpan, bukan saat import selesai. Template lanjutan multi-jenis tidak termasuk ruang lingkup saat ini.
+
+---
+
+## Pembaruan Status Acceptance Criteria — 12 Agustus 2026
+
+Penyelarasan dilakukan setelah PR #172 merge ke branch `development` pada 12 Agustus 2026 dengan merge commit `1d3e450`. PR ini menutup empat dari lima kriteria yang sebelumnya sengaja dibiarkan terbuka pada penyelarasan 5 Agustus 2026, yaitu US-3.3 AC-5, US-4.5 AC-2, US-5.5 AC-4, dan US-5.5 AC-5. Status selesai didasarkan pada source hasil merge, bukan pada narasi deskripsi PR.
+
+### Kriteria yang dinaikkan menjadi selesai
+
+| User Story | Kriteria | Bukti implementasi |
+|---|---|---|
+| US-3.3 | AC-5 | Jalur baris terlewat dihidupkan sesuai K-US-02. `ValidateImportBatchAction` mengembalikan status `skip` beserta `skip_reason` "NIP sudah terdaftar di database — baris akan dilewati." dan menghitungnya pada `skip_count` terpisah dari `error_count`. Batas keputusan dipertahankan: NIP ganda di dalam satu berkas tetap error melalui upgrade retroaktif pada kemunculan pertama, dan email pegawai yang sudah terdaftar tetap error. `ExecuteImportBatchAction` memeriksa ulang keunikan NIP saat penyisipan sehingga tabrakan pada waktu eksekusi dilaporkan sebagai `skipped`, bukan sebagai `inserted`. Diuji pada `tests/Feature/EmployeeImportErrorPriorityTest.php`, `tests/Feature/EmployeeImportExecutionRaceTest.php`, dan `tests/Feature/LegacyEmployeeImportKus02Test.php` |
+| US-4.5 | AC-2 | Layar keputusan menyediakan konteks pemohon melalui `BuildVerifierLeaveContextAction`: preview saldo tahun berjalan beserta carry-over, daftar cuti bersama pada tahun acuan, dan riwayat cuti tahunan yang sudah disetujui untuk N, N-1, dan N-2 yang diambil per tahun agar aktivitas tahun berjalan tidak menghabiskan slot dua tahun sebelumnya. `BuildCutiDetailAction` menegakkan akses baca lebih dulu dan hanya menyusun konteks ini bagi pihak yang berwenang bertindak atau pemegang izin baca menyeluruh, sehingga lampiran dan data saldo tidak terbuka bagi pengguna lain. Controller detail cuti tetap tipis |
+| US-5.5 | AC-4 | Milestone Satyalancana 10, 20, dan 30 tahun dihitung dari data pengangkatan pertama lalu disimpan sebagai tiga slot terpisah pada `employee_milestones` melalui `milestone_key` bernilai `10`, `20`, dan `30`. Sinkronisasi dijalankan sekali setelah seluruh riwayat/pengangkatan tersimpan dalam transaksi yang sama dan bersifat idempoten. Diuji pada `tests/Feature/EmployeeAppointmentMilestoneSyncTest.php`, `tests/Feature/TmtCalculatorMilestoneTest.php`, dan `tests/Feature/BackfillEmployeeMilestonesCommandTest.php` |
+| US-5.5 | AC-5 | Hasil kalkulasi disimpan pada tabel terpisah `employee_milestones` sehingga scheduler EWS membaca milestone tersimpan alih-alih menghitung ulang setiap hari. Keutuhan slot dijaga unique index parsial `employee_milestones_active_slot_unique` pada `(employee_id, type, milestone_key)` untuk baris aktif, dan domain `milestone_key` dibatasi check constraint. Rekonsiliasi dilakukan dengan menonaktifkan milestone yang tidak lagi valid, bukan menghapusnya, dan tersedia perintah `milestone:backfill` yang idempoten. Diuji pada `tests/Feature/EwsSchedulerMilestoneOptimizationTest.php`, `tests/Feature/EmployeeMilestonesMigrationTest.php`, dan `tests/Feature/TmtCalculatorMilestoneInvalidationTest.php` |
+
+Dengan masuknya AC-5, seluruh acceptance criteria US-3.3 berstatus selesai. Dengan masuknya AC-2, seluruh acceptance criteria US-4.5 berstatus selesai. Dengan masuknya AC-4 dan AC-5, seluruh acceptance criteria US-5.5 berstatus selesai, sehingga modul EWS tidak lagi memiliki kriteria terbuka.
+
+### Kriteria yang tetap terbuka
+
+| User Story | Kriteria | Alasan |
+|---|---|---|
+| US-6.2 | AC-2 | Daftar notifikasi masih membedakan warna menurut jenis, belum menurut status sudah atau belum dibaca. Tidak disentuh PR #172 |
+
+### Provenance tanggal pensiun
+
+PR ini membedakan asal tanggal pensiun secara eksplisit agar tanggal resmi, manual, dan hasil import tidak tertimpa kalkulasi. Nilai pensiun yang sudah ada sebelum milestone diperkenalkan dipertahankan sebagai `legacy_unverified` secara bawaan dan tidak ditebak sebagai hasil kalkulasi. Rekalkulasi nilai legacy hanya berjalan melalui opsi operator eksplisit `milestone:backfill --recalculate-legacy-pension`. Ketentuan ini menjaga batasan import Fase 1 bahwa tanggal pensiun hasil import dipertahankan apa adanya, sesuai US-3.4 AC-8 dan US-5.5 AC-6.
+
+### Bukti pengujian dan catatan QA PR #172
+
+- Quality gate penuh sebelum merge: Pint PASS, PHPStan 0 error, test suite Laravel 1.750 lulus dengan 36 dilewati dan 8.884 asersi, serta `npm run build` berhasil.
+- Focused test pada PostgreSQL 17 dilaporkan per command dan tidak dijumlahkan karena sebagian coverage beririsan: import/race/provenance 54 lulus, EWS scheduler dan performa 36 lulus, backfill dan provenance pensiun 19 lulus, update pegawai beserta milestone terkait 46 lulus, jalur trigger/advisory-lock/concurrency yang dilewati pada SQLite 9 lulus, dan migration `employee_milestones` 1 lulus.
+- Browser smoke mencakup halaman import beserta peringatan mapping dan halaman detail cuti pada viewport desktop serta tablet, dengan konsol tanpa error maupun warning. Tidak ada eksekusi import pegawai pada smoke tersebut.
+- Bukti visual pada deskripsi PR masih berupa penampung gambar yang belum diisi, sehingga bukti responsif tercatat sebagai narasi, bukan lampiran. Ini gap bukti, bukan gap requirement pada source.
+- Regression/UAT formal Sprint 7 tetap wajib sebelum release candidate.
+
+### Catatan penyuntingan dokumen
+
+Header dokumen sebelumnya memuat penanda konflik merge yang belum diselesaikan sehingga terdapat dua basis verifikasi status yang saling bertentangan, yaitu 11 Agustus 2026 @ `4f3f2c3` dan 10 Agustus 2026 @ `ff260a5`. Konflik tersebut diselesaikan pada penyuntingan ini dengan menetapkan basis tunggal 12 Agustus 2026 @ `1d3e450`, karena kedua commit tersebut merupakan leluhur dari merge commit PR #172 pada branch `development`. Section penyelarasan tanggal-tanggal sebelumnya dipertahankan apa adanya sebagai riwayat.
 
 ---
 
@@ -754,7 +788,7 @@ Setiap story mengikuti format:
 - [x] AC-2: Tampilkan ringkasan validasi: jumlah baris total, baris valid (✅), baris error (❌).
 - [x] AC-3: Untuk baris error, tampilkan detail: nomor baris, kolom yang bermasalah, jenis error.
 - [x] AC-4: Admin bisa memilih: "Import Hanya yang Valid" atau "Batalkan Semua".
-- [ ] AC-5: Baris yang sudah ada (NIP duplikat) ditandai sebagai "Sudah ada — akan di-skip" (bukan error). *(Kriteria dipertahankan dan jalur skip dihidupkan sesuai keputusan K-US-02, 5 Agustus 2026. Batasnya: NIP yang sudah ada di database menjadi baris terlewat; NIP ganda di dalam satu berkas tetap error; email pegawai yang sudah terdaftar tetap error.)*
+- [x] AC-5: Baris yang sudah ada (NIP duplikat) ditandai sebagai "Sudah ada — akan di-skip" (bukan error). *(Kriteria dipertahankan dan jalur skip dihidupkan sesuai keputusan K-US-02, 5 Agustus 2026. Batasnya: NIP yang sudah ada di database menjadi baris terlewat; NIP ganda di dalam satu berkas tetap error; email pegawai yang sudah terdaftar tetap error. Selesai melalui PR #172, 12 Agustus 2026.)*
 
 ---
 
@@ -926,7 +960,7 @@ Setiap story mengikuti format:
 **Acceptance Criteria:**
 
 - [x] AC-1: Sama dengan US-4.4, tetapi hanya menampilkan pengajuan yang sudah sampai pada step saya.
-- [ ] AC-2: Verifikator dapat melihat saldo tahun berjalan, carry-over N-1, riwayat N-2/N-1, dan lampiran.
+- [x] AC-2: Verifikator dapat melihat saldo tahun berjalan, carry-over N-1, riwayat N-2/N-1, dan lampiran.
 - [x] AC-3: Opsi aksi: "Disetujui", "Perubahan", "Ditangguhkan", atau "Tidak Disetujui"; semua selain "Disetujui" wajib keterangan.
 - [x] AC-4: Notifikasi terkirim sesuai aksi.
 - [x] AC-5: Audit log tercatat.
@@ -1243,8 +1277,8 @@ Setiap story mengikuti format:
 - [x] AC-1: Saat riwayat kepangkatan baru ditambahkan → hitung `tanggal_kenaikan_pangkat_berikutnya = tmt_pangkat + 4 tahun`.
 - [x] AC-2: Saat riwayat KGB baru ditambahkan → hitung `tanggal_kgb_berikutnya = tmt_kgb + 2 tahun`.
 - [x] AC-3: Saat jabatan baru ditambahkan → hitung ulang `tanggal_pensiun = tanggal_lahir + BUP_sesuai_jenis_jabatan_baru`.
-- [ ] AC-4: Saat data pengangkatan pertama tersedia → hitung milestone Satyalancana 10/20/30 tahun.
-- [ ] AC-5: Hasil kalkulasi disimpan di tabel `employees` (kolom computed atau tabel terpisah) agar scheduler EWS tidak perlu hitung ulang setiap hari.
+- [x] AC-4: Saat data pengangkatan pertama tersedia → hitung milestone Satyalancana 10/20/30 tahun.
+- [x] AC-5: Hasil kalkulasi disimpan di tabel `employees` (kolom computed atau tabel terpisah) agar scheduler EWS tidak perlu hitung ulang setiap hari. *(Diselesaikan dengan tabel terpisah `employee_milestones`; PR #172, 12 Agustus 2026.)*
 - [x] AC-6: Kalkulasi TMT dipicu saat riwayat/sumber resmi disimpan per pegawai, bukan saat import massal selesai (keputusan pengguna 22 Juli 2026). Import Data Utama tidak memanggil kalkulasi ini dan tanggal pensiun hasil import dipertahankan apa adanya.
 
 ---
