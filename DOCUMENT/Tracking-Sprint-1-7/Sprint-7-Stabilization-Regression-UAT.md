@@ -5,8 +5,8 @@
 | Periode | 10 – 20 Agustus 2026 (gate akhir: release candidate siap, go-live 20 Agustus) |
 | Cakupan issue | #45, #47, #48, #50, #52 (`Issues-SIMPEG-Fase1.md`) + jendela bugfix seluruh sisa temuan Sprint 1–6 |
 | Slice | 7.1 Audit view + redirect + polish P1 (hari 1–4) · 7.2 Bugfix backlog (hari 5–8) · 7.3 Full regression + UAT + RC (hari 9–15) |
-| Pembaruan terakhir | 10 Agustus 2026 (rekonsiliasi source setelah PR #179) |
-| Basis verifikasi | `development` @ `ff260a5` setelah PR #179 |
+| Pembaruan terakhir | 14 Agustus 2026 (rekonsiliasi terbatas setelah PR #182) |
+| Basis verifikasi | `development` @ `ff0e9e1` setelah PR #182; status slice lain terakhir direkonsiliasi @ `ff260a5` (PR #179) |
 | Acuan | User-Stories US-7.2/7.3, US-1.5, US-6.2/6.4, US-4.8/4.9 · Tracking-Sprint-Vertical-Slice §10 · Tim-dan-Pembagian-Tugas §4 Sprint 7 |
 
 Legend: ✅ selesai pada source · ⚠️ sebagian · ❌ belum. Status source ≠ tracker `Done` (tetap butuh review, QA/retest, evidence).

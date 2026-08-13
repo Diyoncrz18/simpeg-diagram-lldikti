@@ -5,14 +5,32 @@
 |-------|--------|
 | **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.4 |
 | **Tanggal** | 22 Juli 2026 |
-| **Pembaruan status terakhir** | 13 Agustus 2026 |
-| **Basis verifikasi status** | Branch `development` @ `73a358a` (setelah PR #194 masuk) |
+| **Pembaruan status terakhir** | 14 Agustus 2026 |
+| **Basis verifikasi status** | Branch `development` @ `ff0e9e1` (setelah PR #182 masuk) |
 | **Total User Stories** | 53 |
 | **Total Epics** | 9 |
 
 > **Catatan sinkronisasi PRD 1.4:** Keycloak digunakan hanya untuk SSO/login. Role dan permission dikelola di database SIMPEG. Approval cuti memakai tepat satu chain runtime per pegawai; unit hanya menjadi target penyalinan template sesuai K-US-01. Status keputusan resmi adalah `Disetujui`, `Perubahan`, `Ditangguhkan`, dan `Tidak Disetujui`; cuti tahunan tidak boleh lintas tahun; EWS menambahkan Satyalancana; notifikasi harus channel-configurable; dan laporan mendukung export nominatif Excel custom.
 >
 > **Keputusan import Fase 1 (kanonis, disetujui pengguna 22 Juli 2026):** import massal hanya mengaktifkan template Data Utama. Import membuat record pegawai beserta field snapshot awal, tidak membuat riwayat kepangkatan/jabatan/KGB, dan tidak memanggil kalkulasi TMT. Riwayat resmi diinput per pegawai melalui CRUD append-only. Tanggal pensiun hasil import dipertahankan apa adanya. Kalkulasi TMT dipicu saat riwayat/sumber resmi disimpan, bukan saat import selesai. Template lanjutan multi-jenis tidak termasuk ruang lingkup saat ini.
+
+---
+
+## Pembaruan Status Acceptance Criteria — 14 Agustus 2026
+
+Penyelarasan dilakukan setelah PR #182 merge ke branch `development` pada 14 Agustus 2026 (WIB) dengan merge commit `ff0e9e1`. Pembaruan ini hanya merekonsiliasi PR #182; PR #181, #198, dan #202 yang terlebih dahulu masuk pada rentang yang sama belum direkonsiliasi ke dokumen ini.
+
+### Kriteria yang dikonfirmasi dengan bukti browser
+
+| User Story | Kriteria | Bukti implementasi |
+|---|---|---|
+| US-3.3 | AC-5 | PR #182 (`ff0e9e1`) menutup BUG-04 dengan bukti retest browser Playwright: berkas CSV berisi NIP yang sudah terdaftar di database menghasilkan ringkasan validasi 0 valid, 1 skip, 0 error dengan keterangan "NIP sudah terdaftar di database.", dan tombol import menampilkan 0 baris sehingga tidak dapat dijalankan. Perilaku sumber dari PR #172 dipertahankan: NIP ganda dalam satu berkas tetap error melalui koreksi retroaktif pada kemunculan pertama, email terdaftar tetap error, dan NIP yang menjadi terdaftar di antara validasi dan eksekusi dicatat sebagai skip pada laporan akhir. Endpoint kompatibilitas mempertahankan perilaku all-or-nothing dengan rule unique sebelumnya. PR #182 juga menambahkan lifecycle lock bersama pada aksi validasi, antrean, dan penyimpanan mapping wizard import sehingga permintaan paralel tidak membaca state parsial, dikunci regression test kondisi balapan pada `tests/Feature/EmployeeImportExecutionRaceTest.php`. |
+
+Dengan pembaruan ini, US-3.3 AC-5 tidak lagi hanya selesai pada source dan test otomatis, tetapi juga memiliki bukti browser. Regression/UAT formal Sprint 7 tetap menjadi release gate terpisah.
+
+### Catatan cakupan PR #182 di luar import
+
+PR #182 turut menambahkan event `status_pegawai.diubah` pada `NotificationEventCatalog` (in-app + email) dan menjadikan `NotificationRecipientResolver` fail-closed terhadap katalog domain: event yang tidak mendukung channel email pada katalog tidak dapat diaktifkan oleh kebijakan database yang stale. Perubahan ini bersifat hardening notifikasi dan tidak mengubah acceptance criteria mana pun.
 
 ---
 
@@ -806,7 +824,7 @@ Setiap story mengikuti format:
 - [x] AC-2: Tampilkan ringkasan validasi: jumlah baris total, baris valid (✅), baris error (❌).
 - [x] AC-3: Untuk baris error, tampilkan detail: nomor baris, kolom yang bermasalah, jenis error.
 - [x] AC-4: Admin bisa memilih: "Import Hanya yang Valid" atau "Batalkan Semua".
-- [x] AC-5: Baris yang sudah ada (NIP duplikat) ditandai sebagai "Sudah ada — akan di-skip" (bukan error). *(Kriteria dipertahankan dan jalur skip dihidupkan sesuai keputusan K-US-02, 5 Agustus 2026. Batasnya: NIP yang sudah ada di database menjadi baris terlewat; NIP ganda di dalam satu berkas tetap error; email pegawai yang sudah terdaftar tetap error. Selesai melalui PR #172, 12 Agustus 2026.)*
+- [x] AC-5: Baris yang sudah ada (NIP duplikat) ditandai sebagai "Sudah ada — akan di-skip" (bukan error). *(Kriteria dipertahankan dan jalur skip dihidupkan sesuai keputusan K-US-02, 5 Agustus 2026. Batasnya: NIP yang sudah ada di database menjadi baris terlewat; NIP ganda di dalam satu berkas tetap error; email pegawai yang sudah terdaftar tetap error. Selesai pada source melalui PR #172, 12 Agustus 2026; ditutup dengan bukti browser dan hardening lifecycle lock melalui PR #182, 14 Agustus 2026.)*
 
 ---
 

@@ -4,8 +4,8 @@
 |---|---|
 | Periode | 1 – 10 Juli 2026 |
 | Cakupan issue | #20 – #25, #51 (`Issues-SIMPEG-Fase1.md`) |
-| Pembaruan terakhir | 11 Agustus 2026 |
-| Basis verifikasi | Branch `development` @ `4f3f2c3` setelah PR #183 merge; baseline historis verifikasi 26 Juli 2026 |
+| Pembaruan terakhir | 14 Agustus 2026 |
+| Basis verifikasi | Branch `development` @ `ff0e9e1` setelah PR #182 merge; baseline historis verifikasi 26 Juli 2026 |
 | Keputusan kanonis terkait | Import Fase 1 hanya template **Data Utama** (keputusan pengguna 22 Juli 2026): membuat record + snapshot saja, tanpa riwayat, tanpa kalkulasi TMT, tanggal pensiun dipertahankan apa adanya. Dikunci test regresi PR #121. |
 | Menggantikan | `Analisis-Kesesuaian-Sprint-1-5.md` (dihapus 26 Juli 2026) |
 
@@ -29,7 +29,7 @@ Legend: ✅ selesai pada source · ⚠️ sebagian · ❌ belum selesai. Status 
 
 ## Gap dan Tindak Lanjut
 
-1. **US-3.3 AC-5 / K-US-02:** cabang "skip NIP duplikat" di `ValidateImportBatchAction` masih perlu diselaraskan bila belum ditutup PR lain. NIP yang sudah ada di database harus menjadi baris terlewat, NIP ganda dalam satu berkas tetap error, dan email terdaftar tetap error. Pokok ini terpisah dari penyelesaian US-3.2 oleh PR #183.
+1. ~~**US-3.3 AC-5 / K-US-02:**~~ **Tertutup 14 Agustus 2026 — PR #182 (`ff0e9e1`).** Jalur skip untuk NIP yang sudah ada di database hidup dan terverifikasi browser (Playwright: 0 valid, 1 skip, 0 error; tombol import tidak dapat dijalankan untuk berkas tersebut). Batas K-US-02 terjaga: NIP ganda dalam satu berkas tetap error melalui koreksi retroaktif pada kemunculan pertama, email terdaftar tetap error, dan NIP yang menjadi terdaftar di antara validasi dan eksekusi dicatat sebagai skip. Lifecycle lock bersama kini melindungi aksi validasi, antrean, dan penyimpanan mapping dari pembacaan state parsial. Penyelesaian source sebelumnya melalui PR #172 (12 Agustus 2026) dipertahankan.
 2. **QA browser:** Laravel Dusk regression untuk mapping sudah tersedia, tetapi belum menjadi quality gate CI dan bukti eksekusi manual penuh belum tercatat. Jalankan Dusk/manual browser regression beserta UAT formal sebelum release candidate.
 
 Rambu: pertahankan batasan keputusan 22 Juli (jangan memulihkan template multi-jenis, jangan membuat riwayat/kalkulasi TMT dari import) — test regresi PR #121 wajib tetap hijau.
@@ -44,6 +44,7 @@ Rambu: pertahankan batasan keputusan 22 Juli (jangan memulihkan template multi-j
 
 | Tanggal | Perubahan |
 |---|---|
+| 14 Agustus 2026 | Gap K-US-02 ditutup melalui **PR #182** (`ff0e9e1`): jalur SKIP NIP existing terverifikasi browser via Playwright, lifecycle lock bersama untuk aksi validasi/antrean/mapping, serta regression test kondisi balapan validasi→eksekusi. Melengkapi penyelesaian source PR #172. |
 | 20 Juli 2026 | #23 naik ke ✅ (PR #117); #25 tuntas setelah penghapusan hard delete. |
 | 22 Juli 2026 | Keputusan import Data Utama menjadi kanonis; temuan "template lanjutan/snapshot riwayat/TMT pasca-import" direklasifikasi **sengaja tidak ada**. PR #121 menambah test regresi batasnya. |
 | 26 Juli 2026 (siang) | Verifikasi HEAD `1b2e5b6`: #20–#22 tidak berubah (tak tersentuh PR #122–#128). |

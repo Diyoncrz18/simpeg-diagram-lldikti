@@ -21,7 +21,7 @@ Testing browser langsung terhadap modul Data Pegawai (Babak 2) dan Import Excel/
 | BUG-01 | Tombol "Tambah Riwayat" (Kepangkatan/Jabatan/KGB) tidak ada di UI | 🔴 Critical | Data Pegawai | Fixed / Merged — PR #180 |
 | BUG-02 | Soft delete hanya muncul untuk Super Admin (route mengizinkan Admin) | 🟠 Major | Data Pegawai | Open |
 | BUG-03 | Auto-match pemetaan kolom salah petakan (substring) → validasi import terblokir | 🔴 Critical | Import Excel/CSV | Fixed / Merged — PR #183 |
-| BUG-04 | NIP duplikat dari DB ditandai ERROR, bukan SKIP (K-US-02 belum terimplementasi) | 🟠 Major | Import Excel/CSV | Open |
+| BUG-04 | NIP duplikat dari DB ditandai ERROR, bukan SKIP (K-US-02 belum terimplementasi) | 🟠 Major | Import Excel/CSV | Fixed / Merged — PR #182 |
 
 **Yang terverifikasi BERFUNGSI BAIK (bukan bug):** login SSO Keycloak, dashboard Admin real data, daftar pegawai (render, search Enter-triggered, filter jenis, pagination, sorting), detail pegawai 8 tab, tambah riwayat via API (backend), soft delete + restore via API (backend), wizard import lengkap (download template, upload, preview, validasi, eksekusi queue), hasil import sesuai keputusan 22 Juli (snapshot tanpa riwayat, tanggal pensiun apa adanya), dan audit log mencatat import.
 
@@ -190,7 +190,14 @@ Per keputusan K-US-02, baris dengan NIP yang sudah ada di database seharusnya di
 
 **Rekomendasi perbaikan:** Lepas rule `unique:employees,nip` dari `EmployeeValidationRules::import()` agar jalur skip di `ValidateImportBatchAction` hidup, pertahankan pemeriksaan ulang NIP saat penyisipan (mencegah kondisi balapan), lalu perbarui test yang mengunci perilaku lama.
 
-**Status retest:** Belum — menunggu perbaikan.
+**Penyelesaian:**
+
+- PR #182 (`fix(import): tandai NIP existing sebagai SKIP`) merge ke `development` pada 14 Agustus 2026 (WIB) melalui merge commit `ff0e9e1`.
+- Jalur SKIP pada wizard kini hidup dan terverifikasi: NIP yang sudah terdaftar di database menghasilkan status `skip` berketerangan "NIP sudah terdaftar di database.", NIP ganda dalam satu berkas tetap `error` (termasuk koreksi retroaktif pada kemunculan pertama), dan email yang sudah terdaftar tetap `error`. Perilaku sumber ini dibangun PR #172 (12 Agustus 2026) dan dipertahankan; endpoint kompatibilitas tetap memakai rule `unique` dengan perilaku all-or-nothing seperti sebelumnya.
+- PR #182 menambahkan lifecycle lock bersama (`import_batch:lifecycle:{batchId}`, 300 detik) pada `ValidateImportBatchAction`, `QueueImportBatchAction`, dan `SaveImportMappingAction` agar permintaan paralel tidak membaca state validasi parsial, serta regression test untuk kondisi balapan validasi→eksekusi (`EmployeeImportExecutionRaceTest`).
+- Catatan cakupan: PR yang sama juga menambahkan event `status_pegawai.diubah` pada katalog notifikasi dan menjadikan resolusi email penerima utama fail-closed terhadap katalog domain; perubahan ini bersifat hardening notifikasi dan tidak mengubah AC import.
+
+**Status retest:** Pass — retest browser Playwright (10 Agustus 2026, pada branch PR) atas CSV berisi NIP `196808202005011003` yang sudah ada di database menghasilkan ringkasan validasi **0 valid, 1 skip, 0 error** dan tombol import menampilkan **0 baris** sehingga tidak dapat dijalankan; tidak ada pegawai baru yang dibuat selama pengujian. Regression/UAT formal Sprint 7 tetap menjadi gate terpisah.
 
 ---
 
