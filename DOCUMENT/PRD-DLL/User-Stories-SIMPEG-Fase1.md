@@ -5,14 +5,28 @@
 |-------|--------|
 | **Berdasarkan** | PRD-SIMPEG-Fase1-Core.md v1.4 |
 | **Tanggal** | 22 Juli 2026 |
-| **Pembaruan status terakhir** | 12 Agustus 2026 |
-| **Basis verifikasi status** | Branch `development` @ `1d3e450` (setelah PR #172 masuk) |
+| **Pembaruan status terakhir** | 13 Agustus 2026 |
+| **Basis verifikasi status** | Branch `development` @ `73a358a` (setelah PR #194 masuk) |
 | **Total User Stories** | 53 |
 | **Total Epics** | 9 |
 
 > **Catatan sinkronisasi PRD 1.4:** Keycloak digunakan hanya untuk SSO/login. Role dan permission dikelola di database SIMPEG. Approval cuti memakai tepat satu chain runtime per pegawai; unit hanya menjadi target penyalinan template sesuai K-US-01. Status keputusan resmi adalah `Disetujui`, `Perubahan`, `Ditangguhkan`, dan `Tidak Disetujui`; cuti tahunan tidak boleh lintas tahun; EWS menambahkan Satyalancana; notifikasi harus channel-configurable; dan laporan mendukung export nominatif Excel custom.
 >
 > **Keputusan import Fase 1 (kanonis, disetujui pengguna 22 Juli 2026):** import massal hanya mengaktifkan template Data Utama. Import membuat record pegawai beserta field snapshot awal, tidak membuat riwayat kepangkatan/jabatan/KGB, dan tidak memanggil kalkulasi TMT. Riwayat resmi diinput per pegawai melalui CRUD append-only. Tanggal pensiun hasil import dipertahankan apa adanya. Kalkulasi TMT dipicu saat riwayat/sumber resmi disimpan, bukan saat import selesai. Template lanjutan multi-jenis tidak termasuk ruang lingkup saat ini.
+
+---
+
+## Pembaruan Status Penyelesaian Issue #188 — 13 Agustus 2026
+
+PR #194 telah merge ke branch `development` melalui commit `73a358a`. **Status task: ✅ Selesai.** Verifikasi dilakukan terhadap source hasil merge, bukan hanya status PR atau narasi deskripsinya.
+
+| User Story | Status | Bukti implementasi |
+|---|---|---|
+| US-2.1 | ✅ Selesai | Pegawai baru tetap memakai status default `Aktif` dari `ref_status_pegawai`, sementara `employees.status_tanggal` tetap `null` dan `employee_status_histories` belum dibuat sampai perubahan status resmi pertama. Kontrak ini dikunci oleh `EmployeeCreateIntegrationTest`. |
+| US-2.4 | ✅ Selesai | Halaman detail membedakan label dan sumber **Tanggal Efektif Status Kepegawaian** dari tanggal penugasan Kepala Bagian. Resolver tunggal memakai `employees.status_tanggal`, lalu history `is_latest`, lalu history bertanggal terbaru, dan menampilkan `-` bila tidak ada sumber resmi. |
+| US-4.11 | ✅ Selesai | Bagian Kepala Bagian menampilkan tanggal mulai penugasan aktif dan form memakai label **Tanggal Mulai Penugasan Kepala Bagian**. Mutasi supervisor hanya mengubah pointer/timeline supervisor dan tidak mengubah status pegawai maupun riwayat status. |
+
+Regression test hasil merge membuktikan perubahan status tidak menggeser `supervisor_assignments`, sedangkan assign supervisor tidak mengubah `status_tanggal`, `status_pegawai_id`, atau `employee_status_histories`. CI exact head PR #194 berhasil sebelum merge. Pembaruan ini mengonfirmasi kriteria yang sudah bertanda selesai; tidak ada acceptance criteria lain yang diubah.
 
 ---
 
@@ -470,6 +484,8 @@ Setiap story mengikuti format:
 - [x] AC-8: Tampilkan notifikasi sukses: *"Data pegawai [Nama] berhasil ditambahkan."*
 
 **Keputusan status awal pegawai:** Pegawai baru menggunakan status default `Aktif` dari `ref_status_pegawai`. Sistem tidak membuat tanggal efektif status maupun riwayat status awal tanpa sumber administrasi resmi. `employees.status_tanggal` tetap `null` dan `employee_status_histories` belum dibuat sampai perubahan status resmi pertama dilakukan.
+
+> **Catatan status implementasi (13 Agustus 2026):** ✅ Selesai melalui PR #194 (`73a358a`) pada branch `development`. Regression test memastikan create pegawai tidak mengarang tanggal efektif atau riwayat status awal.
 
 ---
 
@@ -1124,6 +1140,8 @@ Setiap story mengikuti format:
 - [x] AC-3: Satu pegawai hanya bisa memiliki satu kepala bagian aktif.
 - [x] AC-4: Riwayat perubahan kepala bagian tersimpan (tanggal_mulai, tanggal_berakhir).
 - [x] AC-5: Audit log mencatat perubahan.
+
+> **Catatan status implementasi Issue #188 (13 Agustus 2026):** ✅ Selesai melalui PR #194 (`73a358a`). UI membedakan tanggal mulai penugasan Kepala Bagian dari tanggal efektif status kepegawaian, tanggal penugasan aktif tetap tampil setelah simpan/reload, dan regression test menjaga kedua domain penyimpanan tidak saling mengubah.
 
 ---
 
