@@ -469,6 +469,8 @@ Setiap story mengikuti format:
 - [x] AC-7: Audit log mencatat: user yang menambahkan, timestamp, dan seluruh data yang dimasukkan.
 - [x] AC-8: Tampilkan notifikasi sukses: *"Data pegawai [Nama] berhasil ditambahkan."*
 
+**Keputusan status awal pegawai:** Pegawai baru menggunakan status default `Aktif` dari `ref_status_pegawai`. Sistem tidak membuat tanggal efektif status maupun riwayat status awal tanpa sumber administrasi resmi. `employees.status_tanggal` tetap `null` dan `employee_status_histories` belum dibuat sampai perubahan status resmi pertama dilakukan.
+
 ---
 
 ### US-2.2 · Edit Data Pegawai
